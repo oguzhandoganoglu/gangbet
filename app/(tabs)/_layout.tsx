@@ -9,7 +9,7 @@ import { faBars, faFire, faUser, faUserFriends, faBell } from '@fortawesome/free
 import HomeScreen from './index';
 import GroupsScreen from './groups';
 import NotificationScreen from './notification';
-import ProfileScreen from './profile';
+import SwippingScreen from './swiping';
 
 const Tab = createBottomTabNavigator();
 
@@ -66,7 +66,7 @@ export default function TabsLayout() {
 
         <Tab.Screen 
           name="profile" 
-          component={ProfileScreen} 
+          component={SwippingScreen} 
           options={{
             tabBarIcon: ({ focused }) => (
               <FontAwesomeIcon icon={faBars} size={30} color={focused ? '#fff' : '#888'} />
