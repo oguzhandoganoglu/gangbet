@@ -9,9 +9,9 @@ import ThirdRoute from '@/components/GroupsRoute';
 export default function NotificationScreen() {
   const [index, setIndex] = useState(0);
   const [routes] = useState([
-    { key: 'first', title: 'Results' },
+    { key: 'first', title: 'Last Results' },
     { key: 'second', title: 'Friends' },
-    { key: 'third', title: 'Groups' },
+    { key: 'third', title: 'Gangs' },
   ]);
 
   const renderScene = SceneMap({

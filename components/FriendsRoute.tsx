@@ -40,16 +40,16 @@ export default function FirstRoute() {
                 </View>
                 <View style={styles.iconsContainer}>
                   <View style={styles.iconItem}>
-                    <Icon name="hourglass-half" size={14} color="#ddd" />
+                    <Image source={require('@/assets/images/hourglass.png')} style={{ width: 16, height: 16 }} />
                     <Text style={styles.iconText}>7D Left</Text>
                   </View>
                   <View style={styles.iconItem}>
-                    <Icon name="line-chart" size={14} color="#ddd" />
+                    <Image source={require('@/assets/images/chart-line.png')} style={{ width: 16, height: 16 }} />
                     <Text style={styles.iconText}>50K</Text>
                   </View>
-                  <Icon name="share" size={14} color="#ddd" style={styles.icon} />
-                  <Icon name="send" size={14} color="#ddd" style={styles.icon} />
-                  <Icon name="star" size={14} color="#ddd" style={styles.icon} />
+                  <Image source={require('@/assets/images/share.png')} style={{ width: 16, height: 16, marginRight:6 }} />
+                  <Image source={require('@/assets/images/send.png')} style={{ width: 16, height: 16, marginRight:6 }} />
+                  <Image source={require('@/assets/images/star.png')} style={{ width: 16, height: 16}} />
                 </View>
               </View>
             </View>
@@ -79,17 +79,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   profileImage: {
-    width: 95,
-    height: 95,
-    borderRadius: 0,
+    width: 84,
+    height: 84,
+    borderRadius: 4,
     marginRight: 6,
   },
   textContainer: {
     flex: 1,
   },
   title: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 14,
+    fontWeight: '600',
     color: '#fff',
   },
   userContainer: {
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   userText: {
     fontSize: 14,
     color: '#ddd',
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
   iconsContainer: {
     flexDirection: 'row',
@@ -121,8 +121,9 @@ const styles = StyleSheet.create({
   },
   iconText: {
     fontSize: 12,
-    color: '#ddd',
-    marginLeft: 5,
+    color: '#fff',
+    marginLeft: 2,
+    marginTop: 2,
   },
   icon: {
     marginRight: 10,
