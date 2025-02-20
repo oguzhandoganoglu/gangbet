@@ -1,15 +1,13 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { FontAwesome5 } from '@expo/vector-icons';
-import { TouchableOpacity, View, StyleSheet, ImageBackground } from 'react-native';
+import { View, StyleSheet, ImageBackground, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-import { faBars, faFire, faUser, faUserFriends, faBell } from '@fortawesome/free-solid-svg-icons';
 
 import HomeScreen from './index';
 import GroupsScreen from './groups';
 import NotificationScreen from './notification';
 import SwippingScreen from './swiping';
+import FireScreen from './fire';
 
 const Tab = createBottomTabNavigator();
 
@@ -29,12 +27,13 @@ export default function TabsLayout() {
           tabBarStyle: styles.tabBar,
         }}
       >
+        
         <Tab.Screen 
           name="home" 
           component={HomeScreen} 
           options={{
             tabBarIcon: ({ focused }) => (
-              <FontAwesomeIcon icon={faUser} size={30} color={focused ? '#fff' : '#888'} />
+              <Image source={focused ? require('@/assets/images/wallet-filled.png') : require('@/assets/images/wallet.png')} style={{ width: 24, height: 24 }}/>
             ),
           }} 
         />
@@ -44,22 +43,22 @@ export default function TabsLayout() {
           component={GroupsScreen} 
           options={{
             tabBarIcon: ({ focused }) => (
-              <FontAwesomeIcon icon={faUserFriends} size={30} color={focused ? '#fff' : '#888'} />
+              <Image source={focused ? require('@/assets/images/users2-filled.png') : require('@/assets/images/users2.png')} style={{ width: 24, height: 24 }}/>
             ),
           }} 
         />
 
         <Tab.Screen 
-          name="add" 
-          component={EmptyScreen}
+          name="fire" 
+          component={FireScreen} 
           options={{
-            tabBarButton: (props) => (
-              <TouchableOpacity 
-                onPress={() => router.push('/create')} 
-                style={[props.style, styles.addButton, { transform: [{ translateX: 10 }] }]}
-              >
-                <FontAwesomeIcon icon={faFire} size={25} color="#000" />
-              </TouchableOpacity>
+            tabBarIcon: ({ focused }) => (
+              <View style={[styles.iconContainer]}>
+                <Image 
+                  source={focused ? require('@/assets/images/fire-filled.png') : require('@/assets/images/fire.png')} 
+                  style={styles.iconImage}
+                />
+              </View>
             ),
           }} 
         />
@@ -69,7 +68,7 @@ export default function TabsLayout() {
           component={SwippingScreen} 
           options={{
             tabBarIcon: ({ focused }) => (
-              <FontAwesomeIcon icon={faBars} size={30} color={focused ? '#fff' : '#888'} />
+              <Image source={focused ? require('@/assets/images/layout-list-filled.png') : require('@/assets/images/layout-list.png')} style={{ width: 24, height: 24 }}/>
             ),
           }} 
         />
@@ -79,10 +78,11 @@ export default function TabsLayout() {
           component={NotificationScreen} 
           options={{
             tabBarIcon: ({ focused }) => (
-              <FontAwesomeIcon icon={faBell} size={30} color={focused ? '#fff' : '#888'} />
+              <Image source={focused ? require('@/assets/images/notification-filled.png') : require('@/assets/images/notification.png')} style={{ width: 24, height: 24 }}/>
             ),
           }} 
         />
+        
       </Tab.Navigator>
     </ImageBackground>
   );
@@ -94,16 +94,23 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     backgroundColor: '#1E1E4C',
-    height: 85,
+    height: 45,
     borderTopWidth: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
-  addButton: {
-    width: 55,
-    height: 55,
-    borderRadius: 40,
-    backgroundColor: '#fff',
+  iconContainer: {
+    width: 48, // Daire boyutu
+    height: 48,
+    borderRadius: 24, // Yuvarlak yapmak için
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  iconImage: {
+    width: 17,
+    height: 20,
+    tintColor: '#fff', // Görselin rengini değiştirmek için (gerekirse)
   },
 });
