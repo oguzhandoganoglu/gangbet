@@ -2,10 +2,9 @@ import Navbar from '@/components/Navbar';
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function FireScreen() {
+export default function BetHistory() {
   return (
     <View >
-        <Navbar />
         <View>
             <Text>Boş Sayfa</Text>
         </View>

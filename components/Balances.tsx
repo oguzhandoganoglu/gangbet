@@ -1,10 +1,13 @@
+import Navbar from '@/components/Navbar';
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function TabTwoScreen() {
+export default function ActiveBets() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Boş Sayfa</Text>
+    <View >
+        <View>
+            <Text>Boş Sayfa</Text>
+        </View>
     </View>
   );
 }

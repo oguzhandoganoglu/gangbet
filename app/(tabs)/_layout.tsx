@@ -3,11 +3,12 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, StyleSheet, ImageBackground, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 
-import HomeScreen from './index';
+import WalletScreen from './index';
 import GroupsScreen from './groups';
 import NotificationScreen from './notification';
 import SwippingScreen from './swiping';
 import FireScreen from './fire';
+import Index from '../../scripts/reset-project';
 
 const Tab = createBottomTabNavigator();
 
@@ -30,7 +31,7 @@ export default function TabsLayout() {
         
         <Tab.Screen 
           name="home" 
-          component={HomeScreen} 
+          component={WalletScreen} 
           options={{
             tabBarIcon: ({ focused }) => (
               <Image source={focused ? require('@/assets/images/wallet-filled.png') : require('@/assets/images/wallet.png')} style={{ width: 24, height: 24 }}/>

@@ -4,6 +4,7 @@ import { TabView, SceneMap } from 'react-native-tab-view';
 import TabBarComponent from '@/components/TabBarComponent';
 import JoinedGroups from '@/components/JoinedGroups';
 import ManagedGroups from '@/components/ManagedGroups';
+import Navbar from '@/components/Navbar';
 
 export default function NotificationScreen() {
   const [index, setIndex] = useState(0);
@@ -19,6 +20,7 @@ export default function NotificationScreen() {
 
   return (
     <View style={{ flex: 1 }}>
+      <Navbar />
       <Text style={styles.header}>Groups</Text>
       <TabView
         navigationState={{ index, routes }}
