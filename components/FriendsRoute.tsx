@@ -9,6 +9,8 @@ const exampleData = [
     user: 'Alptoksoz traded YES',
     image: require('@/assets/images/elon.png'),
     image2: require('@/assets/images/alp.png'),
+    invite: true,
+    invitePerson: 'Alptoksoz',
   },
   {
     id: '2',
@@ -16,6 +18,8 @@ const exampleData = [
     user: 'CryptoGuy traded YES',
     image: require('@/assets/images/elon.png'),
     image2: require('@/assets/images/alp.png'),
+    invite: false,
+    invitePerson: null,
   },
 ];
 
@@ -32,6 +36,8 @@ export default function FirstRoute() {
             {/* Asıl içerik */}
             <View style={styles.cardContent}>
               <Image source={item.image} style={styles.profileImage} />
+              {!item.invite && (
+                
               <View style={styles.textContainer}>
                 <Text style={styles.title}>{item.title}</Text>
                 <View style={styles.userContainer}>
@@ -52,6 +58,30 @@ export default function FirstRoute() {
                   <Image source={require('@/assets/images/star.png')} style={{ width: 16, height: 16}} />
                 </View>
               </View>
+              )}
+              {item.invite && (
+                
+                <View style={styles.textContainer}>
+                  <View style={styles.userContainer}>
+                    <Image source={item.image2} style={styles.profileImage2} />
+                    <Text style={styles.userText}>{item.invitePerson} Inveted You</Text>
+                  </View>
+                  <Text style={styles.title}>{item.title}</Text>
+                  <View style={styles.iconsContainer}>
+                    <View style={styles.iconItem}>
+                      <Image source={require('@/assets/images/hourglass.png')} style={{ width: 16, height: 16 }} />
+                      <Text style={styles.iconText}>7D Left</Text>
+                    </View>
+                    <View style={styles.iconItem}>
+                      <Image source={require('@/assets/images/chart-line.png')} style={{ width: 16, height: 16 }} />
+                      <Text style={styles.iconText}>50K</Text>
+                    </View>
+                    <Image source={require('@/assets/images/share.png')} style={{ width: 16, height: 16, marginRight:6 }} />
+                    <Image source={require('@/assets/images/send.png')} style={{ width: 16, height: 16, marginRight:6 }} />
+                    <Image source={require('@/assets/images/star.png')} style={{ width: 16, height: 16}} />
+                  </View>
+                </View>
+                )}
             </View>
           </View>
         )}
@@ -89,7 +119,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: 600,
     color: '#fff',
   },
   userContainer: {
