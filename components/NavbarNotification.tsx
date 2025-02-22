@@ -2,17 +2,14 @@ import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-export default function Navbar() {
+export default function NavbarNotificaiton() {
   return (
     <LinearGradient colors={["#6C5CE7", "#341F97"]} style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.logo}>GANGBET👍</Text>
         <TouchableOpacity style={styles.profileContainer}>
-          <Image
-            source={require("@/assets/images/user1.png")}
-            style={styles.profileImage}
-          />
-          <Text style={styles.profileText}>4,350.5 USDC</Text>
+          <Text style={styles.profileText}>Total Won</Text>
+          <Text style={styles.profileText2}>4 Bets</Text>
         </TouchableOpacity>
       </View>
     </LinearGradient>
@@ -36,12 +33,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   profileContainer: {
-    flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
   },
   profileImage: {
     width: 24,
@@ -51,7 +43,12 @@ const styles = StyleSheet.create({
   },
   profileText: {
     color: "white",
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: 10,
+    fontWeight: 400,
+  },
+  profileText2: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: 600,
   },
 });

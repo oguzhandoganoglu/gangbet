@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { SafeAreaView } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import Navbar from '@/components/Navbar'; // Navbar bileşenini import edin
+
 
 SplashScreen.preventAutoHideAsync();
 
