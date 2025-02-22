@@ -8,7 +8,8 @@ const exampleData = [
     image: require('@/assets/images/elon.png'),
     claimAmount: '10 USDC',
     claim: true,
-    result : false,
+    result : "Pending",
+    percent : '50,534',
   },
   {
     id: '2',
@@ -16,7 +17,35 @@ const exampleData = [
     image: require('@/assets/images/latte.jpeg'),
     claimAmount: '10 USDC',
     claim: false,
-    result : true,
+    result : "Ended",
+    percent : '50,534',
+  },
+  {
+    id: '3',
+    title: 'Elon Musk out as Head of DOGE before July?',
+    image: require('@/assets/images/latte.jpeg'),
+    claimAmount: '10 USDC',
+    claim: true,
+    result : "Won",
+    percent : '50,534',
+  },
+  {
+    id: '4',
+    title: 'Elon Musk out as Head of DOGE before July?',
+    image: require('@/assets/images/elon.png'),
+    claimAmount: '10 USDC',
+    claim: true,
+    result : "Lost",
+    percent : '50,534',
+  },
+  {
+    id: '5',
+    title: 'Elon Musk out as Head of DOGE before July?',
+    image: require('@/assets/images/latte.jpeg'),
+    claimAmount: '10 USDC',
+    claim: false,
+    result : "Won",
+    percent : '50,534',
   },
   
 ];
@@ -32,44 +61,96 @@ export default function SecondRoute() {
             <View style={styles.content}>
               <Text style={styles.title}>{item.title}</Text>
               <View style={styles.actions}>
-                {item.result && (
-                  <View style={styles.yesButton}>
-                    <Image source={require('@/assets/images/thumb-up.png')} style={{ width: 16, height: 16 }} />
-                    <Text style={styles.yesText}>YES</Text>
+                <View style={styles.percentCard}>
+                  <Image source={require('@/assets/images/thumb-up.png')} style={styles.percentImage} />
+                    <View style={styles.percentText}>
+                    <Text style={{color:'#fff', fontSize:12, fontWeight:400}}>YES</Text>
+                    <Text style={{color:'#fff', fontSize:12, fontWeight:400}}> {item.percent}</Text>
+                 </View>
+                </View>
+                {(item.result==="Lost")&& (
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
+                      <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, tintColor:"white" }} />
+                      <Text style={styles.wonText}> %40</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
+                      <Image source={require('@/assets/images/ghost.png')} style={{ width: 16, height: 16 }} />
+                      <Text style={styles.wonText}> Lost!</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
+                      <Image source={require('@/assets/images/chart-line.png')} style={{ width: 16, height: 16 }} />
+                      <Text style={styles.statText}>50K</Text>
+                    </View>
+                    <Image source={require('@/assets/images/send.png')} style={{ width: 16, height: 16, marginLeft:18 }} />
+                    <Image source={require('@/assets/images/star.png')} style={{ width: 16, height: 16, marginLeft:6 }} />
                   </View>
                 )}
-                {!item.result && (
-                  <View style={styles.yesButton}>
-                    <Image source={require('@/assets/images/thumb-down.png')} style={{ width: 16, height: 16 }} />
-                    <Text style={styles.yesText}>NO</Text>
+                {(item.result==="Won")&& (
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
+                      <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, tintColor:"white" }} />
+                      <Text style={styles.wonText}> %40</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
+                      <Image source={require('@/assets/images/mood-suprised.png')} style={{ width: 16, height: 16 }} />
+                      <Text style={styles.wonText}> Won</Text>
+                    </View>
+                    <Image source={require('@/assets/images/share.png')} style={{ width: 16, height: 16, marginLeft:8 }} />
                   </View>
                 )}
-
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Image source={require('@/assets/images/mood-suprised.png')} style={{ width: 16, height: 16 }} />
-                  <Text style={styles.wonText}> Won</Text>
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Image source={require('@/assets/images/chart-line.png')} style={{ width: 16, height: 16, marginRight:2 }} />
-                  <Text style={styles.statText}>50K</Text>
-                </View>
-                <Image source={require('@/assets/images/share.png')} style={{ width: 16, height: 16 }} />
+                {(item.result==="Pending")&& (
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
+                      <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, tintColor:"white" }} />
+                      <Text style={styles.statText}> %40</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
+                      <Image source={require('@/assets/images/hourglass.png')} style={{ width: 16, height: 16 }} />
+                      <Text style={styles.statText}>30M Left</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
+                      <Image source={require('@/assets/images/chart-line.png')} style={{ width: 16, height: 16 }} />
+                      <Text style={styles.statText}>50K</Text>
+                    </View>
+                    <Image source={require('@/assets/images/send.png')} style={{ width: 16, height: 16, marginLeft:12 }} />
+                    <Image source={require('@/assets/images/star.png')} style={{ width: 16, height: 16, marginLeft:6 }} />
+                  </View>
+                )}
+                {(item.result==="Ended")&& (
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
+                      <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, tintColor:"white" }} />
+                      <Text style={styles.statText}> %40</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
+                      <Image source={require('@/assets/images/gavel.png')} style={{ width: 16, height: 16 }} />
+                      <Text style={styles.statText}>Ended</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
+                      <Image source={require('@/assets/images/chart-line.png')} style={{ width: 16, height: 16 }} />
+                      <Text style={styles.statText}>50K</Text>
+                    </View>
+                    <Image source={require('@/assets/images/send.png')} style={{ width: 16, height: 16, marginLeft:12 }} />
+                    <Image source={require('@/assets/images/star.png')} style={{ width: 16, height: 16, marginLeft:6 }} />
+                  </View>
+                )}
               </View>
             </View>
-          
-            {!item.claim && (
+            {(item.claim) && (item.result==="Won") && (
+              <View style={styles.claimContainer}>
+                <Text style={styles.claimLabel}>Claimed</Text>
+                <TouchableOpacity style={styles.claimedButton}>
+                  <Text style={styles.claimedText}>{item.claimAmount}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            {(!item.claim) && (item.result==="Won") && (
               <View style={styles.claimContainer}>
                 <Text style={styles.claimLabel}>Claim</Text>
                 <TouchableOpacity style={styles.claimButton}>
                   <Text style={styles.claimText}>{item.claimAmount}</Text>
                 </TouchableOpacity>
-              </View>
-            )}
-            {item.claim && (
-              <View style={styles.claimContainer}>
-                <View style={styles.claimedButton}>
-                  <Text style={styles.claimedText}>Claimed</Text>
-                </View>
               </View>
             )}
           </View>
@@ -99,8 +180,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   profileImage: {
-    width: 84,
-    height: 84,
+    width: 60,
+    height: 60,
     borderRadius: 4,
     marginRight: 10,
   },
@@ -132,13 +213,13 @@ const styles = StyleSheet.create({
   },
   wonText: {
     fontSize: 12,
+    fontWeight: 400,
     color: '#ddd',
-    marginRight: 12,
   },
   statText: {
     fontSize: 12,
+    fontWeight: 400,
     color: '#ddd',
-    marginRight: 12,
   },
   claimContainer: {
     alignItems: 'center',
@@ -190,4 +271,25 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
   },  
+  percentCard : {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor:"#D6D6D673", 
+    borderRadius: 13, 
+    paddingHorizontal: 5,
+    paddingVertical: 3,
+  },
+  percentText: {
+    flexDirection: "row",
+  },
+  percentImage : { 
+    width: 16, 
+    height: 16,
+    tintColor: "#fff",
+  },
+  percentImage2 : { 
+    width: 16, 
+    height: 16,
+    tintColor: '#5E5E5E5C'
+  }
 });
