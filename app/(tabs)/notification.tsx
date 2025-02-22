@@ -5,6 +5,7 @@ import TabBarComponent from '@/components/TabBarComponent';
 import FirstRoute from '@/components/ResultsRoute';
 import SecondRoute from '@/components/FriendsRoute';
 import ThirdRoute from '@/components/GroupsRoute';
+import ForthRoute from '@/components/ManagedRoute';
 import NavbarNotificaiton from '@/components/NavbarNotification';
 import Navbar from '@/components/Navbar';
 
@@ -14,12 +15,14 @@ export default function NotificationScreen() {
     { key: 'first', title: 'Last Results' },
     { key: 'second', title: 'Friends' },
     { key: 'third', title: 'Gangs' },
+    { key: 'forth', title: 'Managed' },
   ]);
 
   const renderScene = SceneMap({
     first: FirstRoute,
     second: SecondRoute,
     third: ThirdRoute,
+    forth: ForthRoute,
   });
 
   // Navbar'ı useMemo ile render ediyoruz.
@@ -30,6 +33,8 @@ export default function NotificationScreen() {
       case 1:
         return <Navbar />;
       case 2:
+        return <Navbar />;
+      case 3:
         return <Navbar />;
       default:
         return <NavbarNotificaiton />;
