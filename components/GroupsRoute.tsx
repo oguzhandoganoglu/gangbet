@@ -7,10 +7,10 @@ const exampleData = [
     title: 'Elon Musk out as Head of DOGE before July?',
     image: require('@/assets/images/elon.png'),
     image2: require('@/assets/images/alp.png'),
-    user: 'Alptoksoz Created New Bet!',
-    claimAmount: '10 USDC',
+    claimPersonNumber: '10',
     claim: true,
-    result : "Begin",
+    invitePerson: "Alptoksoz",
+    result : "Pending",
   },
   {
     id: '2',
@@ -18,20 +18,34 @@ const exampleData = [
     image: require('@/assets/images/latte.jpeg'),
     image2: require('@/assets/images/alp.png'),
     user: 'Alptoksoz Has Resulted the Bet',
-    claimAmount: '10 USDC',
-    claim: false,
+    claimPersonNumber: '10',
+    invitePerson: 'Alptoksoz',
+    choose: "YES",
+    claim: true,
     result : "Result",
   },
-
   {
     id: '3',
     title: 'Elon Musk out as Head of DOGE before July?',
     image: require('@/assets/images/latte.jpeg'),
     image2: require('@/assets/images/alp.png'),
     user: 'Alptoksoz Has Resulted the Bet',
-    claimAmount: '10 USDC',
+    claimPersonNumber: '10',
+    invitePerson: 'Alptoksoz',
+    choose: "NO",
+    claim: true,
+    result : "Result",
+  },
+  {
+    id: '4',
+    title: 'Elon Musk out as Head of DOGE before July?',
+    image: require('@/assets/images/latte.jpeg'),
+    image2: require('@/assets/images/alp.png'),
+    user: 'Alptoksoz Has Resulted the Bet',
+    claimPersonNumber: '10',
+    invitePerson: 'Alptoksoz',
     claim: false,
-    result : "Pending",
+    result : "Begin",
   },
   
 ];
@@ -45,51 +59,77 @@ export default function ThirdRoute() {
           <View style={styles.card}>
             <View style={styles.imageContainer}>
               <Image source={item.image} style={styles.profileImage} />
-              <View style={styles.overlay}>
-                <Image source={require('@/assets/images/users.png')} style={styles.overlayIcon} />
-                <Text style={styles.overlayText}>PKOS</Text>
-              </View>
             </View>
             <View style={styles.content}>
-              <View style={styles.userContainer}>
-                <Image source={item.image2} style={styles.profileImage2} />
-                <Text style={styles.userText}>{item.user}</Text>
-              </View>
+              {(item.result==="Begin") && (!item.claim) && (
+                <View style={styles.userContainer}>
+                  <Image source={item.image2} style={styles.profileImage2} />
+                  <Text style={styles.userText}>{item.invitePerson} Invited You</Text>
+                </View>
+              )}
+              {(item.result==="Pending") && (
+                <View style={styles.userContainer}>
+                  <Image source={require('@/assets/images/alarm.png')} style={{ width: 18, height: 18, marginBottom:3 }} />
+                  <Text style={styles.userText}>Time is Up. Waiting for Admin!</Text>
+                </View>
+              )}
+              {(item.result==="Result") && (
+                <View style={styles.userContainer}>
+                  <Image source={item.image2} style={styles.profileImage2} />
+                  <Text style={styles.userText}>{item.invitePerson} Has Resulted the Bet</Text>
+                </View>
+              )}
               <Text style={styles.title}>{item.title}</Text>
               <View style={styles.actions}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Image source={require('@/assets/images/currency-dollar.png')} style={{ width: 16, height: 16 }} />
-                  <Text style={styles.claimAmount}> {item.claimAmount}</Text>
-                </View>
-                {(item.result==="Begin") && (
+                {(item.result==="Begin") && (!item.claim) && (
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Image source={require('@/assets/images/hourglass.png')} style={{ width: 16, height: 16, marginRight:2 }} />
-                    <Text style={styles.claimAmount}>7D Left</Text>
+                    <Image source={require('@/assets/images/users2.png')} style={{ width: 16, height: 16, }} />
+                    <Text style={styles.claimPersons}> {item.claimPersonNumber} Members</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 14 }}>
+                      <TouchableOpacity style={styles.yesButton}>
+                        <Image source={require('@/assets/images/thumb-up.png')} style={{ width: 16, height: 16, tintColor:'white' }} />
+                        <Text style={styles.yesText}>Accept</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.yesButton}>
+                        <Image source={require('@/assets/images/thumb-down.png')} style={{ width: 16, height: 16, tintColor:'white' }} />
+                        <Text style={styles.yesText}>Decline</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 )}
+                
                 {(item.result==="Pending") && (
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Image source={require('@/assets/images/hourglass.png')} style={{ width: 16, height: 16, marginRight:2 }} />
-                    <Text style={styles.claimAmount}>Waiting</Text>
+                    <Image source={require('@/assets/images/users2.png')} style={{ width: 16, height: 16, }} />
+                    <Text style={styles.claimPersons}> {item.claimPersonNumber} Members</Text>
+                    <Image source={require('@/assets/images/alert-circle.png')} style={{ width: 16, height: 16, marginRight:2 }} />
+                    <Text style={styles.claimPersons}>Waiting</Text>
                   </View>
                 )}
                 {(item.result==="Result") && (
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    {(item.choose==="YES") && (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.2)', borderRadius: 10, padding: 3, marginRight: 5 }}>
+                        <Image source={require('@/assets/images/thumb-up.png')} style={{ width: 16, height: 16 }} />
+                        <Text style={styles.claimPersons}>YES</Text>
+                      </View>
+                    )}
+                    {(item.choose==="NO") && (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 0.2)', borderRadius: 10, padding: 3, marginRight: 5 }}>
+                        <Image source={require('@/assets/images/thumb-down.png')} style={{ width: 16, height: 16, }} />
+                        <Text style={styles.claimPersons}>NO</Text>
+                      </View>
+                    )}
+                    <Image source={require('@/assets/images/users2.png')} style={{ width: 16, height: 16, }} />
+                    <Text style={styles.claimPersons}> {item.claimPersonNumber} Members</Text>
                     <Image source={require('@/assets/images/gavel.png')} style={{ width: 16, height: 16, marginRight:2 }} />
-                    <Text style={styles.claimAmount}>Ended</Text>
+                    <Text style={styles.claimPersons}>Ended</Text>
                   </View>
                 )}
 
               </View>
             </View>
-          
-            {(item.result==="Begin") && (
-              <View style={styles.claimContainer}>
-                <TouchableOpacity style={styles.claimButton}>
-                  <Text style={styles.claimText}>Vote</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+
             {((item.result==="Pending") || (item.result==="Result") )&& (
               <View style={styles.claimContainer}>
                 <View style={styles.claimedButton}>
@@ -146,20 +186,21 @@ const styles = StyleSheet.create({
   yesButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 2,
-    padding: 3,
-    marginRight: 12,
+    padding: 6,
+    marginRight: 10,
   },
   yesText: {
-    fontSize: 12,
-    fontWeight: 'semibold',
-    marginLeft: 2,
+    fontSize: 14,
+    fontWeight: 400,
+    color: '#fff',
+    marginLeft: 4,
   },
-  claimAmount: {
+  claimPersons: {
     fontSize: 12,
-    color: '#ddd',
-    marginRight: 12,
+    color: '#fff',
+    marginRight: 6,
   },
   statText: {
     fontSize: 12,
