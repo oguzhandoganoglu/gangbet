@@ -3,7 +3,7 @@ import Navbar from '@/components/Navbar';
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from "expo-linear-gradient";
-
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 type BadgeProps = {
   text: string;
   isActive: boolean;
@@ -31,9 +31,11 @@ export default function FireScreen() {
               </View>
             )}
             {((activeTab === "Friends") &&
+              <GestureHandlerRootView style={{ width: "100%"}}>
               <View style={styles.betfriendcontainer}>
                 <BetCardFriends />
               </View>
+              </GestureHandlerRootView>
             )}
         </View>
     </View>

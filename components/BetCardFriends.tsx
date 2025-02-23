@@ -1,23 +1,38 @@
 import React, { useState } from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import { PanGestureHandler } from "react-native-gesture-handler";
+import Animated, {
+  useSharedValue,
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  withSpring,
+  runOnJS,
+} from "react-native-reanimated";
 
 const localImage = require("@/assets/images/latte.jpeg");
-
 const profileImages = [
-  require('@/assets/images/char1.png'),  // Yerel dosya yolunu kullanarak
-  require('@/assets/images/char2.png'),
-  require('@/assets/images/alp.png'),
-  require('@/assets/images/more.png')
+  require("@/assets/images/char1.png"),
+  require("@/assets/images/char2.png"),
+  require("@/assets/images/alp.png"),
+  require("@/assets/images/more.png")
 ];
 
-type HeaderProps = {
+const { width } = Dimensions.get("window");
+const SWIPE_THRESHOLD = width * 0.3;
+
+type Bet = {
   title: string;
+  volume: string;
+  date: string;
+};
+
+type HeaderProps = {
+  title?: string;
 };
 
 type StatsProps = {
-  volume: string;
-  date: string;
+  volume?: string;
+  date?: string;
 };
 
 type ImageSectionProps = {
@@ -28,25 +43,59 @@ type PriceButtonProps = {
   price: number;
 };
 
-
-
-const BetCardFriends = () => {
-
-
-  return (
-    <View style={{ alignItems: "center" }}>
-      <View style={styles.card}>
-        <Header title="First Point TR LTD. STi. 2030'da gelecek."/>
-        <Stats volume="29,251" date="Jan 31, 2026" />
-        <ImageSection imageSource={localImage} />
-        <ActionButtons /> 
-        <ProfileImageRow imageSources={profileImages} />
-      </View>
-      <PriceButton price={10} />
-    </View>
-  );
+type ProfileImageRowProps = {
+  imageSources: any[];
 };
 
+const BetCardFriends: React.FC = () => {
+  const [bets, setBets] = useState<Bet[]>([{
+    title: "First Point TR LTD. STi. 2030'da gelecek.",
+    volume: "29,251",
+    date: "Jan 31, 2026"
+  }]);
+
+  const translateX = useSharedValue(0);
+
+  const gestureHandler = useAnimatedGestureHandler({
+    onActive: (event) => {
+      translateX.value = event.translationX;
+    },
+    onEnd: (event) => {
+      if (Math.abs(event.translationX) > SWIPE_THRESHOLD) {
+        translateX.value = withSpring(
+          event.translationX > 0 ? width : -width,
+          {},
+          () => runOnJS(removeTopCard)()
+        );
+      } else {
+        translateX.value = withSpring(0);
+      }
+    },
+  });
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: translateX.value }],
+    };
+  });
+
+  const removeTopCard = () => {
+    setBets((prevBets) => prevBets.slice(1));
+  };
+
+  return (
+    <PanGestureHandler onGestureEvent={gestureHandler}>
+      <Animated.View style={[styles.card, animatedStyle]}>
+        <Header title={bets[0]?.title} />
+        <Stats volume={bets[0]?.volume} date={bets[0]?.date} />
+        <ImageSection imageSource={localImage} />
+        <ActionButtons />
+        <ProfileImageRow imageSources={profileImages} />
+        <PriceButton price={10} />
+      </Animated.View>
+    </PanGestureHandler>
+  );
+};
 
 const Header: React.FC<HeaderProps> = ({ title }) => (
   <View style={styles.header}>
@@ -61,26 +110,26 @@ const Stats: React.FC<StatsProps> = ({ volume, date }) => (
       <Text style={styles.statText}>{volume} Volume</Text>
     </View>
     <View style={{ flexDirection: "row", alignItems: "center" }}>
-    <Image source={require("@/assets/images/calendar-minus.png")} style={{ width: 24, height: 24 }} />
+      <Image source={require("@/assets/images/calendar-minus.png")} style={{ width: 24, height: 24 }} />
       <Text style={styles.statText}>{date}</Text>
     </View>
   </View>
 );
 
 const ImageSection: React.FC<ImageSectionProps> = ({ imageSource }) => (
-  <Image source={imageSource} style={styles.image} resizeMode="cover"/>
+  <Image source={imageSource} style={styles.image} resizeMode="cover" />
 );
 
-const ActionButtons = () => (
+const ActionButtons: React.FC = () => (
   <View style={styles.actionButtons}>
     <TouchableOpacity>
       <Image source={require("@/assets/images/arrow-back.png")} style={styles.actionbuttonimage} />
     </TouchableOpacity>
     <TouchableOpacity>
-      <Image source={require("@/assets/images/share.png")} style={styles.actionbuttonimage}  />
+      <Image source={require("@/assets/images/share.png")} style={styles.actionbuttonimage} />
     </TouchableOpacity>
     <TouchableOpacity>
-      <Image source={require("@/assets/images/info-circle.png")} style={styles.actionbuttonimage}  />
+      <Image source={require("@/assets/images/info-circle.png")} style={styles.actionbuttonimage} />
     </TouchableOpacity>
     <TouchableOpacity>
       <Image source={require("@/assets/images/star.png")} style={styles.actionbuttonimage} />
@@ -94,7 +143,7 @@ const PriceButton: React.FC<PriceButtonProps> = ({ price }) => (
   </TouchableOpacity>
 );
 
-const ProfileImageRow: React.FC<{ imageSources: any[] }> = ({ imageSources }) => (
+const ProfileImageRow: React.FC<ProfileImageRowProps> = ({ imageSources }) => (
   <View style={styles.profileContainer}>
     {imageSources.map((imageSource, index) => (
       <Image key={index} source={imageSource} style={styles.profileImage} />
@@ -160,10 +209,14 @@ const styles = StyleSheet.create({
   },
   priceButton: {
     borderColor: "white",
+    backgroundColor: "#5E5E5E5C",
     borderWidth: 1,
-    padding: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
     borderRadius: 8,
-    marginTop: 12,
+    marginTop: 4,
+    marginBottom: 22,
+    alignSelf: "center",
   },
   priceText: {
     color: "white",
