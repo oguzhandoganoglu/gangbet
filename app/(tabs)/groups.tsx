@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import { useRouter } from 'expo-router';
 
 export default function NotificationScreen() {
- const [showFriendsOnly, setShowFriendsOnly] = useState(false);
+
    const [selectedCategory, setSelectedCategory] = useState('all');
    const [searchText, setSearchText] = useState('');
 // DataType türü (örnekData için)
