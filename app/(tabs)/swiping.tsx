@@ -1,9 +1,9 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, Animated, FlatList, TextInput } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import Navbar from '@/components/Navbar';
 
 export default function SwippingScreen() {
-  const [showFriendsOnly, setShowFriendsOnly] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchText, setSearchText] = useState('');
   type DataType = {
@@ -41,20 +41,10 @@ export default function SwippingScreen() {
   // Veri filtreleme işlemi
   useEffect(() => {
     const filtered = exampleData.filter(item =>
-      (selectedCategory === 'all' || item.category === selectedCategory) &&
-      (showFriendsOnly ? item.type === 'friends' : item.type === 'popular')
+      (selectedCategory === 'all' || item.category === selectedCategory)
     );
     setFilteredData(filtered);
-  }, [showFriendsOnly, selectedCategory]);
-
-  const toggleSwitch = () => {
-    setShowFriendsOnly(prev => !prev);
-    Animated.timing(animatedValue, {
-      toValue: showFriendsOnly ? 0 : 1,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-  };
+  },[selectedCategory]);
 
   const translateX = animatedValue.interpolate({
     inputRange: [0, 1],
@@ -63,7 +53,8 @@ export default function SwippingScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#1E1E4C' }}>
-      <Text style={styles.header}>{showFriendsOnly ? 'Friends' : 'Popular'}</Text>
+      <Navbar />
+      <Text style={styles.header}>Popular</Text>
 
       <View style={styles.categoryContainer}>
         {routes.map(route => (
@@ -138,29 +129,6 @@ export default function SwippingScreen() {
         )}
         keyExtractor={(item) => item.id.toString()}
       />
-
-      {/* Toggle Button */}
-      <View style={styles.toggleContainer}>
-        <View style={styles.toggleBackground}>
-          <Animated.View style={[styles.toggleCircle, { transform: [{ translateX }] }]} />
-          <TouchableOpacity
-            style={[styles.toggleButton, showFriendsOnly ? null : styles.selectedButton]}
-            onPress={toggleSwitch}
-          >
-            <Text style={[styles.toggleText, showFriendsOnly ? null : styles.selectedText]}>
-              Popular
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.toggleButton, showFriendsOnly ? styles.selectedButton : null]}
-            onPress={toggleSwitch}
-          >
-            <Text style={[styles.toggleText, showFriendsOnly ? styles.selectedText : null]}>
-              Friends
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
     </View>
   );
 }
@@ -173,6 +141,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     paddingLeft: 15,
     backgroundColor: '#1E1E4C',
+    marginTop: 20
   },
   categoryContainer: {
     flexDirection: 'row',

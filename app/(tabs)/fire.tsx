@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from "expo-linear-gradient";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import BetCardPopular from '@/components/BetCardPopular';
 type BadgeProps = {
   text: string;
   isActive: boolean;
@@ -25,15 +26,17 @@ export default function FireScreen() {
                 <Badge text="Friends" isActive={activeTab === "Friends"} onPress={() => setActiveTab("Friends")} />
               </View>
             </View>
-            {((activeTab === "Popular") &&
-              <View>
-                <Text style={styles.text}>Popular</Text>
-              </View>
-            )}
             {((activeTab === "Friends") &&
               <GestureHandlerRootView style={{ width: "100%"}}>
               <View style={styles.betfriendcontainer}>
                 <BetCardFriends />
+              </View>
+              </GestureHandlerRootView>
+            )}
+             {((activeTab === "Popular") &&
+              <GestureHandlerRootView style={{ width: "100%"}}>
+              <View style={styles.betfriendcontainer}>
+                <BetCardPopular />
               </View>
               </GestureHandlerRootView>
             )}
