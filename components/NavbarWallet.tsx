@@ -1,13 +1,15 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 
 export default function NavbarWallet() {
+  const router = useRouter();
   return (
     <LinearGradient colors={["#6C5CE7", "#341F97"]} style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.logo}>GANGBET👍</Text>
-        <TouchableOpacity style={styles.profileContainer}>
+        <TouchableOpacity style={styles.profileContainer} onPress={() => router.push("/profile")} >
           <Image
             source={require("@/assets/images/user1.png")}
             style={styles.profileImage}
