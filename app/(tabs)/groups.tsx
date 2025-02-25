@@ -181,6 +181,19 @@ const [filteredData, setFilteredData] = useState<(DataType | ManagedDataType)[]>
             }}
       keyExtractor={(item) => item.id.toString()}
     />
+    {selectedCategory === 'managed' && (
+      <View style={styles.bottomButtonContainer}>
+        <TouchableOpacity style={styles.button}>
+          <Image source={require('@/assets/images/layout-grid-add.png')} style={{width: 24, height: 24, marginRight: 5}} />
+          <Text style={styles.buttonText}>New Group</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button}>
+        <Image source={require('@/assets/images/sort-descending-2.png')} style={{width: 24, height: 24, marginRight: 5}} />
+          <Text style={styles.buttonText}>Edit Sorting</Text>
+        </TouchableOpacity>
+      </View>
+    )}
+
      </View>
    );
  }
@@ -376,5 +389,27 @@ const [filteredData, setFilteredData] = useState<(DataType | ManagedDataType)[]>
   subText: {
     color: '#ccc',
     fontSize: 14,
+  },
+  bottomButtonContainer: {
+    position: 'absolute',
+    bottom: 20,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    paddingVertical: 4,
+    backgroundColor: '#5E5E5E5C',
+    borderRadius: 4,
+  },
+  
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  
+  buttonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 400,
   },
  });
