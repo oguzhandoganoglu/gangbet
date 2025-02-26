@@ -7,7 +7,9 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { SafeAreaView } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import {PrivyProvider} from '@privy-io/expo';
 
+import {Slot} from 'expo-router';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -28,15 +30,17 @@ export default function RootLayout() {
   }
 
   return (
+    <PrivyProvider
+    appId={'cm6wqx6sk02bpm1wmsdi7zwri'}
+    clientId={'client-WY5gJVh4xfgKSFeXukcRh3YHqa1Fmx4MT3cMJUPPwUT7X'}
+  >
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <SafeAreaView style={{ flex: 1 }}>
-        {/* <Navbar /> */}
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
+        {/* Slot ile alt ekranları yerleştirme */}
+        <Slot />
         <StatusBar style="auto" />
       </SafeAreaView>
     </ThemeProvider>
-  );
+  </PrivyProvider>
+);
 }

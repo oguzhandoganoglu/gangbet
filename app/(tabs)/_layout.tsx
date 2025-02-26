@@ -2,6 +2,8 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, StyleSheet, ImageBackground, Image } from 'react-native';
 import { useRouter } from 'expo-router';
+import FullScreenLoader from '@/app/FullScreenLoader';
+import ErrorScreen from '../ErrorScreen';
 
 import WalletScreen from './index';
 import GroupsScreen from './groups';
@@ -9,6 +11,9 @@ import NotificationScreen from './notification';
 import SwippingScreen from './swiping';
 import FireScreen from './fire';
 import Index from '../../scripts/reset-project';
+import {Stack, Redirect} from 'expo-router';
+
+import {AuthBoundary} from '@privy-io/expo';
 
 const Tab = createBottomTabNavigator();
 
@@ -17,6 +22,11 @@ export default function TabsLayout() {
   const EmptyScreen = () => <View />;
 
   return (
+    <AuthBoundary
+      loading={<FullScreenLoader />}
+      error={(error) => <ErrorScreen error={error} onRetry={() => router.replace('/')} />}
+      unauthenticated={<Redirect href={{ pathname: '/sign-in' }} />}
+    >
     <ImageBackground
       source={require('@/assets/images/betfriend-bg.png')} // Arka plan resminizin yolu
       style={styles.background}
@@ -86,6 +96,7 @@ export default function TabsLayout() {
         
       </Tab.Navigator>
     </ImageBackground>
+    </AuthBoundary>
   );
 }
 

@@ -1,10 +1,22 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, Button } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import {usePrivy} from '@privy-io/expo';
 
 export default function NavbarProfile() {
   const router = useRouter();
+  const {logout} = usePrivy();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/sign-in");
+    }
+    catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
   return (
     <LinearGradient colors={["#6C5CE7", "#341F97"]} style={styles.container}>
       <View style={styles.header}>
@@ -28,7 +40,9 @@ export default function NavbarProfile() {
               <Text style={styles.xtext}>@gangbetuser_x</Text>
             </View>
             <Image source={require("@/assets/images/qrcode.png")} style={styles.qrImage}/>
-            <Image source={require("@/assets/images/logout.png")} style={styles.qrImage}/>
+            <TouchableOpacity onPress={handleLogout} style={styles.button}>
+              <Image source={require("@/assets/images/logout.png")} style={styles.qrImage} />
+            </TouchableOpacity>
           </View>
           <View style={styles.bottomlinecontainer}> 
             <Text style={styles.friendsText}>54 Friends</Text>
