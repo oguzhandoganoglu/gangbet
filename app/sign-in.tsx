@@ -39,7 +39,7 @@ interface AppMetadata {
         return { success: true };
       } else if (data.message === 'Username already exists') {
         console.log('User already exists, proceeding with login.');
-        return { success: true, message: 'User already exists' };
+        return { success: false, message: 'User already exists' };
       } else {
         console.error('Error registering user:', data);
         return { success: false, message: data.message || 'Error' };
@@ -49,6 +49,31 @@ interface AppMetadata {
       return { success: false, message: 'Network error' };
     }
   };
+
+  const loginUser = async (userData: { username: string, password: string}) => {
+    try {
+      const response = await fetch('http://51.21.28.186:5001/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+    });
+    
+        const data = await response.json();
+    
+        if (data.message === 'Login successful') {
+            console.log('Login successful:', data);
+            return { success: true };
+        } else {
+            console.error('Error logging in:', data);
+            return { success: false, message: data.message || 'Error' };
+        }
+        } catch (error) {
+        console.error('Error during login:', error);
+        return { success: false, message: 'Network error' };
+    }
+};
 
 export default function LoginScreen() {
   const [code, setCode] = useState('');
@@ -82,6 +107,11 @@ export default function LoginScreen() {
         } else if (registrationResult.message === 'User already exists') {
           // User exists, now login
           console.log('Logging in user...');
+          const loginUserResult = await loginUser({
+            username: email,
+            password: 'password',
+        });
+            console.log('Login user result:', loginUserResult);
           // Burada login işlemini gerçekleştirebilirsiniz, örneğin:
           router.push('/(tabs)/fire'); // Başarıyla login olduktan sonra yönlendirme
         } else {
