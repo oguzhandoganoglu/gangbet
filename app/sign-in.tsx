@@ -2,7 +2,8 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-nativ
 import React, { useState } from 'react';
 import { useLoginWithEmail } from '@privy-io/expo';
 import { useRouter } from 'expo-router';
-import { NightlyConnectAptosAdapter } from '@nightlylabs/wallet-selector-aptos'
+import { usePrivy } from '@privy-io/expo';
+
 
 interface AppMetadata {
     name: string;
@@ -21,29 +22,75 @@ interface AppMetadata {
       //   Do not connect eagerly, even if the previous session is saved
   }
 
+  const registerUser = async (userData: { username: string, email: string, password: string, walletAddress: string }) => {
+    try {
+      const response = await fetch('http://51.21.28.186:5001/api/users/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+  
+      const data = await response.json();
+  
+      if (data.message === 'User registered successfully') {
+        console.log('User registered successfully:', data);
+        return { success: true };
+      } else if (data.message === 'Username already exists') {
+        console.log('User already exists, proceeding with login.');
+        return { success: true, message: 'User already exists' };
+      } else {
+        console.error('Error registering user:', data);
+        return { success: false, message: data.message || 'Error' };
+      }
+    } catch (error) {
+      console.error('Error during registration:', error);
+      return { success: false, message: 'Network error' };
+    }
+  };
+
 export default function LoginScreen() {
   const [code, setCode] = useState('');
   const [email, setEmail] = useState('');
   const { state, sendCode, loginWithCode } = useLoginWithEmail();
   const router = useRouter();
   
+  const {user} = usePrivy();
 
   const handleLogin = async () => {
     try {
-      const result = await loginWithCode({ code });
-      // Burada dönen sonucun başarılı olup olmadığını kontrol ediyoruz.
-      if (state.status==="error") {
-        // Giriş başarılıysa yönlendirme yapıyoruz.
-        console.error("Login failed");
-         // Örnek olarak '/home' sayfasına yönlendirme
-      } else {
-        // Giriş başarısız olduğunda hata mesajır
-        router.push('/(tabs)/fire');
+        const loginResult = await loginWithCode({ code });
+        
+        console.log('Login result:', loginResult);
+        if (state.status === 'error' || !loginResult) {
+          console.error('Login failed');
+          return;
+        }
+  
+        // Register user or login if user already exists
+        const registrationResult = await registerUser({
+          username: email, // Burada kullanıcı adını istediğiniz gibi belirleyebilirsiniz
+          email,
+          password: 'password', // Burada şifrenin nasıl alındığına dikkat edin
+          walletAddress: loginResult.id, // Cüzdan adresini burada kullanabilirsiniz
+        });
+  
+        if (registrationResult.success) {
+          // User was successfully registered
+          router.push('/(tabs)/fire');
+        } else if (registrationResult.message === 'User already exists') {
+          // User exists, now login
+          console.log('Logging in user...');
+          // Burada login işlemini gerçekleştirebilirsiniz, örneğin:
+          router.push('/(tabs)/fire'); // Başarıyla login olduktan sonra yönlendirme
+        } else {
+          console.error('Registration failed:', registrationResult.message);
+        }
+      } catch (error) {
+        console.error('Login error:', error);
       }
-    } catch (error) {
-      console.error("Login error:", error);
-    }
-  };
+    };
 
   return (
     <View style={styles.container}>
