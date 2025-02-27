@@ -2,9 +2,12 @@ import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { useUser } from "../app/UserContext"; // UserContext'i import ediyoruz
 
 export default function NavbarWallet() {
   const router = useRouter();
+  const { user } = useUser(); // useUser hook'unu kullanıyoruz
+
   return (
     <LinearGradient colors={["#6C5CE7", "#341F97"]} style={styles.container}>
       <View style={styles.header}>
@@ -17,9 +20,12 @@ export default function NavbarWallet() {
           <Text style={styles.profileText}>Profile</Text>
         </TouchableOpacity>
       </View>
-
-      <Text style={styles.balanceText}>4,350.5 USDC</Text>
-
+      
+      {/* Kullanıcı balance değerini göster */}
+      <Text style={styles.balanceText}>
+        {user ? `${user.balance.toFixed(1)} USDC` : "0.0 USDC"}
+      </Text>
+      
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button}>
           <Image source={require('@/assets/images/qrcode.png')} style={{ width: 24, height: 24 }} />

@@ -1,78 +1,104 @@
 import React from 'react';
-import { View, Text, FlatList, Image, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Image, StyleSheet, ActivityIndicator } from 'react-native';
 
-const exampleData = [
-  {
-    id: '1',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/elon.png'),
-    user: 'Alptoksoz Created New Bet!',
-    percent: '50,534',
-    claim: true,
-    result : "Begin",
-  },
-  {
-    id: '2',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/latte.jpeg'),
-    user: 'Alptoksoz Has Resulted the Bet',
-    percent: '50,534',
-    claim: false,
-    result : "Pending",
-  },
-];
+// ActiveBets bileşeni için prop tipi
+interface ActiveBetsProps {
+  data: Array<{
+    id: string;
+    title: string;
+    photoUrl: string;
+    groupName: string;
+    channelName: string;
+    endDate: string;
+    remainingTime: number;
+    userChoice: string;
+    amount: number;
+    totalPool: number;
+    yesOdds: string;
+    noOdds: string;
+  }>;
+}
 
-export default function ActiveBets() {
+export default function ActiveBets({ data }: ActiveBetsProps) {
+  // Kalan süreyi formatla (milisaniye -> saat:dakika formatına)
+  const formatRemainingTime = (milliseconds: number) => {
+    if (milliseconds <= 0) return "Ended";
+    
+    const hours = Math.floor(milliseconds / (1000 * 60 * 60));
+    if (hours > 24) {
+      const days = Math.floor(hours / 24);
+      return `${days}D Left`;
+    }
+    
+    const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 0) {
+      return `${hours}H Left`;
+    } else {
+      return `${minutes}M Left`;
+    }
+  };
+
+  if (!data || data.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>No active bets found</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
-        data={exampleData}
+        data={data}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.imageContainer}>
-              <Image source={item.image} style={styles.profileImage} />
+              <Image 
+                source={{ uri: item.photoUrl }} 
+                style={styles.profileImage} 
+                defaultSource={require('@/assets/images/angry.png')}
+              />
               <View style={styles.overlay}>
                 <Image source={require('@/assets/images/users.png')} style={styles.overlayIcon} />
-                <Text style={styles.overlayText}>PKOS</Text>
+                <Text style={styles.overlayText}>{item.groupName}</Text>
               </View>
             </View>
             <View style={styles.content}>
               <Text style={styles.title}>{item.title}</Text>
               <View style={styles.actions}>
-                <View style={styles.percentCard}>
-                  <Image source={require('@/assets/images/thumb-up.png')} style={styles.percentImage} />
+                <View style={[
+                  styles.percentCard, 
+                  { backgroundColor: item.userChoice === 'yes' ? '#50C878' : '#FF6347' }
+                ]}>
+                  <Image 
+                    source={
+                      item.userChoice === 'yes' 
+                        ? require('@/assets/images/thumb-up.png') 
+                        : require('@/assets/images/thumb-down.png')
+                    } 
+                    style={styles.percentImage} 
+                  />
                   <View style={styles.percentText}>
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400}}>YES</Text>
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400}}> {item.percent}</Text>
+                    <Text style={{color:'#fff', fontSize:12, fontWeight:'400'}}>
+                      {item.userChoice.toUpperCase()}
+                    </Text>
+                    <Text style={{color:'#fff', fontSize:12, fontWeight:'400'}}>
+                      {' '}{item.userChoice === 'yes' ? item.yesOdds : item.noOdds}x
+                    </Text>
                   </View>
                 </View>
-                {(item.result === "Begin") && (
-                  <View style={{ flexDirection: 'row', alignItems: 'center'}}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 10 }}>
-                      <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, marginRight:1, marginLeft:10 }} />
-                      <Text style={styles.percent}>%40</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <Image source={require('@/assets/images/hourglass.png')} style={{ width: 16, height: 16, marginRight:1, marginLeft:10 }} />
-                      <Text style={styles.percent}>1H Left</Text>
-                    </View>
+
+                <View style={{ flexDirection: 'row', alignItems: 'center'}}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 10 }}>
+                    <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, marginRight:1, marginLeft:10 }} />
+                    <Text style={styles.percent}>{item.amount} USDC</Text>
                   </View>
-                )}
-                {(item.result === "Pending") && (
-                  <View style={{ flexDirection: 'row', alignItems: 'center'}}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 10 }}>
-                      <Image source={require('@/assets/images/thumb-up.png')} style={styles.percentImage2} />
-                      <Text style={styles.percent}>%40 (2.5x)</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 10 }}>
-                      <Image source={require('@/assets/images/alert-circle.png')} style={{ width: 16, height: 16, marginRight:2 }} />
-                      <Text style={styles.percent}>Waiting</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 10 }}>
-                      <Image source={require('@/assets/images/send.png')} style={{ width: 16, height: 16, marginRight:2 }} />
-                    </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Image source={require('@/assets/images/hourglass.png')} style={{ width: 16, height: 16, marginRight:1, marginLeft:10 }} />
+                    <Text style={styles.percent}>{formatRemainingTime(item.remainingTime)}</Text>
                   </View>
-                )}
+                </View>
               </View>
             </View>
           </View>
@@ -89,6 +115,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#1E1E4C',
     padding: 1,
   },
+  emptyContainer: {
+    flex: 1,
+    backgroundColor: '#1E1E4C',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyText: {
+    color: '#fff',
+    fontSize: 16,
+  },
   card: {
     flexDirection: 'row',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -101,6 +138,7 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 4,
     marginRight: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   content: {
     flex: 1,
@@ -119,7 +157,7 @@ const styles = StyleSheet.create({
   },
   percent: {
     fontSize: 12,
-    fontWeight: 400,
+    fontWeight: '400',
     color: '#FEFEFE',
   },
   imageContainer: {
@@ -146,25 +184,25 @@ const styles = StyleSheet.create({
   },
   overlayText: {
     fontSize: 8,
-    fontWeight: 700,
+    fontWeight: '700',
     color: '#000',
     paddingTop: 3
   },
   percentCard : {
     flexDirection: 'row', 
     alignItems: 'center', 
-    backgroundColor:"#D6D6D673", 
+    backgroundColor: '#D6D6D673', 
     borderRadius: 13, 
     paddingHorizontal: 5,
     paddingVertical: 3,
   },
   percentText: {
-    flexDirection: "row",
+    flexDirection: 'row',
   },
   percentImage : { 
     width: 16, 
     height: 16,
-    tintColor: "#fff",
+    tintColor: '#fff',
   },
   percentImage2 : { 
     width: 16, 

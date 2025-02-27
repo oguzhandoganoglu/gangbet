@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, Alert } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import Animated, {
   useSharedValue,
@@ -8,8 +8,8 @@ import Animated, {
   withSpring,
   runOnJS,
 } from "react-native-reanimated";
+import { useUser } from '../app/UserContext';
 
-const localImage = require("@/assets/images/latte.jpeg");
 const profileImages = [
   require("@/assets/images/char1.png"),
   require("@/assets/images/char2.png"),
@@ -20,11 +20,35 @@ const profileImages = [
 const { width } = Dimensions.get("window");
 const SWIPE_THRESHOLD = width * 0.3;
 
-type Bet = {
+// API'den gelen bahis veri tipi
+interface ApiBet {
+  _id: string;
   title: string;
-  volume: string;
-  date: string;
-};
+  description: string;
+  photoUrl?: string;
+  createdBy: {
+    _id: string;
+    username: string;
+  };
+  channel: string;
+  totalPool: number;
+  totalYesAmount: number;
+  totalNoAmount: number;
+  yesUsersCount: number;
+  noUsersCount: number;
+  yesOdds: number;
+  noOdds: number;
+  minBetAmount: number;
+  maxBetAmount: number;
+  status: string;
+  result: string;
+  endDate: string;
+  participants: Array<{
+    user: string;
+    choice: string;
+    amount: number;
+  }>;
+}
 
 type HeaderProps = {
   title?: string;
@@ -36,42 +60,148 @@ type StatsProps = {
 };
 
 type ImageSectionProps = {
-  imageSource: any;
+  imageSource?: any;
 };
 
 type PriceButtonProps = {
   price: number;
+  onYesPress: () => void;
+  onNoPress: () => void;
 };
 
 type ProfileImageRowProps = {
-  imageSources: any[];
+  yesCount: number;
+  noCount: number;
 };
 
 const BetCardFriends: React.FC = () => {
-  const [bets, setBets] = useState<Bet[]>([{
-    title: "First Point TR LTD. STi. 2030'da gelecek.",
-    volume: "29,251",
-    date: "Jan 31, 2026"
-  }]);
+  const [bets, setBets] = useState<ApiBet[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const { user } = useUser();
 
   const translateX = useSharedValue(0);
+
+  // API'den bahisleri çekme
+  useEffect(() => {
+    fetchBets();
+  }, []);
+
+  const fetchBets = async () => {
+    try {
+      const baseUrl = 'http://51.21.28.186:5001';
+      const response = await fetch(`${baseUrl}/api/bets/all`, {
+        headers: {
+          'Authorization': `Bearer ${user?.token || ''}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch bets');
+      }
+
+      const data = await response.json();
+      
+      // Sadece aktif bahisleri filtrele
+      const activeBets = data.bets.filter(bet => bet.status === 'active');
+      
+      // Kullanıcının zaten katıldığı bahisleri filtrele
+      const availableBets = user ? activeBets.filter(bet => 
+        !bet.participants?.some(p => p.user === user._id)
+      ) : activeBets;
+      
+      setBets(availableBets);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching bets:', err);
+      setLoading(false);
+    }
+  };
+
+  // Bahis yerleştirme
+  const placeBet = async (betId: string, choice: 'yes' | 'no') => {
+    if (!user || !user._id) {
+      Alert.alert('Error', 'You need to be logged in to place a bet');
+      return;
+    }
+
+    const currentBet = bets[currentIndex];
+    if (!currentBet) return;
+
+    try {
+      const baseUrl = 'http://51.21.28.186:5001';
+      const response = await fetch(`${baseUrl}/api/bets/place`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          betId,
+          userId: user._id,
+          choice,
+          amount: currentBet.minBetAmount
+        })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Success', `Bet placed successfully on ${choice.toUpperCase()}!`);
+        removeTopCard();
+      } else {
+        Alert.alert('Error', result.message || 'Failed to place bet');
+      }
+    } catch (error) {
+      console.error('Error placing bet:', error);
+      Alert.alert('Error', 'An error occurred while placing your bet');
+    }
+  };
 
   const gestureHandler = useAnimatedGestureHandler({
     onActive: (event) => {
       translateX.value = event.translationX;
     },
     onEnd: (event) => {
-      if (Math.abs(event.translationX) > SWIPE_THRESHOLD) {
+      if (event.translationX > SWIPE_THRESHOLD) {
+        // Sağa kaydırma - Evet
         translateX.value = withSpring(
-          event.translationX > 0 ? width : -width,
+          width,
           {},
-          () => runOnJS(removeTopCard)()
+          () => runOnJS(handleYesSwipe)()
+        );
+      } else if (event.translationX < -SWIPE_THRESHOLD) {
+        // Sola kaydırma - Hayır
+        translateX.value = withSpring(
+          -width,
+          {},
+          () => runOnJS(handleNoSwipe)()
         );
       } else {
+        // Yeterince kaydırılmadı, geri getir
         translateX.value = withSpring(0);
       }
     },
   });
+
+  const handleYesSwipe = () => {
+    const currentBet = bets[currentIndex];
+    if (currentBet) {
+      placeBet(currentBet._id, 'yes');
+    }
+  };
+
+  const handleNoSwipe = () => {
+    const currentBet = bets[currentIndex];
+    if (currentBet) {
+      placeBet(currentBet._id, 'no');
+    }
+  };
+
+  const removeTopCard = () => {
+    setBets((prevBets) => prevBets.filter((_, index) => index !== currentIndex));
+  };
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -79,19 +209,58 @@ const BetCardFriends: React.FC = () => {
     };
   });
 
-  const removeTopCard = () => {
-    setBets((prevBets) => prevBets.slice(1));
+  // Kalan zamanı hesapla
+  const getRemainingTime = (endDateStr: string) => {
+    const endDate = new Date(endDateStr);
+    const now = new Date();
+    const diffInDays = Math.floor((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffInDays > 365) {
+      return `${Math.floor(diffInDays / 365)} years`;
+    } else if (diffInDays > 30) {
+      return `${Math.floor(diffInDays / 30)} months`;
+    } else {
+      return `${diffInDays} days`;
+    }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.card}>
+        <Text style={styles.loadingText}>Loading bets...</Text>
+      </View>
+    );
+  }
+
+  if (bets.length === 0) {
+    return (
+      <View style={styles.card}>
+        <Text style={styles.loadingText}>No available bets!</Text>
+      </View>
+    );
+  }
+
+  const currentBet = bets[currentIndex];
 
   return (
     <PanGestureHandler onGestureEvent={gestureHandler}>
       <Animated.View style={[styles.card, animatedStyle]}>
-        <Header title={bets[0]?.title} />
-        <Stats volume={bets[0]?.volume} date={bets[0]?.date} />
-        <ImageSection imageSource={localImage} />
+        <Header title={currentBet.title} />
+        <Stats 
+          volume={`${currentBet.totalPool}`} 
+          date={getRemainingTime(currentBet.endDate)} 
+        />
+        <ImageSection imageSource={{ uri: currentBet.photoUrl }} />
         <ActionButtons />
-        <ProfileImageRow imageSources={profileImages} />
-        <PriceButton price={10} />
+        <ProfileImageRow 
+          yesCount={currentBet.yesUsersCount} 
+          noCount={currentBet.noUsersCount} 
+        />
+        <PriceButton 
+          price={currentBet.minBetAmount} 
+          onYesPress={() => placeBet(currentBet._id, 'yes')}
+          onNoPress={() => placeBet(currentBet._id, 'no')}
+        />
       </Animated.View>
     </PanGestureHandler>
   );
@@ -117,7 +286,11 @@ const Stats: React.FC<StatsProps> = ({ volume, date }) => (
 );
 
 const ImageSection: React.FC<ImageSectionProps> = ({ imageSource }) => (
-  <Image source={imageSource} style={styles.image} resizeMode="cover" />
+  <Image 
+    source={imageSource || require("@/assets/images/latte.jpeg")} 
+    style={styles.image} 
+    resizeMode="cover"
+  />
 );
 
 const ActionButtons: React.FC = () => (
@@ -137,17 +310,25 @@ const ActionButtons: React.FC = () => (
   </View>
 );
 
-const PriceButton: React.FC<PriceButtonProps> = ({ price }) => (
-  <TouchableOpacity style={styles.priceButton}>
-    <Text style={styles.priceText}>${price}</Text>
-  </TouchableOpacity>
+const PriceButton: React.FC<PriceButtonProps> = ({ price, onYesPress, onNoPress }) => (
+  <View style={styles.priceButtonContainer}>
+    <TouchableOpacity style={[styles.priceButton, styles.yesButton]} onPress={onYesPress}>
+      <Text style={styles.priceText}>YES ${price}</Text>
+    </TouchableOpacity>
+    <TouchableOpacity style={[styles.priceButton, styles.noButton]} onPress={onNoPress}>
+      <Text style={styles.priceText}>NO ${price}</Text>
+    </TouchableOpacity>
+  </View>
 );
 
-const ProfileImageRow: React.FC<ProfileImageRowProps> = ({ imageSources }) => (
+const ProfileImageRow: React.FC<ProfileImageRowProps> = ({ yesCount, noCount }) => (
   <View style={styles.profileContainer}>
-    {imageSources.map((imageSource, index) => (
+    {profileImages.map((imageSource, index) => (
       <Image key={index} source={imageSource} style={styles.profileImage} />
     ))}
+    <View style={styles.userCountContainer}>
+      <Text style={styles.userCountText}>{yesCount} Yes / {noCount} No</Text>
+    </View>
   </View>
 );
 
@@ -158,6 +339,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 6,
     width: "100%",
+    minHeight: 500,
+    justifyContent: 'center',
+  },
+  loadingText: {
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
+    padding: 20,
   },
   tabs: {
     flexDirection: "row",
@@ -170,7 +359,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "white",
-    fontWeight: 700,
+    fontWeight: '700',
     fontSize: 24,
   },
   subtitle: {
@@ -184,7 +373,7 @@ const styles = StyleSheet.create({
   statText: {
     color: "white",
     fontSize: 16,
-    fontWeight: 400,
+    fontWeight: '400',
     marginLeft: 6,
   },
   image: {
@@ -192,6 +381,7 @@ const styles = StyleSheet.create({
     height: 300,
     borderRadius: 12,
     marginTop: 8,
+    backgroundColor: '#333',
   },
   actionButtons: {
     flexDirection: "row",
@@ -207,16 +397,27 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     padding: 7,
   },
+  priceButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 4,
+    marginBottom: 22,
+    paddingHorizontal: 20,
+  },
   priceButton: {
-    borderColor: "white",
-    backgroundColor: "#5E5E5E5C",
     borderWidth: 1,
     paddingVertical: 8,
     paddingHorizontal: 20,
     borderRadius: 8,
-    marginTop: 4,
-    marginBottom: 22,
-    alignSelf: "center",
+    width: '45%',
+  },
+  yesButton: {
+    backgroundColor: "rgba(80, 200, 120, 0.3)",
+    borderColor: "#50C878",
+  },
+  noButton: {
+    backgroundColor: "rgba(255, 99, 71, 0.3)",
+    borderColor: "#FF6347",
   },
   priceText: {
     color: "white",
@@ -237,6 +438,13 @@ const styles = StyleSheet.create({
     borderRadius: 20, 
     marginLeft: -6,
   },
+  userCountContainer: {
+    marginLeft: 10,
+  },
+  userCountText: {
+    color: 'white',
+    fontSize: 12,
+  }
 });
 
 export default BetCardFriends;
