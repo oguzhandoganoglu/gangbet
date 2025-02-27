@@ -1,0 +1,17 @@
+[package]
+name = "custody_wallet"
+version = "1.0.0"
+authors = []
+
+[addresses]
+custody_wallet = "0xf3648367f126b5408e0d9dae774ac7f857f6e4e10df0de6ce448fb5d62cecb14"
+prediction_market = "0xf3648367f126b5408e0d9dae774ac7f857f6e4e10df0de6ce448fb5d62cecb14"
+
+[dev-addresses]
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-framework.git"
+rev = "mainnet"
+subdir = "aptos-framework"
+
+[dev-dependencies]
