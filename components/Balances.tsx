@@ -1,272 +1,320 @@
-import React from "react";
-import { View, Text, Image, TouchableOpacity, FlatList, StyleSheet } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import React from 'react';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ScrollView } from 'react-native';
 
-// balances ve history dizilerindeki öğelerin türlerini tanımlıyoruz
-interface BalanceItem {
-  id: string;
-  name: string;
-  amount: string;
-  value: string;
-  icon: any; // icon türü uygun şekilde belirlenebilir
+// Balances bileşeni için prop tipleri
+interface BalancesProps {
+  walletInfo?: {
+    totalBalance: number;
+    availableBalance: number;
+    lockedBalance: number;
+  };
+  transactions?: Array<{
+    id: string;
+    type: string;
+    amount: number;
+    status: string;
+    createdAt: string;
+  }>;
+  stats?: {
+    deposit: number;
+    withdraw: number;
+    betAmount: number;
+    claimAmount: number;
+  };
 }
 
-interface HistoryItem {
-  id: string;
-  name: string;
-  amount: string;
-  date: string;
-  type: string;
-  value: string;
-  icon: any;
-}
-
-const balances: BalanceItem[] = [
-  {
-    id: "1",
-    name: "MOVE",
-    amount: "100 MOVE",
-    value: "$100",
-    icon: require("@/assets/images/move.png"),
-  },
-  {
-    id: "2",
-    name: "USDC",
-    amount: "100 USD",
-    value: "$100",
-    icon: require("@/assets/images/usdc.png"),
-  },
-];
-
-const history: HistoryItem[] = [
-  {
-    id: "1",
-    name: "USDC",
-    amount: "100 USD",
-    date: "Jan 15, 2025",
-    type: "In",
-    value: "+$100",
-    icon: require("@/assets/images/usdc.png"),
-  },
-  {
-    id: "2",
-    name: "USDC",
-    amount: "100 USD",
-    date: "Jan 15, 2025",
-    type: "Out",
-    value: "-$100",
-    icon: require("@/assets/images/usdc.png"),
-  },
-  {
-    id: "3",
-    name: "USDC",
-    amount: "100 USD",
-    date: "Jan 15, 2025",
-    type: "Earned",
-    value: "+$100",
-    icon: require("@/assets/images/usdc.png"),
-  },
-];
-
-export default function Balances() {
-  const renderBalanceItem = ({ item }: { item: BalanceItem }) => {
-    if (!item) return null;
-    return (
-      <View key={item.id} style={styles.balanceCard}>
-        {item.icon ? (
-          <Image source={item.icon} style={styles.icon} />
-        ) : (
-          <Text style={styles.iconFallback}>No Icon</Text>
-        )}
-        <View style={styles.textContainer}>
-          <Text style={styles.tokenName}>{item.name}</Text>
-          <Text style={styles.amount}>{item.amount}</Text>
-        </View>
-        <Text style={styles.value}>{item.value}</Text>
-      </View>
-    );
+export default function Balances({ walletInfo, transactions, stats }: BalancesProps) {
+  // Tarihi formatla
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
   };
 
-  const renderHistoryItem = ({ item }: { item: HistoryItem }) => {
-    if (!item) return null;
+  // İşlem tipine göre ikon ve rengini belirle
+  const getTransactionTypeDetails = (type: string) => {
+    switch (type) {
+      case 'deposit':
+        return {
+          icon: require('@/assets/images/qrcode.png'),
+          color: '#50C878',
+          label: 'Deposit'
+        };
+      case 'withdraw':
+        return {
+          icon: require('@/assets/images/send.png'),
+          color: '#FF6347',
+          label: 'Withdraw'
+        };
+      case 'bet':
+        return {
+          icon: require('@/assets/images/hourglass.png'),
+          color: '#FFB74D',
+          label: 'Bet'
+        };
+      case 'claim':
+        return {
+          icon: require('@/assets/images/thumb-up.png'),
+          color: '#4CAF50',
+          label: 'Claim'
+        };
+      default:
+        return {
+          icon: require('@/assets/images/refresh.png'),
+          color: '#5B4FFF',
+          label: 'Transaction'
+        };
+    }
+  };
+
+  if (!walletInfo) {
     return (
-      <View style={styles.historyCard}>
-        {item.icon ? (
-          <Image source={item.icon} style={styles.icon} />
-        ) : (
-          <Text style={styles.iconFallback}>No Icon</Text>
-        )}
-        <View style={styles.textContainer2}>
-          <View style={{marginRight: 25}}>
-            <Text style={styles.tokenName}>{item.name}</Text>
-            <Text style={styles.amount}>{item.amount}</Text>
-          </View>
-          <Text style={styles.date}>{item.date}</Text>
-        </View>
-        
-        <Text style={styles.type}>{item.type}</Text>
-        <Text style={[styles.value, item.value.includes("+") ? styles.positive : styles.negative]}>
-          {item.value}
-        </Text>
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>Wallet information not available</Text>
       </View>
     );
-  };
+  }
 
   return (
-    <LinearGradient colors={["#6C5CE7", "#341F97"]}>
-      <FlatList
-        data={[{ key: "balances" }, { key: "history" }]}
-        keyExtractor={(item) => item.key}
-        renderItem={({ item }) => {
-          if (item.key === "balances") {
-            return (
-              <View style={styles.header}>
-                {balances.map((balance) => renderBalanceItem({ item: balance }))}
-                <TouchableOpacity style={styles.button}>
-                  <Image source={require("@/assets/images/eyeglass.png")} style={{ width: 24, height: 24, paddingRight: 10 }} />
-                  <Text style={styles.buttonText}>Show Other Tokens</Text>
-                </TouchableOpacity>
-              </View>
-            );
-          }
-          if (item.key === "history") {
-            return (
-              <View style={styles.header}>
-                <Text style={styles.historyTitle}>History</Text>
-                <FlatList
-                  data={history}
-                  keyExtractor={(item) => item.id}
-                  renderItem={renderHistoryItem}
-                />
-                <TouchableOpacity style={styles.button2}>
-                <Image source={require("@/assets/images/eyeglass.png")} style={{ width: 24, height: 24, paddingRight: 10 }} />
-                  <Text style={styles.buttonText}>Show All</Text>
-                </TouchableOpacity>
-              </View>
-            );
-          }
-          return null;
-        }}
-      />
-    </LinearGradient>
+    <ScrollView style={styles.container}>
+      {/* Bakiye Kartları */}
+      <View style={styles.balanceCardsContainer}>
+        <View style={[styles.balanceCard, { backgroundColor: 'rgba(92, 79, 255, 0.2)' }]}>
+          <Image source={require('@/assets/images/refresh.png')} style={styles.balanceIcon} />
+          <View>
+            <Text style={styles.balanceLabel}>Total Balance</Text>
+            <Text style={styles.balanceValue}>{walletInfo.totalBalance} USDC</Text>
+          </View>
+        </View>
+        
+        <View style={[styles.balanceCard, { backgroundColor: 'rgba(80, 200, 120, 0.2)' }]}>
+          <Image source={require('@/assets/images/qrcode.png')} style={styles.balanceIcon} />
+          <View>
+            <Text style={styles.balanceLabel}>Available</Text>
+            <Text style={styles.balanceValue}>{walletInfo.availableBalance} USDC</Text>
+          </View>
+        </View>
+        
+        <View style={[styles.balanceCard, { backgroundColor: 'rgba(255, 183, 77, 0.2)' }]}>
+          <Image source={require('@/assets/images/hourglass.png')} style={styles.balanceIcon} />
+          <View>
+            <Text style={styles.balanceLabel}>Locked</Text>
+            <Text style={styles.balanceValue}>{walletInfo.lockedBalance} USDC</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* İstatistikler */}
+      {stats && (
+        <View style={styles.statsContainer}>
+          <Text style={styles.sectionTitle}>Transaction Stats</Text>
+          <View style={styles.statsGrid}>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>Total Deposits</Text>
+              <Text style={styles.statValue}>{stats.deposit} USDC</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>Total Withdrawals</Text>
+              <Text style={styles.statValue}>{stats.withdraw} USDC</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>Bet Amount</Text>
+              <Text style={styles.statValue}>{stats.betAmount} USDC</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>Claim Amount</Text>
+              <Text style={styles.statValue}>{stats.claimAmount} USDC</Text>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {/* İşlem Geçmişi */}
+      <View style={styles.transactionsContainer}>
+        <Text style={styles.sectionTitle}>Transaction History</Text>
+        
+        {!transactions || transactions.length === 0 ? (
+          <Text style={styles.noTransactionsText}>No transaction history found</Text>
+        ) : (
+          <FlatList
+            data={transactions}
+            renderItem={({ item }) => {
+              const typeDetails = getTransactionTypeDetails(item.type);
+              
+              return (
+                <View style={styles.transactionItem}>
+                  <View style={[styles.transactionIconContainer, { backgroundColor: `${typeDetails.color}20` }]}>
+                    <Image source={typeDetails.icon} style={[styles.transactionIcon, { tintColor: typeDetails.color }]} />
+                  </View>
+                  
+                  <View style={styles.transactionDetails}>
+                    <Text style={styles.transactionType}>{typeDetails.label}</Text>
+                    <Text style={styles.transactionDate}>{formatDate(item.createdAt)}</Text>
+                  </View>
+                  
+                  <View style={styles.transactionAmountContainer}>
+                    <Text style={[
+                      styles.transactionAmount, 
+                      { color: item.type === 'deposit' || item.type === 'claim' ? '#50C878' : '#fff' }
+                    ]}>
+                      {item.type === 'deposit' || item.type === 'claim' ? '+' : '-'}{item.amount} USDC
+                    </Text>
+                    <Text style={[
+                      styles.transactionStatus,
+                      { color: item.status === 'completed' ? '#50C878' : '#FFB74D' }
+                    ]}>
+                      {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                    </Text>
+                  </View>
+                </View>
+              );
+            }}
+            keyExtractor={item => item.id}
+            scrollEnabled={false}
+            style={styles.transactionsList}
+          />
+        )}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 9,
+    flex: 1,
+    backgroundColor: '#1E1E4C',
+    padding: 10,
   },
-  header: {
-    padding: 12,
-    marginHorizontal: 6,
-    marginVertical: 6,
-    borderRadius: 10,
-    backgroundColor: "#1E1E4C",
+  emptyContainer: {
+    flex: 1,
+    backgroundColor: '#1E1E4C',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  balanceCardsContainer: {
+    marginBottom: 20,
   },
   balanceCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
     borderRadius: 10,
-    marginBottom: 8,
+    marginBottom: 10,
   },
-  icon: {
-    width: 44,
-    height: 44,
-    marginRight: 12,
+  balanceIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 15,
   },
-  iconFallback: {
-    width: 44,
-    height: 44,
-    marginRight: 12,
-    backgroundColor: "#ccc", 
-    justifyContent: "center",
-    alignItems: "center",
-    textAlign: "center",
-    lineHeight: 44,
-    color: "#000",
+  balanceLabel: {
+    color: '#fff',
+    fontSize: 14,
+    opacity: 0.8,
+    marginBottom: 5,
   },
-  textContainer: {
+  balanceValue: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  statsContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  statItem: {
+    width: '48%',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+  },
+  statLabel: {
+    color: '#fff',
+    fontSize: 12,
+    opacity: 0.8,
+    marginBottom: 5,
+  },
+  statValue: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  transactionsContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 10,
+    padding: 15,
+  },
+  noTransactionsText: {
+    color: '#fff',
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.7,
+    padding: 20,
+  },
+  transactionsList: {
+    marginTop: 10,
+  },
+  transactionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  transactionIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  transactionIcon: {
+    width: 20,
+    height: 20,
+  },
+  transactionDetails: {
     flex: 1,
   },
-  textContainer2: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center"
-  },
-  tokenName: {
-    color: "white",
-    fontWeight: 600,
-    fontSize: 16,
-  },
-  amount: {
-    color: "#FFF",
+  transactionType: {
+    color: '#fff',
     fontSize: 14,
-    fontWeight: 400,
-    marginTop:4
+    fontWeight: 'bold',
+    marginBottom: 3,
   },
-  value: {
-    color: "white",
-    fontWeight: 400,
+  transactionDate: {
+    color: '#fff',
+    fontSize: 12,
+    opacity: 0.7,
+  },
+  transactionAmountContainer: {
+    alignItems: 'flex-end',
+  },
+  transactionAmount: {
+    color: '#fff',
     fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 3,
   },
-  button: {
-    flexDirection: "row",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    paddingVertical: 6,
-    paddingHorizontal: 15, 
-    borderRadius: 15,
-    marginVertical: 8,
-    alignItems: "center",
-    alignSelf: "flex-start", 
-  },
-  button2: {
-    flexDirection: "row",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    paddingVertical: 6,
-    paddingRight: 100,
-    paddingLeft: 15,
-    borderRadius: 15,
-    marginVertical: 8,
-    alignItems: "center",
-    alignSelf: "flex-start", 
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: 400,
-  },
-  historyTitle: {
-    color: "white",
-    fontWeight: 400,
-    fontSize: 16,
-    marginBottom: 8,
-    marginLeft:6
-  },
-  historyCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 8,
-  },
-  date: {
-    color: "#FFFF",
-    fontSize: 14,
-    fontWeight: 400,
-    marginRight: 10,
-  },
-  type: {
-    color: "white",
-    fontWeight: "bold",
-    marginRight: 8,
-  },
-  positive: {
-    color: "#4CAF50", 
-  },
-  negative: {
-    color: "#F44336", 
-  },
+  transactionStatus: {
+    fontSize: 12,
+  }
 });
