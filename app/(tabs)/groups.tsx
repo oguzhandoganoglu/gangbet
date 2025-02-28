@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, TextInput } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, TextInput, Modal } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Navbar from '@/components/Navbar';
@@ -20,6 +20,9 @@ export default function NotificationScreen() {
   const [filteredBets, setFilteredBets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isNewGroupModalVisible, setIsNewGroupModalVisible] = useState(false);
+  const [newGroupTitle, setNewGroupTitle] = useState('');
+  const [newGroupDescription, setNewGroupDescription] = useState('');
 
   // API'den veri çekme
   useEffect(() => {
@@ -86,6 +89,38 @@ export default function NotificationScreen() {
     }));
     
     return [...basicCategories, ...groupCategories];
+  };
+
+  const handleNewGroup = () => {
+    setIsNewGroupModalVisible(true);
+  };
+
+  const createNewGroup = async () => {
+    if (!newGroupTitle.trim()) {
+      alert('Please enter a group title');
+      return;
+    }
+
+    try {
+      const response = await axios.post('http://51.21.28.186:5001/api/groups/create', {
+        userId,
+        name: newGroupTitle,
+        description: newGroupDescription
+      });
+
+      if (response.data.success) {
+        alert('Group created successfully!');
+        setIsNewGroupModalVisible(false);
+        setNewGroupTitle('');
+        setNewGroupDescription('');
+        fetchData(); // Grupları yeniden yükle
+      } else {
+        alert('Failed to create group. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error creating group:', error);
+      alert('An error occurred. Please try again.');
+    }
   };
 
   return (
@@ -251,16 +286,57 @@ export default function NotificationScreen() {
       
       {selectedCategory === 'managed' && (
         <View style={styles.bottomButtonContainer}>
-          <TouchableOpacity style={styles.button}>
-            <Image source={require('@/assets/images/layout-grid-add.png')} style={{width: 24, height: 24, marginRight: 5}} />
-            <Text style={styles.buttonText}>New Group</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button}>
-            <Image source={require('@/assets/images/sort-descending-2.png')} style={{width: 24, height: 24, marginRight: 5}} />
-            <Text style={styles.buttonText}>Edit Sorting</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.button} onPress={handleNewGroup}>
+          <Image source={require('@/assets/images/layout-grid-add.png')} style={{width: 24, height: 24, marginRight: 5}} />
+          <Text style={styles.buttonText}>New Group</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button}>
+          <Image source={require('@/assets/images/sort-descending-2.png')} style={{width: 24, height: 24, marginRight: 5}} />
+          <Text style={styles.buttonText}>Edit Sorting</Text>
+        </TouchableOpacity>
+      </View>
       )}
+      <Modal
+  visible={isNewGroupModalVisible}
+  transparent={true}
+  animationType="slide"
+>
+  <View style={styles.modalContainer}>
+    <LinearGradient
+      colors={['#161638', '#714F60', '#B85B44']}
+      style={styles.modalContent}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
+      {/* Modal içeriği buraya gelecek */}
+      <Text style={styles.modalTitle}>Create New Group</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Group Title"
+        placeholderTextColor="#999"
+        value={newGroupTitle}
+        onChangeText={setNewGroupTitle}
+      />
+      <TextInput
+        style={[styles.input, styles.textArea]}
+        placeholder="Group Description"
+        placeholderTextColor="#999"
+        multiline
+        numberOfLines={4}
+        value={newGroupDescription}
+        onChangeText={setNewGroupDescription}
+      />
+      <View style={styles.modalButtonContainer}>
+        <TouchableOpacity style={styles.modalButton} onPress={() => setIsNewGroupModalVisible(false)}>
+          <Text style={styles.modalButtonText}>Cancel</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.modalButton, styles.createButton]} onPress={createNewGroup}>
+          <Text style={styles.modalButtonText}>Create</Text>
+        </TouchableOpacity>
+      </View>
+    </LinearGradient>
+  </View>
+</Modal>
     </LinearGradient>
   );
 }
@@ -413,7 +489,7 @@ const styles = StyleSheet.create({
   },
   bottomButtonContainer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 60,
     alignSelf: 'center',
     flexDirection: 'row',
     paddingVertical: 6,
@@ -471,5 +547,52 @@ const styles = StyleSheet.create({
   emptyText: {
     color: 'white',
     fontSize: 16,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  input: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+    color: 'white',
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 15,
+  },
+  modalButton: {
+    padding: 10,
+    borderRadius: 5,
+    width: '45%',
+    alignItems: 'center',
+  },
+  createButton: {
+    backgroundColor: '#4CAF50',
+  },
+  modalButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
