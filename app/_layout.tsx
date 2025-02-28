@@ -5,7 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { SafeAreaView } from 'react-native';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { PrivyProvider } from '@privy-io/expo';
 import { UserProvider } from './UserContext';
@@ -35,11 +35,12 @@ export default function RootLayout() {
     >
       <UserProvider>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <SafeAreaView style={{ flex: 1 }}>
-            {/* Slot ile alt ekranları yerleştirme */}
-            <Slot />
-            <StatusBar style="auto" />
-          </SafeAreaView>
+          <SafeAreaProvider>
+            <SafeAreaView style={{ flex: 1 }} edges={['top', 'right', 'left']}>
+              <Slot />
+              <StatusBar style="auto" />
+            </SafeAreaView>
+          </SafeAreaProvider>
         </ThemeProvider>
       </UserProvider>
     </PrivyProvider>

@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { useUser } from "../app/UserContext";
+import { wp, hp, fontSize } from '@/utils/responsive';
 
 export default function Navbar() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export default function Navbar() {
           />
           <Text style={styles.profileText}>
             {user ? `${user.balance.toFixed(1)} USDC` : "0.0 USDC"}
-          </Text>
+          </Text>z
         </TouchableOpacity>
       </View>
     </View>
@@ -30,7 +31,7 @@ export default function Navbar() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    padding: wp(20),
     alignItems: "flex-start",
     backgroundColor: 'transparent', // Arka planı saydam yapıldı
   },
@@ -41,7 +42,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logo: {
-    fontSize: 14,
+    fontSize: fontSize(14),
     color: "white",
     fontWeight: "bold",
   },
@@ -49,19 +50,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: wp(10),
+    paddingVertical: hp(5),
     borderRadius: 20,
   },
   profileImage: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    marginRight: 5,
+    width: wp(24),
+    height: wp(24),
+    borderRadius: wp(12),
+    marginRight: wp(5),
   },
   profileText: {
     color: "white",
-    fontSize: 12,
+    fontSize: fontSize(12),
     fontWeight: "500",
   },
 });

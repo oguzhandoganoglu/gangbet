@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Navbar from '@/components/Navbar';
 import { LinearGradient } from 'expo-linear-gradient'; // Expo-linear-gradient kullanımı
+import { wp, hp, fontSize, isSmallDevice } from '@/utils/responsive';
 
 export default function SwippingScreen() {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -77,7 +78,7 @@ export default function SwippingScreen() {
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <Icon name="search" size={20} color="#ddd" />
+        <Icon name="search" size={wp(20)} color="#ddd" />
         <TextInput
           style={styles.searchInput}
           placeholder=""
@@ -85,11 +86,11 @@ export default function SwippingScreen() {
           value={searchText}
           onChangeText={setSearchText}
         />
-        <Icon name="filter" size={12} color="#ddd" style={styles.icon}/>
-        <Icon name="star" size={12} color="#ddd" style={styles.icon}/>
-        <Icon name="line-chart" size={12} color="#ddd" style={styles.icon}/>
-        <Icon name="paper-plane" size={12} color="#ddd" style={styles.icon}/>
-        <Icon name="hourglass-half" size={12} color="#ddd" style={styles.icon}/>
+        <Icon name="filter" size={wp(12)} color="#ddd" style={styles.icon}/>
+        <Icon name="star" size={wp(12)} color="#ddd" style={styles.icon}/>
+        <Icon name="line-chart" size={wp(12)} color="#ddd" style={styles.icon}/>
+        <Icon name="paper-plane" size={wp(12)} color="#ddd" style={styles.icon}/>
+        <Icon name="hourglass-half" size={wp(12)} color="#ddd" style={styles.icon}/>
       </View>
 
       <FlatList
@@ -106,23 +107,23 @@ export default function SwippingScreen() {
                 <Text style={styles.title}>{item.title}</Text>
                 <View style={styles.infoRow}>
                   <View style={styles.iconItem}>
-                    <Icon name="thumbs-up" size={12} color="#ddd"  />
+                    <Icon name="thumbs-up" size={wp(12)} color="#ddd"  />
                     <Text style={styles.iconText}>YES 50,534</Text>
                   </View>
                   <View style={styles.iconItem}>
-                    <Icon name="balance-scale" size={12} color="#ddd" />
+                    <Icon name="balance-scale" size={wp(12)} color="#ddd" />
                     <Text style={styles.iconText}>%40</Text>
                   </View>
                   <View style={styles.iconItem}>
-                    <Icon name="hourglass-half" size={12} color="#ddd" />
+                    <Icon name="hourglass-half" size={wp(12)} color="#ddd" />
                     <Text style={styles.iconText}>7D Left</Text>
                   </View>
                   <View style={styles.actionRow}>
                   <TouchableOpacity style={styles.actionButton}>
-                    <Icon name="paper-plane" size={12} color="#ddd" />
+                    <Icon name="paper-plane" size={wp(12)} color="#ddd" />
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.actionButton}>
-                    <Icon name="star" size={12} color="#ddd" />
+                    <Icon name="star" size={wp(12)} color="#ddd" />
                   </TouchableOpacity>
                 </View>
                 </View>
@@ -142,26 +143,26 @@ const styles = StyleSheet.create({
     // LinearGradient kullandığımız için arka plan rengini kaldırdık
   },
   header: {
-    fontSize: 24,
+    fontSize: fontSize(24),
     fontWeight: 'bold',
     color: 'white',
     textAlign: 'left',
-    paddingLeft: 15,
-    marginTop: 20,
+    paddingLeft: wp(15),
+    marginTop: hp(20),
   },
   categoryContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
-    marginVertical: 10,
-    paddingLeft: 10,
+    marginVertical: hp(10),
+    paddingLeft: wp(10),
   },
   categoryButton: {
-    paddingVertical: 10,
-    marginHorizontal: 5,
+    paddingVertical: hp(10),
+    marginHorizontal: wp(5),
   },
   categoryText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: fontSize(16),
     opacity: 0.6, // Seçili olmayan kategorileri daha soluk göster
   },
   selectedCategoryText: {
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
   cardContainer: {
     position: 'relative',
     borderRadius: 0,
-    marginBottom: 2,
+    marginBottom: hp(2),
     overflow: 'hidden',
     backgroundColor: 'rgba(138, 43, 226, 0.2)', // Daha saydam kart arkaplanı
   },
@@ -182,28 +183,29 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flexDirection: 'row',
-    padding: 10,
+    padding: wp(10),
     alignItems: 'center',
   },
   profileImage: {
-    width: 50,
-    height: 50,
+    width: wp(50),
+    height: wp(50),
     borderRadius: 0,
-    marginRight: 12,
+    marginRight: wp(12),
   },
   textContainer: {
     flex: 1,
   },
   title: {
-    fontSize: 12,
+    fontSize: fontSize(12),
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 15,
+    marginBottom: hp(15),
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: hp(6),
+    flexWrap: isSmallDevice ? 'wrap' : 'nowrap', // Küçük cihazlarda satır atlama
   },
   actionRow: {
     flexDirection: 'row',
@@ -212,32 +214,32 @@ const styles = StyleSheet.create({
   iconItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 15,
+    marginRight: wp(15),
+    marginBottom: isSmallDevice ? hp(5) : 0, // Küçük cihazlarda alt boşluk
   },
   iconText: {
-    fontSize: 10,
+    fontSize: fontSize(10),
     color: '#ddd',
-    marginLeft: 5,
+    marginLeft: wp(5),
   },
   icon: {
-    marginRight: 15,
+    marginRight: wp(15),
   },
   actionButton: {
-    marginRight: 20,
+    marginRight: wp(20),
   },
   searchInput: {
     flex: 1,
-    padding: 5,
+    padding: wp(5),
     color: 'white',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    marginBottom: 10,
+    paddingHorizontal: wp(10),
+    marginBottom: hp(10),
     backgroundColor: 'rgba(18, 11, 69, 0.53)', // Daha saydam arama kutusu
     borderRadius: 30,
-    marginHorizontal: 10,
-    paddingVertical: 8,
+    height: hp(40), // Sabit yükseklik ekleyin
   },
 });
