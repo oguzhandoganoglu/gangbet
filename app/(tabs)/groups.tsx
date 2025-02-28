@@ -3,9 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Navbar from '@/components/Navbar';
 import { useRouter } from 'expo-router';
-
 import axios from 'axios'; 
-
 import { useUser } from "../UserContext";
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -168,29 +166,19 @@ export default function NotificationScreen() {
           data={joinedGroups}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => {
-                setSelectedCategory(item.name); // Grup adını kategori olarak ayarla
-              }}
+              onPress={() => handleGroupPress(item.id)}
               style={styles.managedCard}
             >
-              <View style={styles.managedCard}>
-                <Image source={item.gangImage} style={styles.managedProfileImage} />
-                <View style={{ alignItems: 'flex-start'}}>
-                  <Text style={styles.managedtitle}>{item.gangName}</Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
-                    <Image source={require('@/assets/images/users2.png')} style={{height:16, width:16, marginRight:4}} />
-                    <Text style={styles.subText}>{item.gangMembers} Members</Text>
-                  </View>
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 30 }}>
-                  <Image source={require('@/assets/images/share.png')} style={{height:16, width:16, marginRight:7}} />
-                  <Image source={require('@/assets/images/user-plus.png')} style={{height:16, width:16, marginRight:7}} />
-                  <Image source={require('@/assets/images/user-minus.png')} style={{height:16, width:16, marginRight:7}} />
-                  <Image source={require('@/assets/images/settings.png')} style={{height:16, width:16}} />
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 30 }}>
-                  <Text style={styles.subText}>{item.gangBets} Bets</Text>
-
+              <Image 
+                source={ require( '@/assets/images/angry.png' )} 
+                style={styles.managedProfileImage}
+                defaultSource={require('@/assets/images/angry.png')}
+              />
+              <View style={{ alignItems: 'flex-start', flex: 1 }}>
+                <Text style={styles.managedtitle}>{item.name}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
+                  <Image source={require('@/assets/images/users2.png')} style={{height:16, width:16, marginRight:4}} />
+                  <Text style={styles.subText}>{item.membersCount} Members</Text>
                 </View>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 'auto' }}>
@@ -412,7 +400,7 @@ const styles = StyleSheet.create({
   },
   managedCard: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(46, 46, 94, 0.6)',
+    backgroundColor: 'rgba(46, 46, 94, 0.2)',
     padding: 12,
     marginVertical: 5,
     marginHorizontal: 8,
