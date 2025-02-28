@@ -2,6 +2,7 @@ import NavbarProfile from '@/components/NavbarProfile';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import { TabView, SceneMap } from 'react-native-tab-view';
+import { LinearGradient } from 'expo-linear-gradient';
 import TabBarComponent2 from '@/components/TabBarComponent2';
 import ProfileBets from '@/components/ProfileBets';
 import ProfileFriends from '@/components/ProfileFriends';
@@ -132,7 +133,12 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={['#161638', '#714F60', '#B85B44']}
+      style={styles.container}
+      start={{x: 0, y: 0}}
+      end={{x: 1, y: 1}}
+    >
       <NavbarProfile userData={profileData?.user} />
       <View style={{width: '100%', flex:1}}>
         <TabView
@@ -144,7 +150,7 @@ export default function ProfileScreen() {
           style={{flex:1}}
         />
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 

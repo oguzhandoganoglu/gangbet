@@ -74,7 +74,7 @@ export default function NavbarProfile({ userData }: NavbarProfileProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent',
     padding: 20,
     alignItems: "flex-start",
     width: '100%'

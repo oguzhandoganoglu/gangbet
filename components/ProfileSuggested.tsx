@@ -112,13 +112,13 @@ export default function ProfileSuggested({ data = [] }: ProfileSuggestedProps) {
                 </View>
               </View>
             </View>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.confirmButton}
               onPress={() => handleAcceptFriendRequest(item.user._id)}
             >
-              <Image 
-                source={require('@/assets/images/user-plus.png')} 
-                style={{ width: 16, height: 16, marginRight:4, tintColor: '#fff' }} 
+              <Image
+                source={require('@/assets/images/user-plus.png')}
+                style={{ width: 16, height: 16, marginRight:4, tintColor: '#fff' }}
               />
               <Text style={styles.confirmButtonText}>Confirm</Text>
             </TouchableOpacity>
@@ -145,7 +145,7 @@ export default function ProfileSuggested({ data = [] }: ProfileSuggestedProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent',
     padding: 1,
   },
   emptyContainer: {

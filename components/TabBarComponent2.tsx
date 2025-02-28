@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
   tabBar: {
     paddingLeft: 14,
     height: 50,
-    backgroundColor: '#341F97',
+    backgroundColor: 'transparent',
   },
   labelStyle: {
     fontSize: 16,

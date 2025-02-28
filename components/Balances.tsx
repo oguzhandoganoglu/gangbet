@@ -181,12 +181,12 @@ export default function Balances({ walletInfo, transactions, stats }: BalancesPr
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent', // Saydam arka plan
     padding: 10,
   },
   emptyContainer: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent', // Saydam arka plan
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -205,6 +205,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
+    // Saydamlık artırıldı
   },
   balanceIcon: {
     width: 24,
@@ -223,7 +224,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   statsContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)', // Saydamlık artırıldı
     borderRadius: 10,
     padding: 15,
     marginBottom: 20,
@@ -241,7 +242,7 @@ const styles = StyleSheet.create({
   },
   statItem: {
     width: '48%',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)', // Saydamlık artırıldı
     borderRadius: 8,
     padding: 10,
     marginBottom: 10,
@@ -258,7 +259,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   transactionsContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)', // Saydamlık artırıldı
     borderRadius: 10,
     padding: 15,
   },

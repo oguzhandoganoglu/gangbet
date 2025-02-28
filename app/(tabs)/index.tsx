@@ -2,12 +2,16 @@ import NavbarWallet from '@/components/NavbarWallet';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import { TabView, SceneMap } from 'react-native-tab-view';
+import { LinearGradient } from 'expo-linear-gradient';
 import TabBarComponent2 from '@/components/TabBarComponent2';
 import ActiveBets from '@/components/ActiveBets';
 import Wins from '@/components/Wins';
 import BetHistory from '@/components/BetHistory';
 import Balances from '@/components/Balances';
 import { useUser } from '../UserContext';
+import { opacity } from 'react-native-reanimated/lib/typescript/Colors';
+import Background from '@/components/ui/Background';
+import { setStatusBarBackgroundColor } from 'expo-status-bar';
 
 // Wallet veri tipi 
 interface WalletData {
@@ -82,7 +86,7 @@ export default function WalletScreen() {
       }
       
       try {
-        const baseUrl = 'http://51.21.28.186:5001'; // API base URL'inizi buraya ekleyin
+        const baseUrl = 'http://51.21.28.186:5001';
         const response = await fetch(`${baseUrl}/api/pages/wallet/${user._id}`, {
           headers: {
             'Authorization': `Bearer ${user.token}`,
@@ -125,22 +129,37 @@ export default function WalletScreen() {
   
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <LinearGradient
+        colors={['#161638', '#714F60', '#B85B44']}
+        style={styles.loadingContainer}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+      >
         <ActivityIndicator size="large" color="#5B4FFF" />
-      </View>
+      </LinearGradient>
     );
   }
   
   if (error) {
     return (
-      <View style={styles.errorContainer}>
+      <LinearGradient
+        colors={['#161638', '#714F60', '#B85B44']}
+        style={styles.errorContainer}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
+      >
         <Text style={styles.errorText}>{error}</Text>
-      </View>
+      </LinearGradient>
     );
   }
 
   return (
-    <View style={{flex:1}} >
+    <LinearGradient
+      colors={['#161638', '#714F60', '#B85B44']}
+      style={{flex: 1}}
+      start={{x: 0, y: 0}}
+      end={{x: 1, y: 1}}
+    >
       <NavbarWallet/>
       <View style={styles.container}>
         <TabView
@@ -152,25 +171,24 @@ export default function WalletScreen() {
           style={{flex:1}}
         />
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: 'transparent', // Arka plan saydamlığı için
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1E1E4C',
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1E1E4C',
     padding: 20,
   },
   errorText: {

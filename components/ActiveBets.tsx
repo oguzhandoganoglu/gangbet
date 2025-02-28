@@ -69,7 +69,7 @@ export default function ActiveBets({ data }: ActiveBetsProps) {
               <View style={styles.actions}>
                 <View style={[
                   styles.percentCard, 
-                  { backgroundColor: item.userChoice === 'yes' ? '#50C878' : '#FF6347' }
+                  { backgroundColor: item.userChoice === 'yes' ? 'rgba(80, 200, 120, 0.6)' : 'rgba(255, 99, 71, 0.6)' }
                 ]}>
                   <Image 
                     source={
@@ -112,12 +112,12 @@ export default function ActiveBets({ data }: ActiveBetsProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent', // Saydam arka plan
     padding: 1,
   },
   emptyContainer: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent', // Saydam arka plan
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   },
   card: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Saydam kart arka planı
     borderRadius: 2,
     padding: 10,
     marginBottom: 1,
@@ -190,8 +190,7 @@ const styles = StyleSheet.create({
   },
   percentCard : {
     flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor: '#D6D6D673', 
+    alignItems: 'center',
     borderRadius: 13, 
     paddingHorizontal: 5,
     paddingVertical: 3,

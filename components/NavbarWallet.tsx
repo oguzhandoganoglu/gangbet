@@ -2,17 +2,23 @@ import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useUser } from "../app/UserContext"; // UserContext'i import ediyoruz
+import { useUser } from "../app/UserContext";
 
 export default function NavbarWallet() {
   const router = useRouter();
-  const { user } = useUser(); // useUser hook'unu kullanıyoruz
-
+  const { user } = useUser();
+  
   return (
-    <LinearGradient colors={["#6C5CE7", "#341F97"]} style={styles.container}>
+    <LinearGradient 
+      colors={["rgba(108, 92, 231, 0.1)", "rgba(52, 31, 151, 0.1)"]} 
+      style={styles.container}
+    >
       <View style={styles.header}>
         <Text style={styles.logo}>GANGBET👍</Text>
-        <TouchableOpacity style={styles.profileContainer} onPress={() => router.push("/profile")} >
+        <TouchableOpacity 
+          style={styles.profileContainer} 
+          onPress={() => router.push("/profile")}
+        >
           <Image
             source={require("@/assets/images/user1.png")}
             style={styles.profileImage}
@@ -20,12 +26,10 @@ export default function NavbarWallet() {
           <Text style={styles.profileText}>Profile</Text>
         </TouchableOpacity>
       </View>
-      
       {/* Kullanıcı balance değerini göster */}
       <Text style={styles.balanceText}>
         {user ? `${user.balance.toFixed(1)} USDC` : "0.0 USDC"}
       </Text>
-      
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button}>
           <Image source={require('@/assets/images/qrcode.png')} style={{ width: 24, height: 24 }} />
@@ -47,7 +51,8 @@ export default function NavbarWallet() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    alignItems: "flex-start"
+    alignItems: "flex-start",
+    // Gradient arka plan, LinearGradient ile sağlanıyor artık
   },
   header: {
     flexDirection: "row",
@@ -64,7 +69,7 @@ const styles = StyleSheet.create({
   profileContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.2)", // Daha saydam
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 20,
@@ -99,7 +104,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 8,
     borderRadius: 64,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(255, 255, 255, 0.2)", // Daha saydam
     marginHorizontal: 5,
   },
   buttonText: {

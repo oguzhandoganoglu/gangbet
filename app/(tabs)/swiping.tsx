@@ -2,6 +2,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, Animated, FlatList, Te
 import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Navbar from '@/components/Navbar';
+import { LinearGradient } from 'expo-linear-gradient'; // Expo-linear-gradient kullanımı
 
 export default function SwippingScreen() {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -33,11 +34,7 @@ export default function SwippingScreen() {
     { id: 1, title: 'Elon Musk out as Head of DOGE before July?', content: 'Politics Content...', category: 'politics', type: 'popular', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
     { id: 2, title: 'Elon Musk out as Head of DOGE before July?', content: 'Sports Content...', category: 'sports', type: 'popular', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
     { id: 3, title: 'Elon Musk out as Head of DOGE before July?', content: 'Culture Content...', category: 'culture', type: 'popular', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
-    { id: 4, title: 'Elon Musk out as Head of DOGE before July?', content: 'World Content...', category: 'world', type: 'popular', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
-    { id: 5, title: 'Elon Musk out as Head of DOGE before July?', content: 'Politics by Friends...', category: 'politics', type: 'friends', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
-    { id: 6, title: 'Elon Musk out as Head of DOGE before July?', content: 'Sports by Friends...', category: 'sports', type: 'friends', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
-    { id: 7, title: 'Elon Musk out as Head of DOGE before July?', content: 'World Content...', category: 'world', type: 'popular', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
-  ];
+   ];
 
   // Veri filtreleme işlemi
   useEffect(() => {
@@ -48,7 +45,12 @@ export default function SwippingScreen() {
   },[selectedCategory]);
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={['#161638', '#714F60', '#B85B44']} // İndigo, mor menekşe, arduvaz mavisi
+      style={styles.container}
+      start={{x: 0, y: 0}}
+      end={{x: 1, y: 1}}
+    >
       <Navbar />
       <Text style={styles.header}>Popular</Text>
 
@@ -83,11 +85,11 @@ export default function SwippingScreen() {
           value={searchText}
           onChangeText={setSearchText}
         />
-        <Icon name="filter" size={18} color="#ddd" style={styles.icon}/>
-        <Icon name="star" size={18} color="#ddd" style={styles.icon}/>
-        <Icon name="line-chart" size={18} color="#ddd" style={styles.icon}/>
-        <Icon name="paper-plane" size={18} color="#ddd" style={styles.icon}/>
-        <Icon name="hourglass-half" size={18} color="#ddd" style={styles.icon}/>
+        <Icon name="filter" size={12} color="#ddd" style={styles.icon}/>
+        <Icon name="star" size={12} color="#ddd" style={styles.icon}/>
+        <Icon name="line-chart" size={12} color="#ddd" style={styles.icon}/>
+        <Icon name="paper-plane" size={12} color="#ddd" style={styles.icon}/>
+        <Icon name="hourglass-half" size={12} color="#ddd" style={styles.icon}/>
       </View>
 
       <FlatList
@@ -104,25 +106,25 @@ export default function SwippingScreen() {
                 <Text style={styles.title}>{item.title}</Text>
                 <View style={styles.infoRow}>
                   <View style={styles.iconItem}>
-                    <Icon name="thumbs-up" size={14} color="#ddd" />
+                    <Icon name="thumbs-up" size={12} color="#ddd"  />
                     <Text style={styles.iconText}>YES 50,534</Text>
                   </View>
                   <View style={styles.iconItem}>
-                    <Icon name="balance-scale" size={14} color="#ddd" />
+                    <Icon name="balance-scale" size={12} color="#ddd" />
                     <Text style={styles.iconText}>%40</Text>
                   </View>
                   <View style={styles.iconItem}>
-                    <Icon name="hourglass-half" size={14} color="#ddd" />
+                    <Icon name="hourglass-half" size={12} color="#ddd" />
                     <Text style={styles.iconText}>7D Left</Text>
                   </View>
+                  <View style={styles.actionRow}>
+                  <TouchableOpacity style={styles.actionButton}>
+                    <Icon name="paper-plane" size={12} color="#ddd" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.actionButton}>
+                    <Icon name="star" size={12} color="#ddd" />
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.actionRow}>
-                  <TouchableOpacity style={styles.actionButton}>
-                    <Icon name="paper-plane" size={14} color="#ddd" />
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.actionButton}>
-                    <Icon name="star" size={14} color="#ddd" />
-                  </TouchableOpacity>
                 </View>
               </View>
             </View>
@@ -130,14 +132,14 @@ export default function SwippingScreen() {
         )}
         keyExtractor={(item) => item.id.toString()}
       />
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Arka planı saydam yapıldı
+    // LinearGradient kullandığımız için arka plan rengini kaldırdık
   },
   header: {
     fontSize: 24,
@@ -171,6 +173,7 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     marginBottom: 2,
     overflow: 'hidden',
+    backgroundColor: 'rgba(138, 43, 226, 0.2)', // Daha saydam kart arkaplanı
   },
   whiteOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -183,8 +186,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   profileImage: {
-    width: 65,
-    height: 65,
+    width: 50,
+    height: 50,
     borderRadius: 0,
     marginRight: 12,
   },
@@ -192,10 +195,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 8,
+    marginBottom: 15,
   },
   infoRow: {
     flexDirection: 'row',
@@ -209,15 +212,15 @@ const styles = StyleSheet.create({
   iconItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 14,
+    marginRight: 15,
   },
   iconText: {
-    fontSize: 12,
+    fontSize: 10,
     color: '#ddd',
     marginLeft: 5,
   },
   icon: {
-    marginRight: 10,
+    marginRight: 15,
   },
   actionButton: {
     marginRight: 20,
@@ -232,8 +235,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     marginBottom: 10,
-    backgroundColor: 'rgba(0, 0, 88, 0.3)', // Daha saydam arka plan
-    borderRadius: 5,
+    backgroundColor: 'rgba(18, 11, 69, 0.53)', // Daha saydam arama kutusu
+    borderRadius: 30,
     marginHorizontal: 10,
     paddingVertical: 8,
   },

@@ -43,7 +43,7 @@ export default function ProfileNFTs() {
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image source={require('@/assets/images/bell-off.png')} style={{ width: 16, height: 16, marginRight:2 }} />  
               <Image source={require('@/assets/images/user-minus.png')} style={{ width: 16, height: 16, marginRight:4 }} />  
-              <Text style={{color:"#fff", fontSize:12, fontWeight:400}}>Remove</Text>
+              <Text style={{color:"#fff", fontSize:12, fontWeight: '400'}}>Remove</Text>
             </View>
           </View>
         )}
@@ -68,7 +68,7 @@ export default function ProfileNFTs() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent',
     padding: 1,
   },
   card: {
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   },
   yesText: {
     fontSize: 12,
-    fontWeight: 'semibold',
+    fontWeight: '600',
     marginLeft: 2,
   },
   wonText: {
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   },
   claimLabel: {
     fontSize: 13,
-    fontWeight: 'semibold',
+    fontWeight: '600',
     color: '#fff',
     marginBottom: 5,
   },
@@ -145,12 +145,12 @@ const styles = StyleSheet.create({
   },
   claimedText: {
     fontSize: 12,
-    fontWeight: 'semibold',
+    fontWeight: '600',
     color: '#fff',
   },
   claimText: {
     fontSize: 12,
-    fontWeight: 'semibold',
+    fontWeight: '600',
     color: '#000',
   },
   seeAllButton: {
@@ -167,14 +167,14 @@ const styles = StyleSheet.create({
   
   seeAllText: {
     fontSize: 14,
-    fontWeight: 'semibold',
+    fontWeight: '600',
     color: '#fff',
     textAlign: 'center',
   },  
   percentCard : {
     flexDirection: 'row', 
     alignItems: 'center', 
-    backgroundColor:"#D6D6D673", 
+    backgroundColor: 'rgba(214, 214, 214, 0.45)', 
     borderRadius: 13, 
     paddingHorizontal: 5,
     paddingVertical: 3,

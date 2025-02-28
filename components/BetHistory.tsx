@@ -48,7 +48,7 @@ export default function BetHistory({ data }: BetHistoryProps) {
                 <View style={styles.betInfo}>
                   <View style={[
                     styles.choiceLabel,
-                    { backgroundColor: item.userChoice === "yes" ? "#50C878" : "#FF6347" }
+                    { backgroundColor: item.userChoice === "yes" ? "rgba(80, 200, 120, 0.6)" : "rgba(255, 99, 71, 0.6)" }
                   ]}>
                     <Text style={styles.choiceText}>{item.userChoice.toUpperCase()}</Text>
                   </View>
@@ -95,12 +95,12 @@ export default function BetHistory({ data }: BetHistoryProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent',
     padding: 1,
   },
   emptyContainer: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,

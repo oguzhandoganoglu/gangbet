@@ -109,7 +109,7 @@ export default function ProfileFriends({ data = [] }: ProfileFriendsProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent',
     padding: 1,
   },
   emptyContainer: {

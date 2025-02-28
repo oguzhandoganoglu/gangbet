@@ -110,7 +110,7 @@ export default function Wins({ data }: WinsProps) {
               <View style={styles.actions}>
                 <View style={[
                   styles.percentCard, 
-                  { backgroundColor: item.userChoice === 'yes' ? '#50C878' : '#FF6347' }
+                  { backgroundColor: item.userChoice === 'yes' ? 'rgba(80, 200, 120, 0.6)' : 'rgba(255, 99, 71, 0.6)' }
                 ]}>
                   <Image 
                     source={
@@ -147,12 +147,12 @@ export default function Wins({ data }: WinsProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent',
     padding: 1,
   },
   emptyContainer: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -210,13 +210,13 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   pendingButton: {
-    backgroundColor: '#FFB74D',
+    backgroundColor: 'rgba(255, 183, 77, 0.8)',
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
   },
   claimButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: 'rgba(76, 175, 80, 0.8)',
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
@@ -238,8 +238,7 @@ const styles = StyleSheet.create({
   },
   percentCard : {
     flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor: '#D6D6D673', 
+    alignItems: 'center',
     borderRadius: 13, 
     paddingHorizontal: 5,
     paddingVertical: 3,

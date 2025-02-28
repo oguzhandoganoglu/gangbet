@@ -16,7 +16,7 @@ export default function FireScreen() {
   const [activeTab, setActiveTab] = useState("Friends");
   
   return (
-    <LinearGradient colors={["#6C5CE7", "#341F97"]} style={styles.gradient}>
+    <LinearGradient colors={["#383A53", "#6F8AAB","#312C60"]} style={styles.gradient}>
       <Navbar />
       
       <View style={styles.container}>

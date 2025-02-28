@@ -101,14 +101,14 @@ export default function ProfileBets({ data = [] }: ProfileBetsProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent',
     padding: 1,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent',
   },
   emptyText: {
     color: '#fff',

@@ -24,7 +24,6 @@ export default function ProfileGangs({ data = [] }: ProfileGangsProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.headerText}>Gangs</Text>
-      
       <FlatList
         data={data}
         renderItem={({ item }) => (
@@ -32,27 +31,24 @@ export default function ProfileGangs({ data = [] }: ProfileGangsProps) {
             <View style={styles.iconContainer}>
               <Text style={styles.groupInitial}>{item.name.charAt(0)}</Text>
             </View>
-            
             <View style={styles.groupInfo}>
               <Text style={styles.groupName}>{item.name}</Text>
               <Text style={styles.memberCount}>{item.membersCount} members</Text>
             </View>
-            
             <TouchableOpacity style={styles.actionButton}>
-              <Image 
-                source={require('@/assets/images/info-circle.png')} 
-                style={styles.actionIcon} 
+              <Image
+                source={require('@/assets/images/info-circle.png')}
+                style={styles.actionIcon}
               />
             </TouchableOpacity>
           </TouchableOpacity>
         )}
         keyExtractor={(item) => item.id}
       />
-      
       <TouchableOpacity style={styles.createButton}>
-        <Image 
-          source={require('@/assets/images/angry.png')} 
-          style={styles.createIcon} 
+        <Image
+          source={require('@/assets/images/angry.png')}
+          style={styles.createIcon}
         />
         <Text style={styles.createText}>Create New Gang</Text>
       </TouchableOpacity>
@@ -63,7 +59,7 @@ export default function ProfileGangs({ data = [] }: ProfileGangsProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent',
     padding: 15,
   },
   emptyContainer: {
@@ -94,7 +90,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#6C5CE7',
+    backgroundColor: 'rgba(108, 92, 231, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
