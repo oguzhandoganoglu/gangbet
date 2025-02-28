@@ -1,107 +1,118 @@
 import React from 'react';
-import { View, Text, FlatList, Image, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 
-const exampleData = [
-  {
-    id: '1',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    status: 'Pending'
-  },
-  {
-    id: '2',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    status: 'Result'
-  },
-  {
-    id: '3',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    status: 'Result'
-  },
-  {
-    id: '4',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    status: 'Pending'
+export default function GangActiveBets({ bets, isLoading }) {
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#fff" />
+        <Text style={styles.loadingText}>Loading active bets...</Text>
+      </View>
+    );
   }
-];
 
-export default function GangAllBets() {
+  if (!bets || bets.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Image 
+          source={require('@/assets/images/gavel.png')} 
+          style={[styles.iconStyle, { width: 40, height: 40, marginBottom: 10 }]} 
+        />
+        <Text style={styles.emptyText}>No active bets found</Text>
+        <Text style={styles.emptySubText}>Create a new bet to get started</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      
       <FlatList
-        data={exampleData}
+        data={bets}
         renderItem={({ item }) => (
           <View style={styles.mainCard}>
             <View style={styles.card}>
-              { item.status==="Pending" && (
+              {new Date() > new Date(item.endDate) ? (
                 <View style={styles.subcard}>
                   <Image source={require('@/assets/images/alert-triangle.png')} style={styles.iconStyle} />
-                  <Text style={{color:'#fff', fontSize:12, fontWeight:400}}>Need Finalise</Text>
+                  <Text style={{color:'#fff', fontSize:12, fontWeight:'400'}}>Need Finalise</Text>
                 </View>
-              )}
-              { item.status==="Result" && (
+              ) : (
                 <View style={styles.subcard}>
-                  <Image source={require('@/assets/images/gavel.png')} style={styles.iconStyle} />
-                  <Text style={{color:'#fff', fontSize:12, fontWeight:400}}>Finalised</Text>
+                  <Image source={require('@/assets/images/hourglass.png')} style={styles.iconStyle} />
+                  <Text style={{color:'#fff', fontSize:12, fontWeight:'400'}}>
+                    {new Date(item.endDate).toLocaleDateString()}
+                  </Text>
                 </View>
               )}
             </View>    
-            { item.status==="Pending" && (
-              <View style={styles.card}>
-                <View>
-                  <Text style={styles.title}>{item.title}</Text>
-                  <View style={styles.buttons}>
-                    <Image source={require('@/assets/images/scale.png')} style={styles.iconStyle} />
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400, marginRight:7}}>%40</Text>
-                    <Image source={require('@/assets/images/chart-line.png')} style={styles.iconStyle} />
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400, marginRight:7}}>50K</Text>
-                    <Image source={require('@/assets/images/users2.png')} style={styles.iconStyle} />
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400, marginRight:21}}>7 Members</Text>
-                    <Image source={require('@/assets/images/send.png')} style={styles.iconStyle} />
-                    <Image source={require('@/assets/images/share.png')} style={styles.iconStyle} />
-                  </View>
-                </View>
-                <View style={styles.card2}>
-                  <Image source={require('@/assets/images/power.png')} style={styles.iconStyle2} />
-                  <Text style={{color:'#000', fontSize:12, fontWeight:400}}>Finelise</Text>
-                </View>
-              </View>
-             )}
-             { item.status==="Result" && (
-              <View style={styles.card}>
-                <View>
-                  <Text style={styles.title}>{item.title}</Text>
-                  <View style={styles.buttons}>
-                    <Image source={require('@/assets/images/scale.png')} style={styles.iconStyle} />
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400, marginRight:7}}>%40</Text>
-                    <Image source={require('@/assets/images/chart-line.png')} style={styles.iconStyle} />
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400, marginRight:7}}>50K</Text>
-                    <Image source={require('@/assets/images/users2.png')} style={styles.iconStyle} />
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400, marginRight:21}}>7 Members</Text>
-                    <Image source={require('@/assets/images/send.png')} style={styles.iconStyle} />
-                    <Image source={require('@/assets/images/share.png')} style={styles.iconStyle} />
-                  </View>
-                </View>
-                <View style={styles.card3}>
-                  <Image source={require('@/assets/images/thumb-up.png')} style={styles.iconStyle2} />
-                  <Text style={{color:'#000', fontSize:12, fontWeight:400}}>Yes!</Text>
+            <View style={styles.card}>
+              <View style={{flex: 1}}>
+                <Text style={styles.title}>{item.title}</Text>
+                <View style={styles.buttons}>
+                  <Image source={require('@/assets/images/scale.png')} style={styles.iconStyle} />
+                  <Text style={{color:'#fff', fontSize:12, fontWeight:'400', marginRight:7}}>
+                    {item.yesPercentage}%
+                  </Text>
+                  <Image source={require('@/assets/images/chart-line.png')} style={styles.iconStyle} />
+                  <Text style={{color:'#fff', fontSize:12, fontWeight:'400', marginRight:7}}>
+                    {item.totalPool} USDC
+                  </Text>
+                  <Image source={require('@/assets/images/users2.png')} style={styles.iconStyle} />
+                  <Text style={{color:'#fff', fontSize:12, fontWeight:'400', marginRight:21}}>
+                    {item.participantsCount} Members
+                  </Text>
+                  <Image source={require('@/assets/images/send.png')} style={styles.iconStyle} />
+                  <Image source={require('@/assets/images/share.png')} style={styles.iconStyle} />
                 </View>
               </View>
-             )}
+              
+              {item.userParticipation ? (
+                <View style={[
+                  styles.card3,
+                  item.userParticipation.choice === 'yes' ? styles.cardYes : styles.cardNo
+                ]}>
+                  <Image 
+                    source={
+                      item.userParticipation.choice === 'yes' 
+                        ? require('@/assets/images/thumb-up.png') 
+                        : require('@/assets/images/thumb-down.png')
+                    } 
+                    style={styles.iconStyle2} 
+                  />
+                  <Text style={{color:'#000', fontSize:12, fontWeight:'400'}}>
+                    {item.userParticipation.choice === 'yes' ? 'Yes!' : 'No!'}
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.betButtons}>
+                  <TouchableOpacity style={styles.betButton}>
+                    <Text style={styles.betButtonText}>Bet</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
           </View>
         )}
         keyExtractor={(item) => item.id}
       />
 
       <View style={styles.seeAllButton}>
-        <Image source={require('@/assets/images/search.png')} style={styles.iconStyle} />
-        <Image source={require('@/assets/images/vector.png')} style={{width:4, height:16, marginRight:5, marginLeft:80}} />
-        <Image source={require('@/assets/images/seeding.png')} style={styles.iconStyle} />
-        <Text style={styles.seeAllText}>Latest</Text>
-        <Image source={require('@/assets/images/hourglass.png')} style={styles.iconStyle} />
-        <Text style={styles.seeAllText}>Time Ended</Text>
-        <Image source={require('@/assets/images/new-section.png')} style={styles.iconStyle} />
-        <Text style={styles.seeAllText}>New Bet</Text>        
+        <TouchableOpacity style={styles.filterButton}>
+          <Image source={require('@/assets/images/search.png')} style={styles.iconStyle} />
+        </TouchableOpacity>
+        <Image source={require('@/assets/images/vector.png')} style={{width:4, height:16, marginRight:5, marginLeft:10}} />
+        <TouchableOpacity style={styles.filterButton}>
+          <Image source={require('@/assets/images/seeding.png')} style={styles.iconStyle} />
+          <Text style={styles.seeAllText}>Latest</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.filterButton}>
+          <Image source={require('@/assets/images/hourglass.png')} style={styles.iconStyle} />
+          <Text style={styles.seeAllText}>End Soon</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.filterButton}>
+          <Image source={require('@/assets/images/chart-line.png')} style={styles.iconStyle} />
+          <Text style={styles.seeAllText}>Highest Pool</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -113,34 +124,69 @@ const styles = StyleSheet.create({
     backgroundColor: '#1E1E4C',
     padding: 1,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1E1E4C',
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: 16,
+    marginTop: 10,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1E1E4C',
+    padding: 20,
+  },
+  emptyText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  emptySubText: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 14,
+    textAlign: 'center',
+  },
   mainCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 2,
+    borderRadius: 8,
     padding: 10,
     marginBottom: 10,
+    marginHorizontal: 8,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'flex-start',
+    justifyContent: 'space-between',
   },
   card2: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
     backgroundColor: "#fff",
     paddingVertical: 8, 
-    paddingHorizontal: 4,
+    paddingHorizontal: 12,
     borderRadius: 20,
     minWidth: 78,
   },
   card3: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingVertical: 8, 
     paddingHorizontal: 11,
     borderRadius: 20,
+    minWidth: 70,
+  },
+  cardYes: {
+    backgroundColor: 'rgba(69, 170, 69, 0.6)',
+  },
+  cardNo: {
+    backgroundColor: 'rgba(220, 53, 69, 0.6)',
   },
   subcard: {
     flexDirection: 'row',
@@ -149,11 +195,13 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 10,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    marginBottom: 10,
   },
   iconStyle: {
     width: 16,
     height: 16,
     marginRight: 5,
+    tintColor: '#fff',
   },
   iconStyle2: {
     width: 18,
@@ -164,32 +212,50 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     marginTop: 10,
+    flexWrap: 'wrap',
   },
   title: {
     fontSize: 14,
     fontWeight: 'bold',
     color: '#fff',
     marginTop: 8,
-    flexShrink: 1,  
-    width: '90%',   
+    flexShrink: 1,
   },
   seeAllButton: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.2)', 
     paddingVertical: 10,
     paddingHorizontal: 10,
     borderRadius: 15,
     marginTop: 10,
     marginBottom: 20,
+    marginHorizontal: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.5)', 
+    borderColor: 'rgba(255, 255, 255, 0.5)',
   },
-  
   seeAllText: {
     fontSize: 14,
-    fontWeight: 'semibold',
+    fontWeight: '600',
     color: '#fff',
     marginRight: 10,
-  },  
+  },
+  betButtons: {
+    flexDirection: 'row',
+  },
+  betButton: {
+    backgroundColor: '#4285F4',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+  },
+  betButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
 });
