@@ -152,11 +152,12 @@ export default function ThirdRoute() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: '#1E1E4C',
     padding: 1,
   },
   card: {
     flexDirection: 'row',
+    
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 2,
     padding: 10,
@@ -192,7 +193,7 @@ const styles = StyleSheet.create({
   },
   yesText: {
     fontSize: 14,
-    fontWeight: '400',
+    fontWeight: 400,
     color: '#fff',
     marginLeft: 4,
   },
@@ -212,7 +213,7 @@ const styles = StyleSheet.create({
   },
   claimLabel: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: 'semibold',
     color: '#fff',
     marginBottom: 7,
   },
@@ -231,12 +232,12 @@ const styles = StyleSheet.create({
   },
   claimedText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: 'semibold',
     color: '#fff',
   },
   claimText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: 'semibold',
     color: '#fff',
   },
   seeAllButton: {
@@ -253,7 +254,7 @@ const styles = StyleSheet.create({
   
   seeAllText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: 'semibold',
     color: '#fff',
     textAlign: 'center',
   },  
@@ -267,7 +268,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginRight: 5,
   },
-  userText: {
+    userText: {
     fontSize: 12,
     color: '#ddd',
     fontWeight: '600',

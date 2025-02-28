@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     marginBottom: hp(2),
     overflow: 'hidden',
-    backgroundColor: 'rgba(111, 105, 117, 0.1)', // Daha saydam kart arkaplanı
+    backgroundColor: 'rgba(138, 43, 226, 0.2)', // Daha saydam kart arkaplanı
   },
   whiteOverlay: {
     ...StyleSheet.absoluteFillObject,

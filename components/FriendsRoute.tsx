@@ -120,7 +120,7 @@ export default function SecondRoute() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: '#1E1E4C' }}>
        {loading ? (
               <ActivityIndicator size="large" color="#fff" />
             ) : (
@@ -191,10 +191,6 @@ export default function SecondRoute() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
   cardContainer: {
     position: 'relative',
     borderRadius: 0,
@@ -222,7 +218,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: 600,
     color: '#fff',
   },
   userContainer: {

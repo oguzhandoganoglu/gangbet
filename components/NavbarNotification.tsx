@@ -4,9 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 export default function NavbarNotificaiton() {
   return (
-    <LinearGradient 
-      colors={["rgba(108, 92, 231, 0.2)", "rgba(52, 31, 151, 0.1)"]} 
-      style={styles.container}>
+    <LinearGradient colors={["#6C5CE7", "#341F97"]} style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.logo}>GANGBET👍</Text>
         <TouchableOpacity style={styles.profileContainer}>
@@ -22,7 +20,6 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     alignItems: "flex-start",
-    backgroundColor: 'transparent', // Saydam arka plan
   },
   header: {
     flexDirection: "row",
@@ -37,10 +34,6 @@ const styles = StyleSheet.create({
   },
   profileContainer: {
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.2)", // Hafif saydam arka plan
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 10,
   },
   profileImage: {
     width: 24,
@@ -51,11 +44,11 @@ const styles = StyleSheet.create({
   profileText: {
     color: "white",
     fontSize: 10,
-    fontWeight: '400',
+    fontWeight: 400,
   },
   profileText2: {
     color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: 600,
   },
 });

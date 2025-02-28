@@ -98,8 +98,8 @@ export default function FirstRoute() {
                 <View style={styles.percentCard}>
                   <Image source={require('@/assets/images/thumb-up.png')} style={styles.percentImage} />
                     <View style={styles.percentText}>
-                    <Text style={{color:'#fff', fontSize:12, fontWeight: '400'}}>YES</Text>
-                    <Text style={{color:'#fff', fontSize:12, fontWeight: '400'}}> {item.percent}</Text>
+                    <Text style={{color:'#fff', fontSize:12, fontWeight:400}}>YES</Text>
+                    <Text style={{color:'#fff', fontSize:12, fontWeight:400}}> {item.percent}</Text>
                  </View>
                 </View>
               
@@ -179,7 +179,7 @@ export default function FirstRoute() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: '#1E1E4C',
     padding: 1,
   },
   card: {
@@ -219,17 +219,17 @@ const styles = StyleSheet.create({
   },
   yesText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: 'semibold',
     marginLeft: 2,
   },
   wonText: {
     fontSize: 12,
-    fontWeight: '400',
+    fontWeight: 400,
     color: '#ddd',
   },
   statText: {
     fontSize: 12,
-    fontWeight: '400',
+    fontWeight: 400,
     color: '#ddd',
   },
   claimContainer: {
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   },
   claimLabel: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: 'semibold',
     color: '#fff',
     marginBottom: 7,
   },
@@ -256,12 +256,12 @@ const styles = StyleSheet.create({
   },
   claimedText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: 'semibold',
     color: '#fff',
   },
   claimText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: 'semibold',
     color: '#000',
   },
   seeAllButton: {
@@ -278,14 +278,14 @@ const styles = StyleSheet.create({
   
   seeAllText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: 'semibold',
     color: '#fff',
     textAlign: 'center',
   },  
   percentCard : {
     flexDirection: 'row', 
     alignItems: 'center', 
-    backgroundColor: 'rgba(214, 214, 214, 0.45)', 
+    backgroundColor:"#D6D6D673", 
     borderRadius: 13, 
     paddingHorizontal: 5,
     paddingVertical: 3,
