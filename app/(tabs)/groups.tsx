@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, TextInput, Modal, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, TextInput } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Navbar from '@/components/Navbar';
@@ -12,12 +12,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 export default function NotificationScreen() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchText, setSearchText] = useState('');
-
-  const [isNewGroupModalVisible, setIsNewGroupModalVisible] = useState(false);
-  const [newGroupName, setNewGroupName] = useState('');
-  const [newGroupDescription, setNewGroupDescription] = useState('');
-  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
-
+  const { user } = useUser();
+  const userId = user?._id;
+  const router = useRouter();
   
   // State tanımlamaları
   const [joinedGroups, setJoinedGroups] = useState([]);
@@ -37,25 +34,17 @@ export default function NotificationScreen() {
 
     try {
       const response = await axios.get(`http://51.21.28.186:5001/api/pages/groups/all/${userId}`);
-
-    
-      const { joinedGroups } = response.data; 
+      const data = response.data;
       
-    
-      const formattedData: ManagedDataType[] = joinedGroups.map((group: ApiGroupType) => ({
-        id: group.id,
-        gangName: group.name,
-        gangImage: { uri: group.image },
-        gangMembers: group.membersCount,
-        gangBets: group.activeBetsCount,
-      }));
+      // Katılınan grupları kaydet
+      setJoinedGroups(data.joinedGroups || []);
       
-      if (selectedCategory === 'managed') {
-        setFilteredData(formattedData);
-      }
-    
-      setManagedData(formattedData);
-
+      // Grup bahislerini kaydet
+      setBetsWithGroups(data.betsWithGroups || []);
+      
+      // Başlangıçta tüm bahisleri göster
+      setFilteredBets(data.betsWithGroups || []);
+      
     } catch (err) {
       console.error('Error fetching data:', err);
       setError('Failed to load data. Please try again later.');
@@ -64,47 +53,7 @@ export default function NotificationScreen() {
     }
   };
 
-  const createNewGroup = async () => {
-    if (!newGroupName.trim()) {
-      Alert.alert('Error', 'Group name is required');
-      return;
-    }
-
-    setIsCreatingGroup(true);
-    
-    try {
-      const response = await axios.post('http://51.21.28.186:5001/api/groups/create', {
-        name: newGroupName,
-        description: newGroupDescription,
-        createdBy: userId,
-      });
-      
-      Alert.alert('Success', 'Group created successfully');
-      setIsNewGroupModalVisible(false);
-      setNewGroupName('');
-      setNewGroupDescription('');
-      
-    
-      fetchGroups();
-      
-    } catch (err) {
-      console.error('Error creating group:', err);
-      Alert.alert('Error', 'Failed to create group. Please try again.');
-    } finally {
-      setIsCreatingGroup(false);
-    }
-  };
-
-  
-  const [managedData, setManagedData] = useState<ManagedDataType[]>([]);
-
-  
-  useEffect(() => {
-    fetchGroups();
-  }, []);
-
-  
-
+  // Kategori değiştiğinde bahisleri filtrele
   useEffect(() => {
     if (selectedCategory === 'all') {
       // Tüm bahisleri göster
@@ -314,10 +263,7 @@ export default function NotificationScreen() {
       
       {selectedCategory === 'managed' && (
         <View style={styles.bottomButtonContainer}>
-          <TouchableOpacity 
-            style={styles.button}
-            onPress={() => setIsNewGroupModalVisible(true)}
-          >
+          <TouchableOpacity style={styles.button}>
             <Image source={require('@/assets/images/layout-grid-add.png')} style={{width: 24, height: 24, marginRight: 5}} />
             <Text style={styles.buttonText}>New Group</Text>
           </TouchableOpacity>
@@ -327,79 +273,7 @@ export default function NotificationScreen() {
           </TouchableOpacity>
         </View>
       )}
-
-
-      {/* New Group Modal */}
-      <Modal
-        visible={isNewGroupModalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setIsNewGroupModalVisible(false)}
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.modalContainer}
-        >
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Create New Group</Text>
-            
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Group Name</Text>
-              <TextInput
-                style={styles.input}
-                value={newGroupName}
-                onChangeText={setNewGroupName}
-                placeholder="Enter group name"
-                placeholderTextColor="#888"
-                maxLength={30}
-              />
-            </View>
-            
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Description</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                value={newGroupDescription}
-                onChangeText={setNewGroupDescription}
-                placeholder="Enter group description"
-                placeholderTextColor="#888"
-                multiline={true}
-                numberOfLines={4}
-                maxLength={200}
-              />
-            </View>
-            
-            <View style={styles.modalButtonContainer}>
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.cancelButton]} 
-                onPress={() => {
-                  setIsNewGroupModalVisible(false);
-                  setNewGroupName('');
-                  setNewGroupDescription('');
-                }}
-              >
-                <Text style={styles.modalButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[
-                  styles.modalButton, 
-                  styles.createButton,
-                  isCreatingGroup && styles.disabledButton
-                ]} 
-                onPress={createNewGroup}
-                disabled={isCreatingGroup}
-              >
-                <Text style={styles.modalButtonText}>
-                  {isCreatingGroup ? 'Creating...' : 'Create Group'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
-    </View>
-
+    </LinearGradient>
   );
 }
 
@@ -551,7 +425,7 @@ const styles = StyleSheet.create({
   },
   bottomButtonContainer: {
     position: 'absolute',
-    bottom: 70,
+    bottom: 20,
     alignSelf: 'center',
     flexDirection: 'row',
     paddingVertical: 6,
@@ -609,84 +483,5 @@ const styles = StyleSheet.create({
   emptyText: {
     color: 'white',
     fontSize: 16,
-  },
-  // Modal styles
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-  },
-  modalContent: {
-    width: '85%',
-    backgroundColor: '#2E2E5E',
-    borderRadius: 10,
-    padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  inputContainer: {
-    width: '100%',
-    marginBottom: 16,
-  },
-  inputLabel: {
-    color: 'white',
-    fontSize: 16,
-    marginBottom: 6,
-  },
-  input: {
-    backgroundColor: '#1E1E4C',
-    color: 'white',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 6,
-    fontSize: 16,
-    width: '100%',
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: 'top',
-  },
-  modalButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginTop: 20,
-  },
-  modalButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 6,
-    alignItems: 'center',
-    marginHorizontal: 4,
-  },
-  cancelButton: {
-    backgroundColor: '#444471',
-  },
-  createButton: {
-    backgroundColor: '#610f87',
-  },
-  disabledButton: {
-    backgroundColor: '#444471',
-    opacity: 0.7,
-  },
-  modalButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '500',
   },
 });
