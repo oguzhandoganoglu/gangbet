@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Navbar from '@/components/Navbar';
 import { useRouter } from 'expo-router';
-import axios from 'axios';
+
+import axios from 'axios'; 
+
 import { useUser } from "../UserContext";
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -171,16 +173,24 @@ export default function NotificationScreen() {
               }}
               style={styles.managedCard}
             >
-              <Image 
-                source={{ uri: item.image || 'https://via.placeholder.com/60' }} 
-                style={styles.managedProfileImage}
-                defaultSource={require('@/assets/images/angry.png')}
-              />
-              <View style={{ alignItems: 'flex-start', flex: 1 }}>
-                <Text style={styles.managedtitle}>{item.name}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
-                  <Image source={require('@/assets/images/users2.png')} style={{height:16, width:16, marginRight:4}} />
-                  <Text style={styles.subText}>{item.membersCount} Members</Text>
+              <View style={styles.managedCard}>
+                <Image source={item.gangImage} style={styles.managedProfileImage} />
+                <View style={{ alignItems: 'flex-start'}}>
+                  <Text style={styles.managedtitle}>{item.gangName}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
+                    <Image source={require('@/assets/images/users2.png')} style={{height:16, width:16, marginRight:4}} />
+                    <Text style={styles.subText}>{item.gangMembers} Members</Text>
+                  </View>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 30 }}>
+                  <Image source={require('@/assets/images/share.png')} style={{height:16, width:16, marginRight:7}} />
+                  <Image source={require('@/assets/images/user-plus.png')} style={{height:16, width:16, marginRight:7}} />
+                  <Image source={require('@/assets/images/user-minus.png')} style={{height:16, width:16, marginRight:7}} />
+                  <Image source={require('@/assets/images/settings.png')} style={{height:16, width:16}} />
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 30 }}>
+                  <Text style={styles.subText}>{item.gangBets} Bets</Text>
+
                 </View>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 'auto' }}>
