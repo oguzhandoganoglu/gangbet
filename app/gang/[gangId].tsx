@@ -1,20 +1,47 @@
-import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
+import React from 'react';
+import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { TabView, SceneMap } from 'react-native-tab-view';
-import { useState } from 'react';
+import { TabView } from 'react-native-tab-view';
+import { useState, useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native'; 
 import GangActiveBets from '@/components/GangActiveBets';
 import GangAllBets from '@/components/GangAllBets';
 import GangMembers from '@/components/GangMembers';
 import GangSettings from '@/components/GangSettings';
 import TabBarComponent from '@/components/TabBarComponent';
+import { useUser } from "../UserContext";
 
 export default function GangDetailScreen() {
     const { gangId } = useLocalSearchParams();
-    const managedData = [
-        { id: 1, gangName: "RKOS", gangImage: require('@/assets/images/elon.png'), gangMembers: 5, gangBets: 10, volume: "40K"},
-        { id: 2, gangName: "06ankaralilar", gangImage: require('@/assets/images/latte.jpeg'), gangMembers: 5, gangBets: 10, volume: "40K" },
-        { id: 3, gangName: "RKOS", gangImage: require('@/assets/images/yamanalp.png'), gangMembers: 5, gangBets: 10, volume: "40K" },
-    ];
+    const navigation = useNavigation();
+    const { user } = useUser();
+    const userId = user?._id;
+    const [gangDetail, setGangDetail] = useState({
+        gangImage: '',
+        name: '',
+        members: [],
+        gangBets: 0,
+        volume: 0
+    });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchBets = async () => {
+            try {
+                const response = await fetch(`http://51.21.28.186:5001/api/pages/groups/detail/${gangId}/${userId}`);
+                const data = await response.json();
+                setGangDetail(data.group);
+                console.log(data);
+            } catch (error) {
+                console.error("Error fetching bets:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBets();
+    }, [gangId]);
+
     const [index, setIndex] = useState(1);
     const [routes] = useState([
       { key: 'first', title: 'Active Bets |' },
@@ -22,29 +49,41 @@ export default function GangDetailScreen() {
       { key: 'third', title: 'Members' },
       { key: 'forth', title: 'Settings' },
     ]);
-  
-    const renderScene = SceneMap({
-      first: GangActiveBets,
-      second: GangAllBets,
-      third: GangMembers,
-      forth: GangSettings,
-    });
-    const gangDetails = managedData.find(gang => gang.id === Number(gangId));
 
-    if (!gangDetails) {
+    // Fonksiyonel renderScene
+    const renderScene = ({ route }: { route: { key: string } }) => {
+      switch (route.key) {
+        case 'first':
+          return <GangActiveBets />;
+        case 'second':
+          return <GangAllBets gangId={Array.isArray(gangId) ? gangId[0] : gangId} />; // Burada "All Bets" sekmesine gangId geçiyoruz
+        case 'third':
+          return <GangMembers />;
+        case 'forth':
+          return <GangSettings />;
+        default:
+          return null;
+      }
+    };
+
+    if (!gangDetail) {
         return (
-        <View >
+        <View>
             <Text>Gang not found</Text>
         </View>
         );
     }
 
-  return (
+    return (
     <View style={styles.container}>
-        <View style={{flexDirection: 'row', alignItems: 'center', paddingHorizontal:20, paddingVertical: 20}}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Image source={require('@/assets/images/back.png')} style={styles.backIcon} />
+        </TouchableOpacity>
+
+        <View style={{flexDirection: 'row', alignItems: 'center', paddingHorizontal:20, paddingBottom:20, paddingTop: 60}}>
             <View style={{flexDirection: 'row', flex: 1}}>
-                <Image style={styles.gangImage} source={gangDetails.gangImage}  />
-                <Text style={styles.gangName}>{gangDetails.gangName}</Text>
+                <Image style={styles.gangImage} source={require('@/assets/images/alp.png')}  />
+                <Text style={styles.gangName}>{gangDetail.name}</Text>
                 <Image source={require('@/assets/images/qrcode.png')} style={{width:24, height:24}} />
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center',}}>
@@ -53,19 +92,22 @@ export default function GangDetailScreen() {
         </View>
         <View style={{flexDirection: 'row', paddingHorizontal: 20, marginBottom: 15}}>
             <Image source={require('@/assets/images/users2.png')} style={{width: 16, height: 16,}} />
-            <Text style={styles.subtext}>{gangDetails.gangMembers} User</Text>
+            <Text style={styles.subtext}>{gangDetail.members.length} User</Text>
             <Image source={require('@/assets/images/gavel.png')} style={{width: 16, height: 16,}} />
-            <Text style={styles.subtext}>{gangDetails.gangBets} Bets</Text>
-            <Image source={require('@/assets/images/chart-line.png')} style={{width: 16, height: 16,}} />
-            <Text style={styles.subtext}>{gangDetails.volume} Volume</Text>
+            <Text style={styles.subtext}>4 Bets</Text>
         </View>
-        <TabView
+
+        {loading ? (
+            <Text style={styles.loadingText}>Loading bets...</Text>
+        ) : (
+            <TabView
                 navigationState={{ index, routes }}
                 renderScene={renderScene}
                 onIndexChange={setIndex}
                 initialLayout={{ width: Dimensions.get('window').width }}
                 renderTabBar={props => <TabBarComponent {...props} />}
               />
+        )}
     </View>
   );
 }
@@ -75,10 +117,20 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#1E1E4C',    
     },
+    backButton: {
+        position: 'absolute',
+        top: 20,
+        left: 20,
+        zIndex: 1,
+    },
+    backIcon: {
+        width: 24,
+        height: 24,
+    },
     gangImage: {
-        width: 31,
-        height: 31,
-        borderRadius: 15,
+        width: 51,
+        height: 51,
+        borderRadius: 30,
     },
     gangName: {
         color: 'white',
@@ -92,5 +144,11 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: 400,
         marginLeft: 5,
+    },
+    loadingText: {
+        color: 'white',
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 20,
     }
 });

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { View, Text, FlatList, Image, StyleSheet } from 'react-native';
 
 const exampleData = [
@@ -24,10 +24,39 @@ const exampleData = [
   }
 ];
 
-export default function GangAllBets() {
+interface Bet {
+  id: string;
+  title: string;
+  status: string;
+}
+
+interface GangAllBetsProps {
+  gangId: string;
+}
+
+export default function GangAllBets({ gangId }: GangAllBetsProps) {
+  const [bets, setBets] = useState<Bet[]>([]);
+  const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+          const fetchBets = async () => {
+              try {
+                  const response = await fetch(`http://51.21.28.186:5001/api/pages/groups/detail/${gangId}/${userId}`);
+                  const data = await response.json();
+                  setBets(data.group);
+                  console.log(data);
+              } catch (error) {
+                  console.error("Error fetching bets:", error);
+              } finally {
+                  setLoading(false);
+              }
+          };
+  
+          fetchBets();
+      }, [gangId]);
+
   return (
     <View style={styles.container}>
-      
       <FlatList
         data={exampleData}
         renderItem={({ item }) => (
