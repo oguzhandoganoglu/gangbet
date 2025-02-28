@@ -36,9 +36,9 @@ export default function FireScreen() {
         </View>
         
         {activeTab === "Friends" && (
-          <GestureHandlerRootView style={styles.cardContainer}>
+          <View style={styles.cardContainer}>
             <BetCardFriends />
-          </GestureHandlerRootView>
+          </View>
         )}
         
         {activeTab === "Popular" && (
