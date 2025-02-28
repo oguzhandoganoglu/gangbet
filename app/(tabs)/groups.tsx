@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Navbar from '@/components/Navbar';
 import { useRouter } from 'expo-router';
-import axios from 'axios'; // Make sure axios is installed
+import axios from 'axios'; 
 import { useUser } from "../UserContext";
 
 export default function NotificationScreen() {
@@ -192,7 +192,7 @@ export default function NotificationScreen() {
                   <Text style={styles.managedtitle}>{item.gangName}</Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
                     <Image source={require('@/assets/images/users2.png')} style={{height:16, width:16, marginRight:4}} />
-                    <Text style={styles.subText}>{item.gangMembers} sdasd {item.id.toString()} Members</Text>
+                    <Text style={styles.subText}>{item.gangMembers} Members</Text>
                   </View>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 30 }}>

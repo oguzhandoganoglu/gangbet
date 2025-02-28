@@ -20,6 +20,8 @@ interface ProfileResponse {
     walletAddress: string;
     balance: number;
     createdAt: string;
+    friendsCount: number;
+    groupsCount: number;
   };
   friends: Array<{
     id: string;
@@ -99,7 +101,7 @@ export default function ProfileScreen() {
   };
 
   // Her bir sekme için render fonksiyonları
-  const renderScene = ({ route }) => {
+  const renderScene = ({ route }: { route: { key: string } }) => {
     if (loading) {
       return (
         <View style={styles.loadingContainer}>
