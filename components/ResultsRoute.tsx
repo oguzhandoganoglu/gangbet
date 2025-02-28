@@ -1,63 +1,97 @@
-import React from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useUser } from "../app/UserContext";
 
-const exampleData = [
-  {
-    id: '1',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/elon.png'),
-    claimAmount: '10 USDC',
-    claim: true,
-    result : "Pending",
-    percent : '50,534',
-  },
-  {
-    id: '2',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/latte.jpeg'),
-    claimAmount: '10 USDC',
-    claim: false,
-    result : "Ended",
-    percent : '50,534',
-  },
-  {
-    id: '3',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/latte.jpeg'),
-    claimAmount: '10 USDC',
-    claim: true,
-    result : "Won",
-    percent : '50,534',
-  },
-  {
-    id: '4',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/elon.png'),
-    claimAmount: '10 USDC',
-    claim: true,
-    result : "Lost",
-    percent : '50,534',
-  },
-  {
-    id: '5',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/latte.jpeg'),
-    claimAmount: '10 USDC',
-    claim: false,
-    result : "Won",
-    percent : '50,534',
-  },
-  
-];
 
-export default function SecondRoute() {
+function getRemainingMinutes(endDateFromDatabase: Date) {
+  const targetDate = new Date(endDateFromDatabase);  // Stringi Date nesnesine dönüştür
+  const currentDate = new Date();  // Şu anki tarih
+
+  // Hedef tarih ile şu anki tarih arasındaki farkı milisaniye cinsinden hesapla
+  const differenceInMilliseconds = targetDate.getTime() - currentDate.getTime();
+
+  // Milisaniyeyi dakikaya çevirmek için 1000 (saniye) * 60 (dakika) ile bölüyoruz
+  const differenceInMinutes = Math.floor(differenceInMilliseconds / 1000 / 60);
+
+  return differenceInMinutes;
+}
+
+export default function FirstRoute() {
+  interface Bet {
+    id: string;
+    title: string;
+    photoUrl: string;
+    result: string;
+    claimAmount: string;
+    claim: boolean;
+    status: string;
+    percent: string;
+    participants: any[];
+    claimedBy: any[];
+    totalPool: number;
+    yesUsersCount: number;
+    noUsersCount: number;
+    endDate: Date;
+    yesOdds: number;
+  }
+  const { user } = useUser(); // useUser hook'unu kullanıyoruz
+  const userId = user?._id; // Kullanıcı ID'si
+
+
+  const [bets, setBets] = useState<Bet[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [claimAmount, setClaimAmount] = useState(0);
+
+  useEffect(() => {
+    const fetchBets = async () => {
+      try {
+        const response = await fetch(`http://51.21.28.186:5001/api/bets/user/${userId}`);
+        const data = await response.json();
+        setBets(data.bets);
+      } catch (error) {
+        console.error('Error fetching bets:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBets();
+  }, []);  // Verileri yalnızca ilk renderda al
+
+  useEffect(() => {
+    // bets verisi değiştiğinde bu fonksiyon çalışacak
+    if (bets.length > 0) {
+      bets.forEach((bet) => {
+        const totalAmount = bet.totalPool;
+        const totalYes = bet.yesUsersCount;
+        const totalNo = bet.noUsersCount;
+        const result = bet.result;
+
+        if (result === "yes") {
+          setClaimAmount(totalAmount / totalYes);
+        } else if (result === "no") {
+          setClaimAmount(totalAmount / totalNo);
+        }
+      });
+    }
+  }, [bets]);
+
+
   return (
     <View style={styles.container}>
+      {loading ? (
+        <ActivityIndicator size="large" color="#fff" />
+      ) : (
       <FlatList
-        data={exampleData}
-        renderItem={({ item }) => (
+        data={bets.filter(bet => bet.status === "ended")}
+        keyExtractor={(_, index) => index.toString()} 
+        renderItem={({ item }) => {
+          // Her kart için kalan süreyi hesapla
+          const remainingMinutes = getRemainingMinutes(item.endDate);
+
+          return (
           <View style={styles.card}>
-            <Image source={item.image} style={styles.profileImage} />
+            <Image source={{ uri: item.photoUrl }} style={styles.profileImage} />
             <View style={styles.content}>
               <Text style={styles.title}>{item.title}</Text>
               <View style={styles.actions}>
@@ -68,29 +102,29 @@ export default function SecondRoute() {
                     <Text style={{color:'#fff', fontSize:12, fontWeight:400}}> {item.percent}</Text>
                  </View>
                 </View>
-                {(item.result==="Lost")&& (
+              
+                {(item.participants.length>0) && (item?.participants?.find(p => p.user === userId) )&& 
+                (item?.participants?.find(p => p.user === userId).choice!=item.result) &&
+                (
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
                       <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, tintColor:"white" }} />
-                      <Text style={styles.wonText}> %40</Text>
+                      <Text style={styles.wonText}> %{(item.yesOdds)*10}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
                       <Image source={require('@/assets/images/ghost.png')} style={{ width: 16, height: 16 }} />
                       <Text style={styles.wonText}> Lost!</Text>
                     </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/chart-line.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.statText}>50K</Text>
-                    </View>
                     <Image source={require('@/assets/images/send.png')} style={{ width: 16, height: 16, marginLeft:18 }} />
-                    <Image source={require('@/assets/images/star.png')} style={{ width: 16, height: 16, marginLeft:6 }} />
+                    
                   </View>
                 )}
-                {(item.result==="Won")&& (
+                {(item.participants.length>0) && (item?.participants?.find(p => p.user === userId) )&& 
+                (item?.participants?.find(p => p.user === userId).choice===item.result) &&(
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
                       <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, tintColor:"white" }} />
-                      <Text style={styles.wonText}> %40</Text>
+                      <Text style={styles.wonText}> %{(item.yesOdds)*10}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
                       <Image source={require('@/assets/images/mood-suprised.png')} style={{ width: 16, height: 16 }} />
@@ -99,65 +133,42 @@ export default function SecondRoute() {
                     <Image source={require('@/assets/images/share.png')} style={{ width: 16, height: 16, marginLeft:8 }} />
                   </View>
                 )}
-                {(item.result==="Pending")&& (
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, tintColor:"white" }} />
-                      <Text style={styles.statText}> %40</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/hourglass.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.statText}>30M Left</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/chart-line.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.statText}>50K</Text>
-                    </View>
-                    <Image source={require('@/assets/images/send.png')} style={{ width: 16, height: 16, marginLeft:12 }} />
-                    <Image source={require('@/assets/images/star.png')} style={{ width: 16, height: 16, marginLeft:6 }} />
-                  </View>
-                )}
-                {(item.result==="Ended")&& (
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, tintColor:"white" }} />
-                      <Text style={styles.statText}> %40</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/gavel.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.statText}>Ended</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/chart-line.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.statText}>50K</Text>
-                    </View>
-                    <Image source={require('@/assets/images/send.png')} style={{ width: 16, height: 16, marginLeft:12 }} />
-                    <Image source={require('@/assets/images/star.png')} style={{ width: 16, height: 16, marginLeft:6 }} />
-                  </View>
-                )}
               </View>
             </View>
-            {(item.claim) && (item.result==="Won") && (
+            {(item.participants.length>0) && 
+            (item?.participants?.find(p => p.user === userId) )&& 
+            (item?.participants?.find(p => p.user === userId).choice===item.result) &&
+            (item?.claimedBy.length>0) &&
+            (item?.claimedBy.find(p => p.user === userId)) &&
+            (
               <View style={styles.claimContainer}>
                 <Text style={styles.claimLabel}>Claimed</Text>
                 <TouchableOpacity style={styles.claimedButton}>
-                  <Text style={styles.claimedText}>{item.claimAmount}</Text>
+                  <Text style={styles.claimedText}>{}</Text>
                 </TouchableOpacity>
               </View>
             )}
-            {(!item.claim) && (item.result==="Won") && (
+            {
+            (item.participants.length>0) && 
+            (item?.participants?.find(p => p.user === userId) )&& 
+            (item?.participants?.find(p => p.user === userId).choice===item.result) &&
+            (
+              ((item?.claimedBy.length>0) &&
+              (item?.claimedBy.find(p => p.user != userId))) ||
+              (item?.claimedBy.length===0) 
+            )&&
+            (
               <View style={styles.claimContainer}>
                 <Text style={styles.claimLabel}>Claim</Text>
                 <TouchableOpacity style={styles.claimButton}>
-                  <Text style={styles.claimText}>{item.claimAmount}</Text>
+                  <Text style={styles.claimText}>{claimAmount} USDC</Text>
                 </TouchableOpacity>
               </View>
             )}
           </View>
-        )}
-        keyExtractor={(item) => item.id}
+        )}}
       />
-        {/* "See All" Butonu */}
+    )}
       <TouchableOpacity style={styles.seeAllButton}>
         <Text style={styles.seeAllText}>See All</Text>
       </TouchableOpacity>
