@@ -29,11 +29,24 @@ export default function NavbarProfile({ userData }: NavbarProfileProps) {
     }
   };
 
+  const handleBack = () => {
+    router.back(); // Geri navigasyon işlemi
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        {/* Geri butonu */}
+        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+          <Image
+            source={require("@/assets/images/arrow-back.png")}
+            style={styles.backImage}
+          />
+        </TouchableOpacity>
+        
         <Text style={styles.logo}>GANGBET👍</Text>
-        <TouchableOpacity style={styles.profileContainer} onPress={() => router.push("/profile")} >
+        
+        <TouchableOpacity style={styles.profileContainer} onPress={() => router.push("/profile")}>
           <Image
             source={require("@/assets/images/settings.png")}
             style={styles.settingsImage}
@@ -41,6 +54,7 @@ export default function NavbarProfile({ userData }: NavbarProfileProps) {
           <Text style={styles.profileText}>Settings</Text>
         </TouchableOpacity>
       </View>
+      
       <View style={styles.uplinecontainer}>
         <View>
           <Image source={require("@/assets/images/user1.png")} style={styles.profileImage}/>
@@ -58,7 +72,7 @@ export default function NavbarProfile({ userData }: NavbarProfileProps) {
               <Image source={require("@/assets/images/logout.png")} style={styles.qrImage} />
             </TouchableOpacity>
           </View>
-          <View style={styles.bottomlinecontainer}> 
+          <View style={styles.bottomlinecontainer}>
             <Text style={styles.friendsText}>
               {userData?.friendsCount ?? 0} Friends
             </Text>
@@ -85,11 +99,18 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
   },
+  backButton: {
+    padding: 5,
+  },
+  backImage: {
+    width: 24,
+    height: 24,
+    tintColor: "white",
+  },
   logo: {
     fontSize: 14,
     color: "white",
     fontWeight: "bold",
-    marginLeft: 2,
   },
   profileContainer: {
     flexDirection: "row",

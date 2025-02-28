@@ -3,152 +3,136 @@ import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Navbar from '@/components/Navbar';
 import { useRouter } from 'expo-router';
-import axios from 'axios'; // Make sure axios is installed
+import axios from 'axios';
 import { useUser } from "../UserContext";
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function NotificationScreen() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchText, setSearchText] = useState('');
+  const { user } = useUser();
+  const userId = user?._id;
+  const router = useRouter();
   
-  // DataType için tip tanımı (örnekData için)
-  type DataType = {
-    id: number;
-    title: string;
-    category: string;
-    image: any;
-    traded: string;
-    result: string;
-  };
+  // State tanımlamaları
+  const [joinedGroups, setJoinedGroups] = useState([]);
+  const [betsWithGroups, setBetsWithGroups] = useState([]);
+  const [filteredBets, setFilteredBets] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // ManagedDataType için tip tanımı (gruplar için)
-  type ManagedDataType = {
-    id: string;
-    gangName: string;
-    gangImage: { uri: string }; // Resim URL'i
-    gangMembers: number;
-    gangBets: number;
-  };
-  // API'den gelecek gruplar verisi için tip tanımı
-  type ApiGroupType = {
-    id: string;
-    name: string;
-    image: string;
-    membersCount: number;
-    activeBetsCount: number;
-    createdBy: string;
-    createdAt: string;
-  };
-  const { user } = useUser(); // useUser hook'unu kullanıyoruz
-  const userId = user?._id; // Kullanıcı ID'si
-  const [filteredData, setFilteredData] = useState<(DataType | ManagedDataType)[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // API'den veri çekme
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const [routes] = useState([
-    { key: 'managed', title: 'Managed |' },
-    { key: 'all', title: 'All' },
-    { key: 'rkos', title: 'RKOS' },
-    { key: '06ankaralilar', title: '06ankaralilar' },
-    { key: 'culture', title: 'Culture' },
-    { key: 'world', title: 'World' },
-  ]);
-
-  // Örnek Statik Veri
-  const exampleData = [
-    { id: 1, title: 'Elon Musk out as Head of DOGE before July?', category: 'rkos', image: require('@/assets/images/elon.png'), traded:"NO", result:""},
-    { id: 2, title: 'Elon Musk out as Head of DOGE before July?', category: '06ankaralilar', image: require('@/assets/images/latte.jpeg'), traded:"YES", result:"50,534"},
-    { id: 3, title: 'Elon Musk out as Head of DOGE before July?', category: 'rkos', image: require('@/assets/images/yamanalp.png'), traded:"YES", result:"50,534"},
-  ];
-
-  // API'den grupları getirme fonksiyonu
-  const fetchGroups = async () => {
+  const fetchData = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const response = await axios.get(`http://51.21.28.186:5001/api/pages/groups/all/${userId}`);
-      // API'nin döndürdüğü veriyi destructure edin:
-      const { joinedGroups } = response.data; // Eğer sadece joinedGroups'ı kullanacaksanız
+      const data = response.data;
       
-      // API'den gelen verileri ManagedDataType formatına dönüştürün:
-      const formattedData: ManagedDataType[] = joinedGroups.map((group: ApiGroupType) => ({
-        id: group.id,
-        gangName: group.name,
-        gangImage: { uri: group.image },
-        gangMembers: group.membersCount,
-        gangBets: group.activeBetsCount,
-      }));
+      // Katılınan grupları kaydet
+      setJoinedGroups(data.joinedGroups || []);
       
-      // Eğer 'managed' kategorisi seçiliyse, verileri filtrele ve göster
-      if (selectedCategory === 'managed') {
-        setFilteredData(formattedData);
-      }
+      // Grup bahislerini kaydet
+      setBetsWithGroups(data.betsWithGroups || []);
       
-      // Grupları yerel bir state'te saklayın
-      setManagedData(formattedData);
+      // Başlangıçta tüm bahisleri göster
+      setFilteredBets(data.betsWithGroups || []);
+      
     } catch (err) {
-      console.error('Error fetching groups:', err);
-      setError('Failed to load groups. Please try again later.');
+      console.error('Error fetching data:', err);
+      setError('Failed to load data. Please try again later.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Statik verileri saklayacak state
-  const [managedData, setManagedData] = useState<ManagedDataType[]>([]);
-
-  // Sayfa ilk yüklendiğinde grupları getir
+  // Kategori değiştiğinde bahisleri filtrele
   useEffect(() => {
-    fetchGroups();
-  }, []);
-
-  // Kategori değiştiğinde verileri filtrele
-  useEffect(() => {
-    if (selectedCategory === 'managed') {
-      setFilteredData(managedData);
+    if (selectedCategory === 'all') {
+      // Tüm bahisleri göster
+      setFilteredBets(betsWithGroups);
+    } else if (selectedCategory === 'managed') {
+      // Yönetilen grupları göster - burada yalnızca grupları gösteriyoruz
+      setFilteredBets([]);
     } else {
-      const filtered = exampleData.filter(item =>
-        selectedCategory === 'all' || item.category === selectedCategory
-      );
-      setFilteredData(filtered);
+      // Seçilen gruba ait bahisleri filtrele
+      const filtered = betsWithGroups.filter(bet => bet.groupName === selectedCategory);
+      setFilteredBets(filtered);
     }
-  }, [selectedCategory, managedData]);
+  }, [selectedCategory, betsWithGroups]);
 
-  const router = useRouter();
-  
+  // Grup detayı sayfasına gitme
+  const handleGroupPress = (groupId) => {
+    router.push({ pathname: "/gang/[gangId]", params: { gangId: groupId } });
+  };
+
+  // Kategorileri oluşturma (managed, all, ve grup isimleri)
+  const buildCategories = () => {
+    const basicCategories = [
+      { key: 'managed', title: 'Managed |' },
+      { key: 'all', title: 'All' }
+    ];
+    
+    // Grup isimlerini kategori olarak ekle
+    const groupCategories = joinedGroups.map(group => ({
+      key: group.name, // Grup adını key olarak kullan
+      title: group.name,
+      id: group.id // Grup ID'sini sakla
+    }));
+    
+    return [...basicCategories, ...groupCategories];
+  };
+
   return (
-    <View style={{ flex: 1, backgroundColor: '#1E1E4C' }}>
+    <LinearGradient
+      colors={['#161638', '#714F60', '#B85B44']}
+      style={{ flex: 1 }}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
       <Navbar />
       <Text style={styles.header}>Gangs</Text>
-
+      
+      {/* Kategori butonları - joinedGroups'taki grup isimlerini içerir */}
       <View style={styles.categoryContainer}>
-        {routes.map(route => (
-          <TouchableOpacity
-            key={route.key}
-            style={[
-              styles.categoryButton,
-            ]}
-            onPress={() => setSelectedCategory(route.key)}
-          >
-            <Text
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={buildCategories()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
               style={[
-                styles.categoryText,
-                selectedCategory === route.key && styles.selectedCategoryText,
+                styles.categoryButton,
+                selectedCategory === item.key && styles.selectedCategoryButton
               ]}
+              onPress={() => setSelectedCategory(item.key)}
             >
-              {route.title}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.categoryText,
+                  selectedCategory === item.key && styles.selectedCategoryText,
+                ]}
+              >
+                {item.title}
+              </Text>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item) => item.key}
+        />
       </View>
-
+      
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <Icon name="search" size={20} color="#ddd" />
         <TextInput
           style={styles.searchInput}
-          placeholder=""
-          placeholderTextColor="#888"
+          placeholder="Search..."
+          placeholderTextColor="#ccc"
           value={searchText}
           onChangeText={setSearchText}
         />
@@ -158,105 +142,115 @@ export default function NotificationScreen() {
         <Icon name="paper-plane" size={18} color="#ddd" style={styles.icon}/>
         <Icon name="hourglass-half" size={18} color="#ddd" style={styles.icon}/>
       </View>
-
+      
       {/* Loading state */}
-      {isLoading && selectedCategory === 'managed' && (
+      {isLoading && (
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading groups...</Text>
+          <Text style={styles.loadingText}>Loading...</Text>
         </View>
       )}
-
+      
       {/* Error state */}
-      {error && selectedCategory === 'managed' && (
+      {error && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={fetchGroups}>
+          <TouchableOpacity style={styles.retryButton} onPress={fetchData}>
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
         </View>
       )}
-
-      <FlatList
-        data={filteredData}
-        renderItem={({ item }) => {
-          if ('gangName' in item) {
-            // ManagedDataType türü için
-            return (
+      
+      {/* Managed kategori seçiliyse grupları göster */}
+      {selectedCategory === 'managed' && !isLoading && !error && (
+        <FlatList
+          data={joinedGroups}
+          renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => router.push({ pathname: "/gang/[gangId]", params: { gangId: item.id.toString() } })}
+              onPress={() => {
+                setSelectedCategory(item.name); // Grup adını kategori olarak ayarla
+              }}
               style={styles.managedCard}
             >
-              <View style={styles.managedCard}>
-                <Image source={item.gangImage} style={styles.managedProfileImage} />
-                <View style={{ alignItems: 'flex-start'}}>
-                  <Text style={styles.managedtitle}>{item.gangName}</Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
-                    <Image source={require('@/assets/images/users2.png')} style={{height:16, width:16, marginRight:4}} />
-                    <Text style={styles.subText}>{item.gangMembers} sdasd {item.id.toString()} Members</Text>
-                  </View>
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 30 }}>
-                  <Image source={require('@/assets/images/share.png')} style={{height:16, width:16, marginRight:7}} />
-                  <Image source={require('@/assets/images/user-plus.png')} style={{height:16, width:16, marginRight:7}} />
-                  <Image source={require('@/assets/images/user-minus.png')} style={{height:16, width:16, marginRight:7}} />
-                  <Image source={require('@/assets/images/settings.png')} style={{height:16, width:16}} />
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 30 }}>
-                  <Text style={styles.subText}>{item.gangBets} Bets</Text>
+              <Image 
+                source={{ uri: item.image || 'https://via.placeholder.com/60' }} 
+                style={styles.managedProfileImage}
+                defaultSource={require('@/assets/images/angry.png')}
+              />
+              <View style={{ alignItems: 'flex-start', flex: 1 }}>
+                <Text style={styles.managedtitle}>{item.name}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
+                  <Image source={require('@/assets/images/users2.png')} style={{height:16, width:16, marginRight:4}} />
+                  <Text style={styles.subText}>{item.membersCount} Members</Text>
                 </View>
               </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 'auto' }}>
+                <Image source={require('@/assets/images/share.png')} style={{height:16, width:16, marginRight:7}} />
+                <Image source={require('@/assets/images/user-plus.png')} style={{height:16, width:16, marginRight:7}} />
+                <Image source={require('@/assets/images/user-minus.png')} style={{height:16, width:16, marginRight:7}} />
+                <Image source={require('@/assets/images/settings.png')} style={{height:16, width:16}} />
+              </View>
+              <View style={{ marginLeft: 10 }}>
+                <Text style={styles.subText}>{item.activeBetsCount} Bets</Text>
+              </View>
             </TouchableOpacity>
-            );
-          } else {
-          // DataType türü için
-            return (
-              <View style={styles.cardContainer}>
-                <View style={styles.whiteOverlay} />
-                  <View style={styles.cardContent}>
-                    <Image source={item.image} style={styles.profileImage} />
-                    <View style={styles.textContainer}>
-                      <Text style={styles.title}>{item.title}</Text>
-                      <View style={styles.iconsContainer}>
-                        {item.traded === "YES" && (
-                          <View style={styles.percentCard}>
-                            <Image source={require('@/assets/images/thumb-up.png')} style={styles.percentImage} />
-                            <View style={styles.percentText}>
-                              <Text style={{color:'#fff', fontSize:12}}>YES</Text>
-                              <Text style={{color:'#fff', fontSize:12}}> {item.result}</Text>
-                            </View>
-                          </View>
-                        )}
-                        <View style={styles.iconItem}>
-                          <Image source={require("@/assets/images/scale.png")} style={{ width: 16, height: 16 }} />
-                          <Text style={styles.iconText}>%40</Text>
-                        </View>
-                        <View style={styles.iconItem}>
-                          <Image source={require("@/assets/images/mood-suprised.png")} style={{ width: 16, height: 16 }} />
-                          <Text style={styles.iconText}>Won</Text>
-                        </View>
-                        <View style={styles.iconItem}>
-                          <Image source={require("@/assets/images/chart-line.png")} style={{ width: 16, height: 16 }} />
-                          <Text style={styles.iconText}>50K</Text>
-                        </View>
-                        <Image source={require("@/assets/images/send.png")} style={{ width: 16, height: 16, marginRight:10 }} />
-                        <Image source={require("@/assets/images/star.png")} style={{ width: 16, height: 16 }} />
-                      </View>
-                    </View>
-                  </View>
-                </View>
-              );
-           }
-          }}
-        keyExtractor={(item) => item.id.toString()}
-        // Empty list state için
-        ListEmptyComponent={
-          selectedCategory === 'managed' && !isLoading && !error ? (
+          )}
+          keyExtractor={(item) => item.id}
+          ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>No groups found.</Text>
             </View>
-          ) : null
-        }
-      />
+          }
+        />
+      )}
+      
+      {/* Bahisleri göster - managed kategorisi olmadığında */}
+      {selectedCategory !== 'managed' && !isLoading && !error && (
+        <FlatList
+          data={filteredBets}
+          renderItem={({ item }) => (
+            <View style={styles.cardContainer}>
+              <View style={styles.whiteOverlay} />
+              <View style={styles.cardContent}>
+                <Image 
+                  source={{ uri: item.photoUrl || 'https://via.placeholder.com/65' }} 
+                  style={styles.profileImage} 
+                  defaultSource={require('@/assets/images/latte.jpeg')}
+                />
+                <View style={styles.textContainer}>
+                  <Text style={styles.title}>{item.title}</Text>
+                  <Text style={styles.groupText}>{item.groupName} / {item.channelName}</Text>
+                  <View style={styles.iconsContainer}>
+                    <View style={styles.percentCard}>
+                      <Image source={require('@/assets/images/thumb-up.png')} style={styles.percentImage} />
+                      <View style={styles.percentText}>
+                        <Text style={{color:'#fff', fontSize:12}}>YES</Text>
+                        <Text style={{color:'#fff', fontSize:12}}> {item.yesPercentage}%</Text>
+                      </View>
+                    </View>
+                    <View style={styles.iconItem}>
+                      <Image source={require("@/assets/images/scale.png")} style={{ width: 16, height: 16 }} />
+                      <Text style={styles.iconText}>{item.totalPool} USDC</Text>
+                    </View>
+                    <View style={styles.iconItem}>
+                      <Image source={require("@/assets/images/users2.png")} style={{ width: 16, height: 16 }} />
+                      <Text style={styles.iconText}>{item.participantsCount}</Text>
+                    </View>
+                    <Image source={require("@/assets/images/send.png")} style={{ width: 16, height: 16, marginRight:10 }} />
+                    <Image source={require("@/assets/images/star.png")} style={{ width: 16, height: 16 }} />
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
+          keyExtractor={(item) => item.id}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No bets found in this category.</Text>
+            </View>
+          }
+        />
+      )}
+      
       {selectedCategory === 'managed' && (
         <View style={styles.bottomButtonContainer}>
           <TouchableOpacity style={styles.button}>
@@ -264,12 +258,12 @@ export default function NotificationScreen() {
             <Text style={styles.buttonText}>New Group</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button}>
-          <Image source={require('@/assets/images/sort-descending-2.png')} style={{width: 24, height: 24, marginRight: 5}} />
+            <Image source={require('@/assets/images/sort-descending-2.png')} style={{width: 24, height: 24, marginRight: 5}} />
             <Text style={styles.buttonText}>Edit Sorting</Text>
           </TouchableOpacity>
         </View>
       )}
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -280,79 +274,43 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'left',
     paddingLeft: 15,
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent',
     marginTop: 20
   },
   categoryContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
     marginVertical: 10,
-    paddingLeft:10
+    paddingLeft: 10,
+    backgroundColor: 'transparent',
   },
   categoryButton: {
-    paddingVertical: 10,
-    marginHorizontal: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginHorizontal: 4,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  selectedCategoryButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
   },
   categoryText: {
-    color: 'white',
-    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 14,
   },
   selectedCategoryText: {
     fontWeight: 'bold',
-  },
-  toggleContainer: {
-    position: 'absolute',
-    bottom: 20,
-    left: '50%',
-    transform: [{ translateX: -90 }],
-  },
-  toggleBackground: {
-    flexDirection: 'row',
-    width: 180,
-    height: 40,
-    backgroundColor: '#610f87',
-    borderRadius: 5,
-    alignItems: 'center',
-    padding: 2,
-    position: 'relative',
-  },
-  toggleButton: {
-    flex: 1,
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 18,
-    zIndex: 1,
-  },
-  selectedButton: {
-    backgroundColor: 'transparent',
-  },
-  toggleText: {
     color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  selectedText: {
-    color: 'black',
-  },
-  toggleCircle: {
-    position: 'absolute',
-    width: 86,
-    height: 34,
-    backgroundColor: 'white',
-    borderRadius: 0,
-    zIndex: 0,
   },
   cardContainer: {
     position: 'relative',
-    borderRadius: 0,
-    marginBottom: 2,
+    borderRadius: 8,
+    marginBottom: 10,
+    marginHorizontal: 8,
     overflow: 'hidden',
   },
   whiteOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 0,
+    borderRadius: 8,
   },
   cardContent: {
     flexDirection: 'row',
@@ -362,14 +320,14 @@ const styles = StyleSheet.create({
   profileImage: {
     width: 65,
     height: 65,
-    borderRadius: 0,
-    marginRight: 6,
+    borderRadius: 8,
+    marginRight: 10,
   },
   managedProfileImage: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    marginRight: 6,
+    marginRight: 10,
   },
   textContainer: {
     flex: 1,
@@ -378,46 +336,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#fff',
+    marginBottom: 3,
+  },
+  groupText: {
+    fontSize: 12,
+    color: '#ddd',
+    marginBottom: 5,
   },
   managedtitle: {
     fontSize: 16,
     fontWeight: '700',
     color: '#fff',
   },
-  userContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 5,
-  },
-  profileImage2: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    marginRight: 5,
-  },
-  userText: {
-    fontSize: 14,
-    color: '#ddd',
-    fontWeight: 'bold',
-  },
   iconsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
+    marginTop: 4,
   },
   iconItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 6,
+    marginRight: 8,
     marginLeft: 4,
   },
   iconText: {
     fontSize: 12,
-    color: '#ddd',
+    color: '#fff',
     marginLeft: 5,
   },
   icon: {
-    marginRight: 10,
+    marginRight: 15,
   },
   searchInput: {
     flex: 1,
@@ -427,42 +375,42 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    backgroundColor: '#000058',
-    borderRadius: 5,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    marginHorizontal: 10,
+    marginBottom: 15,
+    backgroundColor: 'rgba(0, 0, 88, 0.3)',
+    borderRadius: 25,
   },
-  percentCard : {
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor:"#D6D6D673", 
-    borderRadius: 13, 
+  percentCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: "rgba(214, 214, 214, 0.45)",
+    borderRadius: 13,
     paddingHorizontal: 5,
     paddingVertical: 3,
+    marginRight: 8,
   },
   percentText: {
     flexDirection: "row",
   },
-  percentImage : { 
-    width: 16, 
+  percentImage: {
+    width: 16,
     height: 16,
     tintColor: "#fff",
-  },
-  percentImage2 : { 
-    width: 16, 
-    height: 16,
-    tintColor: '#5E5E5E5C'
+    marginRight: 3,
   },
   managedCard: {
     flexDirection: 'row',
-    backgroundColor: '#2E2E5E',
-    padding: 10,
+    backgroundColor: 'rgba(46, 46, 94, 0.6)',
+    padding: 12,
     marginVertical: 5,
+    marginHorizontal: 8,
     borderRadius: 10,
     alignItems: 'center',
   },
   subText: {
-    color: '#ccc',
+    color: '#fff',
     fontSize: 14,
   },
   bottomButtonContainer: {
@@ -470,18 +418,17 @@ const styles = StyleSheet.create({
     bottom: 20,
     alignSelf: 'center',
     flexDirection: 'row',
-    paddingVertical: 4,
-    backgroundColor: '#5E5E5E5C',
-    borderRadius: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    backgroundColor: 'rgba(94, 94, 94, 0.4)',
+    borderRadius: 8,
   },
-  
   button: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 8,
     paddingHorizontal: 10,
   },
-  
   buttonText: {
     color: 'white',
     fontSize: 14,
@@ -491,6 +438,7 @@ const styles = StyleSheet.create({
   loadingContainer: {
     padding: 20,
     alignItems: 'center',
+    backgroundColor: 'transparent',
   },
   loadingText: {
     color: 'white',
@@ -499,6 +447,7 @@ const styles = StyleSheet.create({
   errorContainer: {
     padding: 20,
     alignItems: 'center',
+    backgroundColor: 'transparent',
   },
   errorText: {
     color: '#ff6b6b',
@@ -506,10 +455,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   retryButton: {
-    backgroundColor: '#3a3a7b',
+    backgroundColor: 'rgba(58, 58, 123, 0.7)',
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 4,
+    borderRadius: 8,
   },
   retryButtonText: {
     color: 'white',
@@ -517,8 +466,9 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   emptyContainer: {
-    padding: 20,
+    padding: 30,
     alignItems: 'center',
+    backgroundColor: 'transparent',
   },
   emptyText: {
     color: 'white',

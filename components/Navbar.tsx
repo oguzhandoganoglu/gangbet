@@ -22,7 +22,7 @@ export default function Navbar() {
           />
           <Text style={styles.profileText}>
             {user ? `${user.balance.toFixed(1)} USDC` : "0.0 USDC"}
-          </Text>z
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
