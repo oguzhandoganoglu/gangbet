@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Dimensions, View } from 'react-native';
 import { TabView, SceneMap } from 'react-native-tab-view';
+import { LinearGradient } from 'expo-linear-gradient';
 import TabBarComponent from '@/components/TabBarComponent';
 import FirstRoute from '@/components/ResultsRoute';
 import SecondRoute from '@/components/FriendsRoute';
@@ -31,26 +32,32 @@ export default function NotificationScreen() {
       case 0:
         return <NavbarNotificaiton />;
       case 1:
-        return <Navbar />;
+        return <NavbarNotificaiton />;
       case 2:
-        return <Navbar />;
+        return <NavbarNotificaiton />;
       case 3:
-        return <Navbar />;
+        return <NavbarNotificaiton />;
       default:
         return <NavbarNotificaiton />;
     }
   }, [index]); // Navbar yalnızca index değiştiğinde yeniden render edilir
 
   return (
-    <View style={{ flex: 1 }}>
-      {renderNavbar} 
+    <LinearGradient
+      colors={['#161638', '#714F60', '#B85B44']}
+      style={{ flex: 1 }}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
+      {renderNavbar}
       <TabView
         navigationState={{ index, routes }}
         renderScene={renderScene}
         onIndexChange={setIndex}
         initialLayout={{ width: Dimensions.get('window').width }}
         renderTabBar={props => <TabBarComponent {...props} />}
+        style={{ flex: 1 }}
       />
-    </View>
+    </LinearGradient>
   );
 }

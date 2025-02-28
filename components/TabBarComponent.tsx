@@ -1,13 +1,18 @@
 import React from 'react';
-import { Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet, View } from 'react-native';
 import { TabBar } from 'react-native-tab-view';
 
-export default function TabBarComponent(props: any) {
+export default function TabBarComponent(props) {
   return (
     <TabBar
       {...props}
-      renderLabel={({ route, focused }: { route: any; focused: boolean }) => (
-        <Text style={[styles.labelStyle, { color: focused ? 'white' : 'lightgray' }]}>
+      renderLabel={({ route, focused }) => (
+        <Text
+          style={[
+            styles.labelStyle,
+            { color: focused ? '#fff' : 'rgba(255,255,255,0.7)' }
+          ]}
+        >
           {route.title}
         </Text>
       )}
@@ -20,17 +25,23 @@ export default function TabBarComponent(props: any) {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: '#1E1E4C',
+    backgroundColor: 'transparent',
     paddingLeft: 9,
+    elevation: 0, // Android için gölgeyi kaldırma
+    shadowOpacity: 0, // iOS için gölgeyi kaldırma
   },
   labelStyle: {
     fontSize: 16,
+    fontWeight: '500',
   },
   indicatorStyle: {
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    height: 2,
+    borderRadius: 1,
   },
   tabStyle: {
     width: 'auto',
     paddingHorizontal: 3,
+    backgroundColor: 'transparent',
   },
 });
