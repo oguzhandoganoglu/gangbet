@@ -1,20 +1,19 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useUser } from "../app/UserContext"; // UserContext'i import ediyoruz
+import { useUser } from "../app/UserContext";
 
 export default function Navbar() {
-  const router = useRouter(); // Gerekirse yönlendirme için
-  const { user } = useUser(); // useUser hook'unu kullanıyoruz
-
+  const router = useRouter();
+  const { user } = useUser();
+  
   return (
-    <LinearGradient colors={["#6C5CE7", "#341F97"]} style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.logo}>GANGBET👍</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.profileContainer}
-          onPress={() => router.push("/profile")} // İsteğe bağlı: profil sayfasına gitmek için
+          onPress={() => router.push("/profile")}
         >
           <Image
             source={require("@/assets/images/user1.png")}
@@ -25,7 +24,7 @@ export default function Navbar() {
           </Text>
         </TouchableOpacity>
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -33,6 +32,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     alignItems: "flex-start",
+    backgroundColor: 'transparent', // Arka planı saydam yapıldı
   },
   header: {
     flexDirection: "row",

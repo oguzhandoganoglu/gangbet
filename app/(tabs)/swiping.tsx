@@ -25,17 +25,18 @@ export default function SwippingScreen() {
     { key: 'sports', title: 'Sports' },
     { key: 'culture', title: 'Culture' },
     { key: 'world', title: 'World' },
+    { key: 'other', title: 'Other' },
   ]);
 
   // Örnek Statik Veri
   const exampleData = [
-    { id: 1, title: 'Political News 1', content: 'Politics Content...', category: 'politics', type: 'popular', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
-    { id: 2, title: 'Sports Update', content: 'Sports Content...', category: 'sports', type: 'popular', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
-    { id: 3, title: 'Cultural Event', content: 'Culture Content...', category: 'culture', type: 'popular', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
-    { id: 4, title: 'World News', content: 'World Content...', category: 'world', type: 'popular', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
-    { id: 5, title: 'Political Discussion', content: 'Politics by Friends...', category: 'politics', type: 'friends', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
-    { id: 6, title: 'Friends Sports Talk', content: 'Sports by Friends...', category: 'sports', type: 'friends', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
-    { id: 7, title: 'World News', content: 'World Content...', category: 'world', type: 'popular', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
+    { id: 1, title: 'Elon Musk out as Head of DOGE before July?', content: 'Politics Content...', category: 'politics', type: 'popular', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
+    { id: 2, title: 'Elon Musk out as Head of DOGE before July?', content: 'Sports Content...', category: 'sports', type: 'popular', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
+    { id: 3, title: 'Elon Musk out as Head of DOGE before July?', content: 'Culture Content...', category: 'culture', type: 'popular', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
+    { id: 4, title: 'Elon Musk out as Head of DOGE before July?', content: 'World Content...', category: 'world', type: 'popular', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
+    { id: 5, title: 'Elon Musk out as Head of DOGE before July?', content: 'Politics by Friends...', category: 'politics', type: 'friends', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
+    { id: 6, title: 'Elon Musk out as Head of DOGE before July?', content: 'Sports by Friends...', category: 'sports', type: 'friends', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
+    { id: 7, title: 'Elon Musk out as Head of DOGE before July?', content: 'World Content...', category: 'world', type: 'popular', image: require('@/assets/images/elon.png'), image2: require('@/assets/images/alp.png'), user: 'CryptoGuy traded YES' },
   ];
 
   // Veri filtreleme işlemi
@@ -46,13 +47,8 @@ export default function SwippingScreen() {
     setFilteredData(filtered);
   },[selectedCategory]);
 
-  const translateX = animatedValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: [2, 88],
-  });
-
   return (
-    <View style={{ flex: 1, backgroundColor: '#1E1E4C' }}>
+    <View style={styles.container}>
       <Navbar />
       <Text style={styles.header}>Popular</Text>
 
@@ -106,22 +102,27 @@ export default function SwippingScreen() {
               <Image source={item.image} style={styles.profileImage} />
               <View style={styles.textContainer}>
                 <Text style={styles.title}>{item.title}</Text>
-                <View style={styles.userContainer}>
-                  <Image source={item.image2} style={styles.profileImage2} />
-                  <Text style={styles.userText}>{item.user}</Text>
-                </View>
-                <View style={styles.iconsContainer}>
+                <View style={styles.infoRow}>
+                  <View style={styles.iconItem}>
+                    <Icon name="thumbs-up" size={14} color="#ddd" />
+                    <Text style={styles.iconText}>YES 50,534</Text>
+                  </View>
+                  <View style={styles.iconItem}>
+                    <Icon name="balance-scale" size={14} color="#ddd" />
+                    <Text style={styles.iconText}>%40</Text>
+                  </View>
                   <View style={styles.iconItem}>
                     <Icon name="hourglass-half" size={14} color="#ddd" />
                     <Text style={styles.iconText}>7D Left</Text>
                   </View>
-                  <View style={styles.iconItem}>
-                    <Icon name="line-chart" size={14} color="#ddd" />
-                    <Text style={styles.iconText}>50K</Text>
-                  </View>
-                  <Icon name="share" size={14} color="#ddd" style={styles.icon} />
-                  <Icon name="send" size={14} color="#ddd" style={styles.icon} />
-                  <Icon name="star" size={14} color="#ddd" style={styles.icon} />
+                </View>
+                <View style={styles.actionRow}>
+                  <TouchableOpacity style={styles.actionButton}>
+                    <Icon name="paper-plane" size={14} color="#ddd" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.actionButton}>
+                    <Icon name="star" size={14} color="#ddd" />
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>
@@ -134,20 +135,23 @@ export default function SwippingScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Arka planı saydam yapıldı
+  },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
     textAlign: 'left',
     paddingLeft: 15,
-    backgroundColor: '#1E1E4C',
-    marginTop: 20
+    marginTop: 20,
   },
   categoryContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
     marginVertical: 10,
-    paddingLeft:10
+    paddingLeft: 10,
   },
   categoryButton: {
     paddingVertical: 10,
@@ -156,52 +160,11 @@ const styles = StyleSheet.create({
   categoryText: {
     color: 'white',
     fontSize: 16,
+    opacity: 0.6, // Seçili olmayan kategorileri daha soluk göster
   },
   selectedCategoryText: {
     fontWeight: 'bold',
-  },
-  toggleContainer: {
-    position: 'absolute',
-    bottom: 20,
-    left: '50%',
-    transform: [{ translateX: -90 }],
-  },
-  toggleBackground: {
-    flexDirection: 'row',
-    width: 180,
-    height: 40,
-    backgroundColor: '#610f87',
-    borderRadius: 5,
-    alignItems: 'center',
-    padding: 2,
-    position: 'relative',
-  },
-  toggleButton: {
-    flex: 1,
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 18,
-    zIndex: 1,
-  },
-  selectedButton: {
-    backgroundColor: 'transparent',
-  },
-  toggleText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  selectedText: {
-    color: 'black',
-  },
-  toggleCircle: {
-    position: 'absolute',
-    width: 86,
-    height: 34,
-    backgroundColor: 'white',
-    borderRadius: 0,
-    zIndex: 0,
+    opacity: 1, // Seçili kategori tam opaklıkta
   },
   cardContainer: {
     position: 'relative',
@@ -223,7 +186,7 @@ const styles = StyleSheet.create({
     width: 65,
     height: 65,
     borderRadius: 0,
-    marginRight: 6,
+    marginRight: 12,
   },
   textContainer: {
     flex: 1,
@@ -232,33 +195,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#fff',
+    marginBottom: 8,
   },
-  userContainer: {
+  infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
+    marginBottom: 6,
   },
-  profileImage2: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    marginRight: 5,
-  },
-  userText: {
-    fontSize: 14,
-    color: '#ddd',
-    fontWeight: 'bold',
-  },
-  iconsContainer: {
+  actionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
   },
   iconItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 10,
-    marginLeft: 4,
+    marginRight: 14,
   },
   iconText: {
     fontSize: 12,
@@ -267,6 +218,9 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginRight: 10,
+  },
+  actionButton: {
+    marginRight: 20,
   },
   searchInput: {
     flex: 1,
@@ -278,7 +232,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     marginBottom: 10,
-    backgroundColor: '#000058',
+    backgroundColor: 'rgba(0, 0, 88, 0.3)', // Daha saydam arka plan
     borderRadius: 5,
+    marginHorizontal: 10,
+    paddingVertical: 8,
   },
 });

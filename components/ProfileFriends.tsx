@@ -1,65 +1,106 @@
-import React, {useState} from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TextInput } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, FlatList, Image, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { useUser } from '../app/UserContext';
+import axios from 'axios';
 
-const exampleData = [
-  {
-    id: '1',
-    title: 'User1',
-    image: require('@/assets/images/user4.png'),
-    claimAmount: '10 USDC',
-    percent: '50,534',
-    claim: true,
-    result : false,
-  },
-  {
-    id: '2',
-    title: 'User2',
-    image: require('@/assets/images/latte.jpeg'),
-    claimAmount: '10 USDC',
-    percent: '50,534',
-    claim: false,
-    result : true,
-  },
-  
-];
+// API veri tipi
+interface FriendData {
+  id: string;
+  username: string;
+}
 
-export default function ProfileFriends() {
+interface ProfileFriendsProps {
+  data: FriendData[];
+}
+
+export default function ProfileFriends({ data = [] }: ProfileFriendsProps) {
   const [search, setSearch] = useState('');
+  const [friendSearch, setFriendSearch] = useState('');
+  const { user } = useUser();
+
+  // Arama filtresi uygula
+  const filteredData = data.filter(friend =>
+    friend.username.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleSendFriendRequest = async () => {
+    if (!user || !user._id || !friendSearch) {
+      Alert.alert('Error', 'Please enter a valid username');
+      return;
+    }
+
+    try {
+      const baseUrl = 'http://51.21.28.186:5001';
+      const response = await axios.post(`${baseUrl}/api/friends/add`, {
+        userId: user._id,
+        friendId: friendSearch
+      }, {
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      Alert.alert('Success', response.data.message);
+      setFriendSearch(''); // Clear the search input after successful request
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to send friend request');
+    }
+  };
+
+  if (data.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>No friends found</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
-        data={exampleData}
+        data={filteredData}
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <Image source={item.image} style={styles.profileImage} />
+            <Image
+              source={require('@/assets/images/user4.png')}
+              style={styles.profileImage}
+            />
             <View style={styles.content}>
-              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.title}>{item.username}</Text>
               <View style={styles.actions}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={styles.wonText}>40 Friends</Text>
+                  <Text style={styles.wonText}>Friends</Text>
                 </View>
               </View>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Image source={require('@/assets/images/bell-off.png')} style={{ width: 16, height: 16, marginRight:2 }} />  
-              <Image source={require('@/assets/images/user-minus.png')} style={{ width: 16, height: 16, marginRight:4 }} />  
-              <Text style={{color:"#fff", fontSize:12, fontWeight:400}}>Remove</Text>
+              <Image source={require('@/assets/images/bell-off.png')} style={{ width: 16, height: 16, marginRight:2 }} />
+              <Image source={require('@/assets/images/user-minus.png')} style={{ width: 16, height: 16, marginRight:4 }} />
+              <Text style={{color:"#fff", fontSize:12, fontWeight:'400'}}>Remove</Text>
             </View>
           </View>
         )}
         keyExtractor={(item) => item.id}
       />
-      <View style={styles.searchBarContainer}>
+      <View style={styles.addFriendContainer}>
         <View style={styles.searchBar}>
           <Image source={require('@/assets/images/search.png')} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder=""
+            placeholder="Enter friend's user ID"
             placeholderTextColor="#ccc"
-            value={search}
-            onChangeText={setSearch}
+            value={friendSearch}
+            onChangeText={setFriendSearch}
           />
+          <TouchableOpacity onPress={handleSendFriendRequest} style={styles.addButton}>
+            <Text style={styles.addButtonText}>Add</Text>
+          </TouchableOpacity>
         </View>
+      </View>
+      <View style={styles.searchBarContainer}>
+        
       </View>
     </View>
   );
@@ -70,6 +111,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1E1E4C',
     padding: 1,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  emptyText: {
+    color: '#fff',
+    fontSize: 16,
   },
   card: {
     flexDirection: 'row',
@@ -98,94 +149,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 5,
   },
-  yesButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 2,
-    padding: 3,
-    marginRight: 12,
-  },
-  yesText: {
-    fontSize: 12,
-    fontWeight: 'semibold',
-    marginLeft: 2,
-  },
   wonText: {
     fontSize: 12,
     color: '#ddd',
     marginRight: 12,
   },
-  statText: {
-    fontSize: 12,
-    color: '#ddd',
-    marginRight: 12,
-  },
-  claimContainer: {
-    alignItems: 'center',
-  },
-  claimLabel: {
-    fontSize: 13,
-    fontWeight: 'semibold',
-    color: '#fff',
-    marginBottom: 5,
-  },
-  claimedButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
-
-  claimButton: {
-    backgroundColor: '#fff',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
-  claimedText: {
-    fontSize: 12,
-    fontWeight: 'semibold',
-    color: '#fff',
-  },
-  claimText: {
-    fontSize: 12,
-    fontWeight: 'semibold',
-    color: '#000',
-  },
-  seeAllButton: {
-    alignSelf: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Hafif transparan arka plan
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 4,
-    marginTop: 10,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.5)', // Kenarlık ekledim
-  },
-  
-  seeAllText: {
-    fontSize: 14,
-    fontWeight: 'semibold',
-    color: '#fff',
-    textAlign: 'center',
-  },  
-  percentCard : {
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor:"#D6D6D673", 
-    borderRadius: 13, 
-    paddingHorizontal: 5,
-    paddingVertical: 3,
-  },
-  percentText: {
-    flexDirection: "row",
-  },
-  percentImage : { 
-    width: 16, 
-    height: 16,
-    tintColor: "#fff",
+  addFriendContainer: {
+    paddingHorizontal: 15,
+    paddingBottom: 10,
   },
   searchBarContainer: {
     position: 'absolute',
@@ -213,5 +184,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#fff',
     paddingVertical: 5,
+  },
+  addButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 10,
+    marginLeft: 5,
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 12,
   }
 });

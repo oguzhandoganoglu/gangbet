@@ -1,12 +1,23 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, Button } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import {usePrivy} from '@privy-io/expo';
+import { usePrivy } from '@privy-io/expo';
 
-export default function NavbarProfile() {
+interface UserData {
+  username?: string;
+  walletAddress?: string;
+  balance?: number;
+  friendsCount: number;
+  groupsCount: number;
+}
+
+interface NavbarProfileProps {
+  userData?: UserData;
+}
+
+export default function NavbarProfile({ userData }: NavbarProfileProps) {
   const router = useRouter();
-  const {logout} = usePrivy();
+  const { logout } = usePrivy();
 
   const handleLogout = async () => {
     try {
@@ -17,8 +28,9 @@ export default function NavbarProfile() {
       console.error("Logout error:", error);
     }
   };
+
   return (
-    <LinearGradient colors={["#6C5CE7", "#341F97"]} style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.logo}>GANGBET👍</Text>
         <TouchableOpacity style={styles.profileContainer} onPress={() => router.push("/profile")} >
@@ -30,14 +42,16 @@ export default function NavbarProfile() {
         </TouchableOpacity>
       </View>
       <View style={styles.uplinecontainer}>
-        <View >
+        <View>
           <Image source={require("@/assets/images/user1.png")} style={styles.profileImage}/>
         </View>
         <View>
           <View style={styles.uplinecontainer}>
             <View style={styles.xbuttonContainer}>
               <Image source={require("@/assets/images/xlogo.png")} style={styles.xImage}/>
-              <Text style={styles.xtext}>@gangbetuser_x</Text>
+              <Text style={styles.xtext}>
+                {userData?.username ? `@${userData.username}` : '@gangbetuser_x'}
+              </Text>
             </View>
             <Image source={require("@/assets/images/qrcode.png")} style={styles.qrImage}/>
             <TouchableOpacity onPress={handleLogout} style={styles.button}>
@@ -45,19 +59,25 @@ export default function NavbarProfile() {
             </TouchableOpacity>
           </View>
           <View style={styles.bottomlinecontainer}> 
-            <Text style={styles.friendsText}>54 Friends</Text>
-            <Text style={styles.friendsText}>20 Groups</Text>
+            <Text style={styles.friendsText}>
+              {userData?.friendsCount ?? 0} Friends
+            </Text>
+            <Text style={styles.friendsText}>
+              {userData?.groupsCount ?? 0} Groups
+            </Text>
           </View>
         </View>
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: '#1E1E4C',
     padding: 20,
-    alignItems: "flex-start"
+    alignItems: "flex-start",
+    width: '100%'
   },
   header: {
     flexDirection: "row",
@@ -132,12 +152,12 @@ const styles = StyleSheet.create({
   xtext: {
     fontSize: 12,
     color: "white",
-    fontWeight: 700,
+    fontWeight: "700",
   },
   friendsText: {
     fontSize: 16,
     color: "white",
-    fontWeight: 400,
+    fontWeight: "400",
     marginRight: 10,
   },
   buttonContainer: {
