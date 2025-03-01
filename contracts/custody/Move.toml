@@ -4,8 +4,8 @@ version = "1.0.0"
 authors = []
 
 [addresses]
-custody_wallet = "0xf3648367f126b5408e0d9dae774ac7f857f6e4e10df0de6ce448fb5d62cecb14"
-prediction_market = "0xf3648367f126b5408e0d9dae774ac7f857f6e4e10df0de6ce448fb5d62cecb14"
+custody_wallet = "0x2f444e50633b3af00025df757437e304af1007c13930ca2e4e1231a7a6a1f86c"
+prediction_market = "0x2f444e50633b3af00025df757437e304af1007c13930ca2e4e1231a7a6a1f86c"
 
 [dev-addresses]
 

@@ -39,7 +39,18 @@ export default function Wins({ data }: WinsProps) {
         }
       });
       
-      const result = await response.json();
+      // Önce yanıt metnini al
+      const responseText = await response.text();
+      
+      // Yanıt JSON olarak parse edilebilir mi kontrol et
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Response is not valid JSON:', responseText.substring(0, 100) + '...');
+        Alert.alert('Error', 'Server returned an invalid response format');
+        return;
+      }
       
       if (response.ok) {
         Alert.alert('Success', 'Claim submitted successfully!');
@@ -48,7 +59,14 @@ export default function Wins({ data }: WinsProps) {
       }
     } catch (error) {
       console.error('Error claiming reward:', error);
-      Alert.alert('Error', 'An error occurred while claiming your reward');
+      
+      // Daha detaylı hata mesajı
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response headers:', error.response.headers);
+      }
+      
+      Alert.alert('Error', 'An error occurred while claiming your reward. Please try again later.');
     }
   };
 
