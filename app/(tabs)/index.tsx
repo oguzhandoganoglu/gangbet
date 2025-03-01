@@ -1,7 +1,7 @@
 import NavbarWallet from '@/components/NavbarWallet';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
-import { TabView, SceneMap } from 'react-native-tab-view';
+import { TabView } from 'react-native-tab-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import TabBarComponent2 from '@/components/TabBarComponent2';
 import ActiveBets from '@/components/ActiveBets';
@@ -9,9 +9,7 @@ import Wins from '@/components/Wins';
 import BetHistory from '@/components/BetHistory';
 import Balances from '@/components/Balances';
 import { useUser } from '../UserContext';
-import { opacity } from 'react-native-reanimated/lib/typescript/Colors';
-import Background from '@/components/ui/Background';
-import { setStatusBarBackgroundColor } from 'expo-status-bar';
+
 
 // Wallet veri tipi 
 interface WalletData {
