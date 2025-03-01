@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useUser } from "../app/UserContext";
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function GangSettings({ gangDetail, isLoading, isAdmin }) {
   const router = useRouter();
@@ -99,6 +100,12 @@ export default function GangSettings({ gangDetail, isLoading, isAdmin }) {
   return (
     <ScrollView style={styles.container}>
       {/* Group Info Section */}
+      <LinearGradient
+              colors={['#161638', '#714F60', '#B85B44']}
+              style={styles.loadingContainer}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 1}}
+            >
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Group Information</Text>
@@ -293,6 +300,7 @@ export default function GangSettings({ gangDetail, isLoading, isAdmin }) {
           </View>
         </View>
       </Modal>
+      </LinearGradient>
     </ScrollView>
   );
 }
@@ -300,14 +308,10 @@ export default function GangSettings({ gangDetail, isLoading, isAdmin }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
-    padding: 15,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#1E1E4C',
   },
   loadingText: {
     color: '#fff',
@@ -412,7 +416,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   dangerButton: {
-    backgroundColor: 'rgba(220, 53, 69, 0.2)',
+    backgroundColor: '#fff',
   },
   dangerIcon: {
     tintColor: '#dc3545',

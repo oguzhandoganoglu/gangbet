@@ -11,6 +11,7 @@ import {
   Alert,
   Modal
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function GangMembers({ members, admins, isLoading }) {
   const [searchText, setSearchText] = useState('');
@@ -73,6 +74,12 @@ export default function GangMembers({ members, admins, isLoading }) {
   
   return (
     <View style={styles.container}>
+      <LinearGradient
+              colors={['#161638', '#714F60', '#B85B44']}
+              style={styles.loadingContainer}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 1}}
+            >
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <Image source={require('@/assets/images/search.png')} style={styles.searchIcon} />
@@ -202,6 +209,7 @@ export default function GangMembers({ members, admins, isLoading }) {
           </View>
         </View>
       </Modal>
+      </LinearGradient>
     </View>
   );
 }
@@ -209,14 +217,11 @@ export default function GangMembers({ members, admins, isLoading }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
-    padding: 10,
+    padding: 1,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#1E1E4C',
   },
   loadingText: {
     color: '#fff',
@@ -245,7 +250,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 88, 0.3)',
+    marginTop: 5,
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 10,
