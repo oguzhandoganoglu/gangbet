@@ -266,18 +266,18 @@ export default function NotificationScreen() {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Yeni Grup Oluştur</Text>
+            <Text style={styles.modalTitle}>Create New Group</Text>
             
             <TextInput
               style={styles.input}
-              placeholder="Grup Adı"
+              placeholder="Group Name"
               value={newGroupTitle}
               onChangeText={setNewGroupTitle}
             />
             
             <TextInput
               style={[styles.input, styles.textArea]}
-              placeholder="Grup Açıklaması (İsteğe bağlı)"
+              placeholder="Group Description (optional)"
               value={newGroupDescription}
               onChangeText={setNewGroupDescription}
               multiline={true}
@@ -290,7 +290,7 @@ export default function NotificationScreen() {
                 onPress={() => setIsNewGroupModalVisible(false)}
                 disabled={isCreatingGroup}
               >
-                <Text style={styles.buttonText}>İptal</Text>
+                <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
@@ -299,7 +299,7 @@ export default function NotificationScreen() {
                 disabled={isCreatingGroup}
               >
                 <Text style={styles.buttonText}>
-                  {isCreatingGroup ? 'Oluşturuluyor...' : 'Oluştur'}
+                  {isCreatingGroup ? 'Creating...' : 'Create'}
                 </Text>
               </TouchableOpacity>
             </View>

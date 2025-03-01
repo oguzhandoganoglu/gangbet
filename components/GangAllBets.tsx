@@ -235,7 +235,7 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
     
     try {
       // Sabit bir resim URL'si kullan
-      const imageUrl = "https://tinderapp-bet-images.s3.eu-north-1.amazonaws.com/bet-photos/1740665862974.png";
+      const imageUrl = "https://tinderapp-bet-images.s3.eu-north-1.amazonaws.com/bet-photos/1740813122515.jpg";
       console.log("Kullanılacak resim URL'si:", imageUrl);
       
       // Postman koleksiyonundaki formata göre bahis oluşturma isteği
@@ -497,28 +497,28 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
                 showsVerticalScrollIndicator={true}
                 contentContainerStyle={{ paddingBottom: 20 }}
               >
-                <Text style={styles.modalTitle}>Yeni Bahis Oluştur</Text>
+                <Text style={styles.modalTitle}>Create New Bet</Text>
                 
                 {/* Bet Title */}
                 <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Bahis Başlığı</Text>
+                  <Text style={styles.inputLabel}>Bet Title</Text>
                   <TextInput
                     style={styles.input}
                     value={newBetTitle}
                     onChangeText={setNewBetTitle}
-                    placeholder="Bahis başlığını girin"
+                    placeholder="Enter bet title"
                     placeholderTextColor="#999"
                   />
                 </View>
                 
                 {/* Bet Description */}
                 <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Bahis Açıklaması</Text>
+                  <Text style={styles.inputLabel}>Bet Description</Text>
                   <TextInput
                     style={[styles.input, styles.textArea]}
                     value={betDescription}
                     onChangeText={setBetDescription}
-                    placeholder="Bahis açıklamasını girin"
+                    placeholder="Enter bet description"
                     placeholderTextColor="#999"
                     multiline
                     numberOfLines={4}
@@ -528,7 +528,7 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
                 
                 {/* Kanal Bilgisi */}
                 <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Kanal</Text>
+                  <Text style={styles.inputLabel}>Channel</Text>
                   <View style={styles.channelInfoContainer}>
                     <Text style={styles.channelInfoText}>
                       {channels.length > 0 
@@ -541,7 +541,7 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
                 {/* Min-Max Bet Amount */}
                 <View style={styles.rowContainer}>
                   <View style={[styles.inputContainer, { flex: 1, marginRight: 10 }]}>
-                    <Text style={styles.inputLabel}>Min. Bahis</Text>
+                    <Text style={styles.inputLabel}>Min. Bet</Text>
                     <TextInput
                       style={styles.input}
                       value={minBetAmount}
@@ -552,7 +552,7 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
                     />
                   </View>
                   <View style={[styles.inputContainer, { flex: 1 }]}>
-                    <Text style={styles.inputLabel}>Max. Bahis</Text>
+                    <Text style={styles.inputLabel}>Max. Bet</Text>
                     <TextInput
                       style={styles.input}
                       value={maxBetAmount}
@@ -566,7 +566,7 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
                 
                 {/* End Date */}
                 <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Bitiş Tarihi</Text>
+                  <Text style={styles.inputLabel}>End Time</Text>
                   <TouchableOpacity 
                     style={styles.datePickerButton}
                     onPress={() => setShowDatePicker(true)}
@@ -587,13 +587,13 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
                 
                 {/* Image Upload Section */}
                 <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Resim (İsteğe Bağlı)</Text>
+                  <Text style={styles.inputLabel}>Image (Optinal)</Text>
                   <TouchableOpacity 
                     style={styles.imageUploadButton}
                     onPress={showImageOptions}
                   >
                     <Text style={{ color: '#fff' }}>
-                      {image ? "Resim Seçildi ✓" : "Resim Ekle"}
+                      {image ? "Uploadad Image ✓" : "Upload Image"}
                     </Text>
                   </TouchableOpacity>
                   
@@ -602,7 +602,7 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
                       style={{ alignItems: 'center', marginTop: 5 }}
                       onPress={removeImage}
                     >
-                      <Text style={{ color: '#ff6b6b' }}>Resmi Kaldır</Text>
+                      <Text style={{ color: '#ff6b6b' }}>Remove Image</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -616,7 +616,7 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
                       resetForm();
                     }}
                   >
-                    <Text style={styles.buttonText}>İptal</Text>
+                    <Text style={styles.buttonText}>Cancel</Text>
                   </TouchableOpacity>
                   
                   <TouchableOpacity 
@@ -625,7 +625,7 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
                     disabled={uploading}
                   >
                     <Text style={styles.buttonText}>
-                      {uploading ? "Oluşturuluyor..." : "Bahis Oluştur"}
+                      {uploading ? "Creating..." : "Create Bet"}
                     </Text>
                   </TouchableOpacity>
                 </View>

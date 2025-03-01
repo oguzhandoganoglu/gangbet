@@ -21,7 +21,7 @@ export default function Navbar() {
             style={styles.profileImage}
           />
           <Text style={styles.profileText}>
-            {user ? `${user.balance.toFixed(1)} USDC` : "0.0 USDC"}
+            Profile
           </Text>
         </TouchableOpacity>
       </View>
