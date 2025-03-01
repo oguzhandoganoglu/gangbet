@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, Modal, TouchableOpacity, Alert } from 'react-native';
 
@@ -128,6 +129,7 @@ export default function GangActiveBets() {
       fetchBets();
     }, []);
 
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -231,16 +233,47 @@ const styles = StyleSheet.create({
     backgroundColor: '#1E1E4C',
     padding: 1,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1E1E4C',
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: 16,
+    marginTop: 10,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1E1E4C',
+    padding: 20,
+  },
+  emptyText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  emptySubText: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 14,
+    textAlign: 'center',
+  },
   mainCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 2,
+    borderRadius: 8,
     padding: 10,
     marginBottom: 10,
+    marginHorizontal: 8,
   },
   card: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    justifyContent: 'space-between',
   },
   card2: {
     flexDirection: 'row',
@@ -259,6 +292,13 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 11,
     borderRadius: 20,
+    minWidth: 70,
+  },
+  cardYes: {
+    backgroundColor: 'rgba(69, 170, 69, 0.6)',
+  },
+  cardNo: {
+    backgroundColor: 'rgba(220, 53, 69, 0.6)',
   },
   subcard: {
     flexDirection: 'row',
@@ -267,11 +307,13 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 10,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    marginBottom: 10,
   },
   iconStyle: {
     width: 16,
     height: 16,
     marginRight: 5,
+    tintColor: '#fff',
   },
   iconStyle2: {
     width: 18,
@@ -282,6 +324,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     marginTop: 10,
+    flexWrap: 'wrap',
   },
   title: {
     fontSize: 14,
@@ -300,6 +343,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginTop: 10,
     marginBottom: 20,
+    marginHorizontal: 8,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.5)',
   },
@@ -335,4 +379,5 @@ const styles = StyleSheet.create({
     width: '50%',
     alignItems: 'center',
   }
+
 });

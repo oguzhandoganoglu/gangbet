@@ -1,166 +1,207 @@
-import React from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { 
+  View, 
+  Text, 
+  FlatList, 
+  Image, 
+  StyleSheet, 
+  TouchableOpacity, 
+  TextInput,
+  ActivityIndicator,
+  Alert,
+  Modal
+} from 'react-native';
 
-const exampleData = [
-  {
-    id: '1',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/elon.png'),
-    claimAmount: '10 USDC',
-    claim: true,
-    result : "Pending",
-    percent : '50,534',
-  },
-  {
-    id: '2',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/latte.jpeg'),
-    claimAmount: '10 USDC',
-    claim: false,
-    result : "Ended",
-    percent : '50,534',
-  },
-  {
-    id: '3',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/latte.jpeg'),
-    claimAmount: '10 USDC',
-    claim: true,
-    result : "Won",
-    percent : '50,534',
-  },
-  {
-    id: '4',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/elon.png'),
-    claimAmount: '10 USDC',
-    claim: true,
-    result : "Lost",
-    percent : '50,534',
-  },
-  {
-    id: '5',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/latte.jpeg'),
-    claimAmount: '10 USDC',
-    claim: false,
-    result : "Won",
-    percent : '50,534',
-  },
+export default function GangMembers({ members, admins, isLoading }) {
+  const [searchText, setSearchText] = useState('');
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
   
-];
-
-export default function GangMembers() {
+  // Function to determine if a member is an admin
+  const isAdmin = (memberId) => {
+    return admins.some(admin => admin.id === memberId);
+  };
+  
+  // Filter members based on search text
+  const filteredMembers = members.filter(member => 
+    member.username.toLowerCase().includes(searchText.toLowerCase())
+  );
+  
+  // Handle invitation
+  const handleInvite = () => {
+    if (!inviteEmail.trim()) {
+      Alert.alert('Error', 'Please enter an email address');
+      return;
+    }
+    
+    // Here you would make an API call to send the invitation
+    // For now, we'll just show a success message
+    Alert.alert('Success', `Invitation sent to ${inviteEmail}`);
+    setInviteEmail('');
+    setShowInviteModal(false);
+  };
+  
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#fff" />
+        <Text style={styles.loadingText}>Loading members...</Text>
+      </View>
+    );
+  }
+  
+  if (!members || members.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Image 
+          source={require('@/assets/images/users2.png')} 
+          style={[styles.iconStyle, { width: 40, height: 40, marginBottom: 10, tintColor: '#fff' }]} 
+        />
+        <Text style={styles.emptyText}>No members found</Text>
+        <Text style={styles.emptySubText}>Invite people to join this group</Text>
+        
+        <TouchableOpacity 
+          style={styles.inviteButton}
+          onPress={() => setShowInviteModal(true)}
+        >
+          <Image source={require('@/assets/images/user-plus.png')} style={styles.iconStyle} />
+          <Text style={styles.inviteButtonText}>Invite Member</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+  
   return (
     <View style={styles.container}>
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <Image source={require('@/assets/images/search.png')} style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search members..."
+          placeholderTextColor="rgba(255, 255, 255, 0.6)"
+          value={searchText}
+          onChangeText={setSearchText}
+        />
+        {searchText.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchText('')} style={styles.clearButton}>
+            <Text style={styles.clearButtonText}>✕</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+      
+      {/* Members List */}
       <FlatList
-        data={exampleData}
+        data={filteredMembers}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Image source={item.image} style={styles.profileImage} />
-            <View style={styles.content}>
-              <Text style={styles.title}>{item.title}</Text>
-              <View style={styles.actions}>
-                <View style={styles.percentCard}>
-                  <Image source={require('@/assets/images/thumb-up.png')} style={styles.percentImage} />
-                    <View style={styles.percentText}>
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400}}>YES</Text>
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400}}> {item.percent}</Text>
-                 </View>
-                </View>
-                {(item.result==="Lost")&& (
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, tintColor:"white" }} />
-                      <Text style={styles.wonText}> %40</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/ghost.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.wonText}> Lost!</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/chart-line.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.statText}>50K</Text>
-                    </View>
-                    <Image source={require('@/assets/images/send.png')} style={{ width: 16, height: 16, marginLeft:18 }} />
-                    <Image source={require('@/assets/images/star.png')} style={{ width: 16, height: 16, marginLeft:6 }} />
-                  </View>
-                )}
-                {(item.result==="Won")&& (
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, tintColor:"white" }} />
-                      <Text style={styles.wonText}> %40</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/mood-suprised.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.wonText}> Won</Text>
-                    </View>
-                    <Image source={require('@/assets/images/share.png')} style={{ width: 16, height: 16, marginLeft:8 }} />
-                  </View>
-                )}
-                {(item.result==="Pending")&& (
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, tintColor:"white" }} />
-                      <Text style={styles.statText}> %40</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/hourglass.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.statText}>30M Left</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/chart-line.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.statText}>50K</Text>
-                    </View>
-                    <Image source={require('@/assets/images/send.png')} style={{ width: 16, height: 16, marginLeft:12 }} />
-                    <Image source={require('@/assets/images/star.png')} style={{ width: 16, height: 16, marginLeft:6 }} />
-                  </View>
-                )}
-                {(item.result==="Ended")&& (
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, tintColor:"white" }} />
-                      <Text style={styles.statText}> %40</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/gavel.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.statText}>Ended</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/chart-line.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.statText}>50K</Text>
-                    </View>
-                    <Image source={require('@/assets/images/send.png')} style={{ width: 16, height: 16, marginLeft:12 }} />
-                    <Image source={require('@/assets/images/star.png')} style={{ width: 16, height: 16, marginLeft:6 }} />
+          <View style={styles.memberCard}>
+            <View style={styles.memberInfo}>
+              <View style={styles.avatarContainer}>
+                <Text style={styles.avatarText}>
+                  {item.username.charAt(0).toUpperCase()}
+                </Text>
+              </View>
+              <View>
+                <Text style={styles.memberName}>{item.username}</Text>
+                {isAdmin(item.id) && (
+                  <View style={styles.adminBadge}>
+                    <Image 
+                      source={require('@/assets/images/star.png')} 
+                      style={styles.badgeIcon} 
+                    />
+                    <Text style={styles.adminText}>Admin</Text>
                   </View>
                 )}
               </View>
             </View>
-            {(item.claim) && (item.result==="Won") && (
-              <View style={styles.claimContainer}>
-                <Text style={styles.claimLabel}>Claimed</Text>
-                <TouchableOpacity style={styles.claimedButton}>
-                  <Text style={styles.claimedText}>{item.claimAmount}</Text>
+            
+            <View style={styles.actionButtons}>
+              <TouchableOpacity style={styles.actionButton}>
+                <Image 
+                  source={require('@/assets/images/send.png')} 
+                  style={styles.actionIcon} 
+                />
+              </TouchableOpacity>
+              
+              {!isAdmin(item.id) && (
+                <TouchableOpacity style={styles.actionButton}>
+                  <Image 
+                    source={require('@/assets/images/user-minus.png')} 
+                    style={styles.actionIcon} 
+                  />
                 </TouchableOpacity>
-              </View>
-            )}
-            {(!item.claim) && (item.result==="Won") && (
-              <View style={styles.claimContainer}>
-                <Text style={styles.claimLabel}>Claim</Text>
-                <TouchableOpacity style={styles.claimButton}>
-                  <Text style={styles.claimText}>{item.claimAmount}</Text>
+              )}
+              
+              {!isAdmin(item.id) && (
+                <TouchableOpacity style={styles.actionButton}>
+                  <Image 
+                    source={require('@/assets/images/star.png')} 
+                    style={styles.actionIcon} 
+                  />
                 </TouchableOpacity>
-              </View>
-            )}
+              )}
+            </View>
           </View>
         )}
-        keyExtractor={(item) => item.id}
       />
-        {/* "See All" Butonu */}
-      <TouchableOpacity style={styles.seeAllButton}>
-        <Text style={styles.seeAllText}>See All</Text>
-      </TouchableOpacity>
+      
+      {/* Invite Button */}
+      <View style={styles.bottomButtonContainer}>
+        <TouchableOpacity 
+          style={styles.inviteButtonLarge}
+          onPress={() => setShowInviteModal(true)}
+        >
+          <Image source={require('@/assets/images/user-plus.png')} style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>Invite Member</Text>
+        </TouchableOpacity>
+      </View>
+      
+      {/* Invite Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showInviteModal}
+        onRequestClose={() => setShowInviteModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Invite New Member</Text>
+            
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Email Address</Text>
+              <TextInput
+                style={styles.input}
+                value={inviteEmail}
+                onChangeText={setInviteEmail}
+                placeholder="Enter email address"
+                placeholderTextColor="#999"
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
+            
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                style={[styles.button, styles.cancelButton]} 
+                onPress={() => {
+                  setShowInviteModal(false);
+                  setInviteEmail('');
+                }}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.button, styles.inviteButtonModal]} 
+                onPress={handleInvite}
+              >
+                <Text style={styles.buttonText}>Send Invite</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -169,127 +210,226 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1E1E4C',
-    padding: 1,
+    padding: 10,
   },
-  card: {
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1E1E4C',
+  },
+  loadingText: {
+    color: '#fff',
+    fontSize: 16,
+    marginTop: 10,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1E1E4C',
+    padding: 20,
+  },
+  emptyText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  emptySubText: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 88, 0.3)',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginBottom: 15,
+  },
+  searchIcon: {
+    width: 16,
+    height: 16,
+    tintColor: '#fff',
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    color: '#fff',
+    fontSize: 14,
+  },
+  clearButton: {
+    padding: 5,
+  },
+  clearButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  memberCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 2,
+    borderRadius: 10,
     padding: 10,
     marginBottom: 10,
   },
-  profileImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 4,
-    marginRight: 10,
-  },
-  content: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  actions: {
+  memberInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
   },
-  yesButton: {
-    flexDirection: 'row',
+  avatarContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#4285F4',
+    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 2,
-    padding: 3,
     marginRight: 12,
   },
-  yesText: {
-    fontSize: 12,
-    fontWeight: 'semibold',
-    marginLeft: 2,
+  avatarText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
-  wonText: {
-    fontSize: 12,
-    fontWeight: 400,
-    color: '#ddd',
+  memberName: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '500',
   },
-  statText: {
-    fontSize: 12,
-    fontWeight: 400,
-    color: '#ddd',
-  },
-  claimContainer: {
+  adminBadge: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 4,
   },
-  claimLabel: {
-    fontSize: 13,
-    fontWeight: 'semibold',
-    color: '#fff',
-    marginBottom: 7,
+  badgeIcon: {
+    width: 12,
+    height: 12,
+    tintColor: '#FFD700',
+    marginRight: 4,
   },
-  claimedButton: {
+  adminText: {
+    color: '#FFD700',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+  },
+  actionButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingVertical: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  actionIcon: {
+    width: 16,
+    height: 16,
+    tintColor: '#fff',
+  },
+  bottomButtonContainer: {
+    paddingVertical: 15,
     paddingHorizontal: 10,
-    borderRadius: 5,
   },
-
-  claimButton: {
-    backgroundColor: '#fff',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
-  claimedText: {
-    fontSize: 12,
-    fontWeight: 'semibold',
-    color: '#fff',
-  },
-  claimText: {
-    fontSize: 12,
-    fontWeight: 'semibold',
-    color: '#000',
-  },
-  seeAllButton: {
-    alignSelf: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Hafif transparan arka plan
+  inviteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#4285F4',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 4,
-    marginTop: 10,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.5)', // Kenarlık ekledim
+    borderRadius: 20,
   },
-  
-  seeAllText: {
-    fontSize: 14,
-    fontWeight: 'semibold',
+  inviteButtonLarge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#4285F4',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  buttonIcon: {
+    width: 20,
+    height: 20,
+    tintColor: '#fff',
+    marginRight: 8,
+  },
+  inviteButtonText: {
     color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  iconStyle: {
+    width: 16,
+    height: 16,
+    marginRight: 5,
+    tintColor: '#fff',
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '85%',
+    backgroundColor: '#1E1E4C',
+    borderRadius: 15,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 20,
     textAlign: 'center',
-  },  
-  percentCard : {
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor:"#D6D6D673", 
-    borderRadius: 13, 
-    paddingHorizontal: 5,
-    paddingVertical: 3,
   },
-  percentText: {
-    flexDirection: "row",
+  inputContainer: {
+    marginBottom: 20,
   },
-  percentImage : { 
-    width: 16, 
-    height: 16,
-    tintColor: "#fff",
+  inputLabel: {
+    fontSize: 14,
+    color: '#fff',
+    marginBottom: 8,
   },
-  percentImage2 : { 
-    width: 16, 
-    height: 16,
-    tintColor: '#5E5E5E5C'
+  input: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+    padding: 12,
+    color: '#fff',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  button: {
+    flex: 1,
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    marginRight: 10,
+  },
+  inviteButtonModal: {
+    backgroundColor: '#4285F4',
   }
 });
