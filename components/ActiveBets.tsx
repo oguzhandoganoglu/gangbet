@@ -59,10 +59,7 @@ export default function ActiveBets({ data }: ActiveBetsProps) {
                 style={styles.profileImage} 
                 defaultSource={require('@/assets/images/angry.png')}
               />
-              <View style={styles.overlay}>
-                <Image source={require('@/assets/images/users.png')} style={styles.overlayIcon} />
-                <Text style={styles.overlayText}>{item.groupName}</Text>
-              </View>
+             
             </View>
             <View style={styles.content}>
               <Text style={styles.title}>{item.title}</Text>
@@ -154,6 +151,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 5,
+    paddingTop: 9,
+    paddingLeft:12
   },
   percent: {
     fontSize: 12,
@@ -164,29 +163,6 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: 60,
     height: 60,
-  },
-  overlay: {
-    position: 'absolute',
-    bottom: 8,
-    left: '60%',
-    transform: [{ translateX: -30 }],
-    backgroundColor: 'rgba(255, 255, 255, 0.9)', 
-    borderRadius: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-  },
-  overlayIcon: {
-    width: 16,
-    height: 16,
-    marginRight: 2,
-  },
-  overlayText: {
-    fontSize: 8,
-    fontWeight: '700',
-    color: '#000',
-    paddingTop: 3
   },
   percentCard : {
     flexDirection: 'row', 
