@@ -1,21 +1,14 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, Clipboard, Alert } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useUser } from "../app/UserContext";
-import QRCode from 'react-native-qrcode-svg';
-import { CUSTODY_WALLET_ADDRESS } from "../services/aptosClient";
+import DepositModal from "./DepositModal";
 
 export default function NavbarWallet() {
   const router = useRouter();
   const { user } = useUser();
   const [depositModalVisible, setDepositModalVisible] = useState(false);
-  
-  // Copy address to clipboard
-  const copyToClipboard = () => {
-    Clipboard.setString(CUSTODY_WALLET_ADDRESS);
-    Alert.alert("Success", "Address copied to clipboard!");
-  };
   
   return (
     <LinearGradient 
@@ -35,7 +28,7 @@ export default function NavbarWallet() {
           <Text style={styles.profileText}>Profile</Text>
         </TouchableOpacity>
       </View>
-      {/* Show user balance */}
+      {/* Kullanıcı balance değerini göster */}
       <Text style={styles.balanceText}>
         {user ? `${user.balance.toFixed(1)} USDC` : "0.0 USDC"}
       </Text>
@@ -57,202 +50,78 @@ export default function NavbarWallet() {
         </TouchableOpacity>
       </View>
       
-      {/* Deposit Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
+      {/* Para Yatırma Modalı */}
+      <DepositModal 
         visible={depositModalVisible}
-        onRequestClose={() => setDepositModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <LinearGradient 
-            colors={["rgba(108, 92, 231, 0.95)", "rgba(52, 31, 151, 0.95)"]} 
-            style={styles.modalContent}
-          >
-            <Text style={styles.modalTitle}>Deposit Funds</Text>
-            <Text style={styles.modalText}>
-              Send APT to the address below to deposit funds to your account.
-            </Text>
-            
-            <View style={styles.qrContainer}>
-              <QRCode
-                value={CUSTODY_WALLET_ADDRESS}
-                size={200}
-                color="black"
-                backgroundColor="white"
-              />
-            </View>
-            
-            <View style={styles.addressContainer}>
-              <Text style={styles.addressLabel}>Custody Wallet Address:</Text>
-              <View style={styles.addressTextContainer}>
-                <Text style={styles.addressText} numberOfLines={1} ellipsizeMode="middle">
-                  {CUSTODY_WALLET_ADDRESS}
-                </Text>
-              </View>
-              <TouchableOpacity style={styles.copyButton} onPress={copyToClipboard}>
-                <Text style={styles.copyButtonText}>Copy</Text>
-              </TouchableOpacity>
-            </View>
-            
-            <Text style={styles.warningText}>
-              Note: Deposit may take a few minutes depending on blockchain confirmation.
-            </Text>
-            
-            <TouchableOpacity 
-              style={styles.closeButton}
-              onPress={() => setDepositModalVisible(false)}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-        </View>
-      </Modal>
+        onClose={() => setDepositModalVisible(false)}
+      />
     </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 20,
+    padding: 20,
+    alignItems: "flex-start",
+    // Gradient arka plan, LinearGradient ile sağlanıyor artık
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
+    width: "100%",
     alignItems: "center",
-    marginBottom: 15,
   },
   logo: {
-    fontSize: 18,
+    fontSize: 14,
+    color: "white",
     fontWeight: "bold",
-    color: "#6c5ce7",
+    marginLeft: 2,
   },
   profileContainer: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.2)", // Daha saydam
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
   },
   profileImage: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     marginRight: 5,
   },
   profileText: {
-    fontSize: 14,
-    color: "#666",
+    color: "white",
+    fontSize: 12,
+    fontWeight: "500",
   },
   balanceText: {
-    fontSize: 24,
+    fontSize: 26,
+    color: "white",
     fontWeight: "bold",
-    marginBottom: 15,
+    marginVertical: 15,
+    marginLeft: 2,
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    width: "100%",
   },
   button: {
-    backgroundColor: "#6c5ce7",
-    padding: 10,
-    borderRadius: 8,
-    alignItems: "center",
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    borderRadius: 64,
+    backgroundColor: "rgba(255, 255, 255, 0.2)", // Daha saydam
     marginHorizontal: 5,
   },
   buttonText: {
     color: "white",
-    marginTop: 5,
-    fontSize: 12,
-  },
-  // Modal styles
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    width: '90%',
-    borderRadius: 15,
-    padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: 'white',
-  },
-  modalText: {
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 20,
-    color: 'white',
-  },
-  qrContainer: {
-    padding: 15,
-    backgroundColor: 'white',
-    borderRadius: 15,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  addressContainer: {
-    width: '100%',
-    marginBottom: 20,
-  },
-  addressLabel: {
-    fontSize: 14,
-    marginBottom: 5,
-    color: 'white',
-    fontWeight: '500',
-  },
-  addressTextContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 8,
-  },
-  addressText: {
-    fontSize: 12,
-    color: 'white',
-  },
-  copyButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    padding: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  copyButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  warningText: {
-    fontSize: 12,
-    color: 'rgba(255, 255, 255, 0.8)',
-    textAlign: 'center',
-    marginBottom: 20,
-    fontStyle: 'italic',
-  },
-  closeButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    width: '100%',
-    alignItems: 'center',
-  },
-  closeButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: "400",
+    marginLeft: 5,
   },
 });
