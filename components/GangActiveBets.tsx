@@ -1,107 +1,231 @@
-import React from 'react';
-import { View, Text, FlatList, Image, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, Image, StyleSheet, Modal, TouchableOpacity, Alert } from 'react-native';
+
 
 const exampleData = [
-  {
-    id: '1',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    status: 'Pending'
-  },
-  {
-    id: '2',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    status: 'Result'
-  },
-  {
-    id: '3',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    status: 'Result'
-  },
-  {
-    id: '4',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    status: 'Pending'
-  }
+  { id: '1', title: 'Elon Musk out as Head of DOGE before July?', status: 'Pending' },
+  { id: '2', title: 'Elon Musk out as Head of DOGE before July?', status: 'Result' },
+  { id: '3', title: 'Elon Musk out as Head of DOGE before July?', status: 'Result' },
+  { id: '4', title: 'Elon Musk out as Head of DOGE before July?', status: 'Pending' },
 ];
 
-export default function GangAllBets() {
+export default function GangActiveBets() {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [bets, setBets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedBetId, setSelectedBetId] = useState(null);
+  interface ApiBet {
+    _id: string;
+    title: string;
+    description: string;
+    photoUrl?: string;
+    createdBy: {
+      _id: string;
+      username: string;
+    };
+    channel: string;
+    totalPool: number;
+    totalYesAmount: number;
+    totalNoAmount: number;
+    yesUsersCount: number;
+    noUsersCount: number;
+    yesOdds: number;
+    noOdds: number;
+    minBetAmount: number;
+    maxBetAmount: number;
+    status: string;
+    result: string;
+    endDate: string;
+    participants: Array<{
+      user: string;
+      choice: string;
+      amount: number;
+    }>;
+  }
+
+  const fetchBets = async () => {
+    try {
+      const baseUrl = 'http://51.21.28.186:5001';
+      const response = await fetch(`${baseUrl}/api/bets/all`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch bets');
+      }
+      
+      const data = await response.json();
+      const activeBets = data.bets.filter(bet => bet.status === 'active');
+
+      
+      setBets(activeBets);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching bets:', err);
+      setLoading(false);
+    }
+  };
+
+  const handleFinalisePress = (betId) => {
+    setSelectedBetId(betId);
+    setModalVisible(true);
+  };
+
+
+  const handleYesPress = async () => {
+    // Backend'e istek gönder
+   
+    try {
+      const payload = { betId: selectedBetId, result: 'yes' };
+      const response = await fetch('http://51.21.28.186:5001/api/bets/resolve', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        Alert.alert("Success", data.message);
+      } else {
+        Alert.alert("Error", "Something went wrong: " + data.message);
+      }
+  
+      setModalVisible(false);
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Could not send the result: " + error.message);
+    }
+  };
+
+  const handleNoPress = async () => {
+    // Backend'e istek gönder
+    try {
+      const response = await fetch('https://your-backend-api.com/endpoint', {
+        method: 'POST',
+        body: JSON.stringify({ result: 'no', betId: selectedBetId }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      // Başarılı işlem
+      Alert.alert("Success", "Result recorded");
+      setModalVisible(false);
+    } catch (error) {
+      // Hata durumunda
+      Alert.alert("Error", "Could not send the result");
+    }
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+  };
+
+  useEffect(() => {
+      fetchBets();
+    }, []);
+
   return (
     <View style={styles.container}>
-      
       <FlatList
-        data={exampleData}
+        data={bets}
+        keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <View style={styles.mainCard}>
             <View style={styles.card}>
-              { item.status==="Pending" && (
+              {item.result === "waiting" && (
                 <View style={styles.subcard}>
                   <Image source={require('@/assets/images/alert-triangle.png')} style={styles.iconStyle} />
-                  <Text style={{color:'#fff', fontSize:12, fontWeight:400}}>Need Finalise</Text>
+                  <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400' }}>Need Finalise</Text>
                 </View>
               )}
-              { item.status==="Result" && (
+              {item.result === "ended" && (
                 <View style={styles.subcard}>
                   <Image source={require('@/assets/images/gavel.png')} style={styles.iconStyle} />
-                  <Text style={{color:'#fff', fontSize:12, fontWeight:400}}>Finalised</Text>
+                  <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400' }}>Finalised</Text>
                 </View>
               )}
-            </View>    
-            { item.status==="Pending" && (
+            </View>
+            {item.result === "waiting" && (
               <View style={styles.card}>
                 <View>
                   <Text style={styles.title}>{item.title}</Text>
                   <View style={styles.buttons}>
                     <Image source={require('@/assets/images/scale.png')} style={styles.iconStyle} />
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400, marginRight:7}}>%40</Text>
+                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 7 }}>%40</Text>
                     <Image source={require('@/assets/images/chart-line.png')} style={styles.iconStyle} />
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400, marginRight:7}}>50K</Text>
+                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 7 }}>50K</Text>
                     <Image source={require('@/assets/images/users2.png')} style={styles.iconStyle} />
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400, marginRight:21}}>7 Members</Text>
+                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 21 }}>7 Members</Text>
                     <Image source={require('@/assets/images/send.png')} style={styles.iconStyle} />
                     <Image source={require('@/assets/images/share.png')} style={styles.iconStyle} />
                   </View>
                 </View>
-                <View style={styles.card2}>
+                <TouchableOpacity onPress={() => handleFinalisePress(item._id)} style={styles.card2}>
                   <Image source={require('@/assets/images/power.png')} style={styles.iconStyle2} />
-                  <Text style={{color:'#000', fontSize:12, fontWeight:400}}>Finelise</Text>
-                </View>
+                  <Text style={{ color: '#000', fontSize: 12, fontWeight: '400' }}>Finalise</Text>
+                </TouchableOpacity>
               </View>
-             )}
-             { item.status==="Result" && (
+            )}
+            {item.status === "ended" && (
               <View style={styles.card}>
                 <View>
                   <Text style={styles.title}>{item.title}</Text>
                   <View style={styles.buttons}>
                     <Image source={require('@/assets/images/scale.png')} style={styles.iconStyle} />
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400, marginRight:7}}>%40</Text>
+                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 7 }}>%40</Text>
                     <Image source={require('@/assets/images/chart-line.png')} style={styles.iconStyle} />
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400, marginRight:7}}>50K</Text>
+                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 7 }}>50K</Text>
                     <Image source={require('@/assets/images/users2.png')} style={styles.iconStyle} />
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400, marginRight:21}}>7 Members</Text>
+                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 21 }}>7 Members</Text>
                     <Image source={require('@/assets/images/send.png')} style={styles.iconStyle} />
                     <Image source={require('@/assets/images/share.png')} style={styles.iconStyle} />
                   </View>
                 </View>
                 <View style={styles.card3}>
                   <Image source={require('@/assets/images/thumb-up.png')} style={styles.iconStyle2} />
-                  <Text style={{color:'#000', fontSize:12, fontWeight:400}}>Yes!</Text>
+                  <Text style={{ color: '#000', fontSize: 12, fontWeight: '400' }}>Yes!</Text>
                 </View>
               </View>
-             )}
+            )}
           </View>
         )}
-        keyExtractor={(item) => item.id}
+        
       />
+
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="slide"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+              <Text style={{ color: '#000', fontSize: 16 }}>X</Text>
+            </TouchableOpacity>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 20 }}>What is the result?</Text>
+            <TouchableOpacity onPress={handleYesPress} style={styles.resultButton}>
+              <Text style={{ color: '#fff', fontSize: 16 }}>Yes</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleNoPress} style={styles.resultButton}>
+              <Text style={{ color: '#fff', fontSize: 16 }}>No</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <View style={styles.seeAllButton}>
         <Image source={require('@/assets/images/search.png')} style={styles.iconStyle} />
-        <Image source={require('@/assets/images/vector.png')} style={{width:4, height:16, marginRight:5, marginLeft:80}} />
+        <Image source={require('@/assets/images/vector.png')} style={{ width: 4, height: 16, marginRight: 5, marginLeft: 80 }} />
         <Image source={require('@/assets/images/seeding.png')} style={styles.iconStyle} />
         <Text style={styles.seeAllText}>Latest</Text>
         <Image source={require('@/assets/images/hourglass.png')} style={styles.iconStyle} />
         <Text style={styles.seeAllText}>Time Ended</Text>
         <Image source={require('@/assets/images/new-section.png')} style={styles.iconStyle} />
-        <Text style={styles.seeAllText}>New Bet</Text>        
+        <Text style={styles.seeAllText}>New Bet</Text>
       </View>
     </View>
   );
@@ -128,7 +252,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     backgroundColor: "#fff",
-    paddingVertical: 8, 
+    paddingVertical: 8,
     paddingHorizontal: 4,
     borderRadius: 20,
     minWidth: 78,
@@ -138,7 +262,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingVertical: 8, 
+    paddingVertical: 8,
     paddingHorizontal: 11,
     borderRadius: 20,
   },
@@ -170,26 +294,51 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     marginTop: 8,
-    flexShrink: 1,  
-    width: '90%',   
+    flexShrink: 1,
+    width: '90%',
   },
   seeAllButton: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)', 
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingVertical: 10,
     paddingHorizontal: 10,
     borderRadius: 15,
     marginTop: 10,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.5)', 
+    borderColor: 'rgba(255, 255, 255, 0.5)',
   },
-  
   seeAllText: {
     fontSize: 14,
-    fontWeight: 'semibold',
+    fontWeight: '600',
     color: '#fff',
     marginRight: 10,
-  },  
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+  resultButton: {
+    backgroundColor: '#1E1E4C',
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 5,
+    width: '50%',
+    alignItems: 'center',
+  }
 });
