@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, TextInput, Modal } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, TextInput, Modal, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Navbar from '@/components/Navbar';
@@ -7,11 +7,15 @@ import axios from 'axios';
 import { useUser } from "../UserContext";
 import { LinearGradient } from 'expo-linear-gradient';
 
+// API temel URL'sini bir değişkende tanımlayalım
+const API_BASE_URL = 'http://51.21.28.186:5001';
+
 export default function NotificationScreen() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchText, setSearchText] = useState('');
   const { user } = useUser();
   const userId = user?._id;
+  const userToken = user?.token;
   const router = useRouter();
   
   // State tanımlamaları
@@ -23,18 +27,35 @@ export default function NotificationScreen() {
   const [isNewGroupModalVisible, setIsNewGroupModalVisible] = useState(false);
   const [newGroupTitle, setNewGroupTitle] = useState('');
   const [newGroupDescription, setNewGroupDescription] = useState('');
+  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+  const [isCreatingChannel, setIsCreatingChannel] = useState(false);
+  const [currentGroupId, setCurrentGroupId] = useState('');
 
   // API'den veri çekme
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (userId) {
+      fetchData();
+    }
+  }, [userId]);
 
   const fetchData = async () => {
+    if (!userId) {
+      setError('Kullanıcı girişi yapılmamış');
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await axios.get(`http://51.21.28.186:5001/api/pages/groups/all/${userId}`);
+      const response = await axios.get(`${API_BASE_URL}/api/pages/groups/all/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
       const data = response.data;
       
       // Katılınan grupları kaydet
@@ -47,8 +68,8 @@ export default function NotificationScreen() {
       setFilteredBets(data.betsWithGroups || []);
       
     } catch (err) {
-      console.error('Error fetching data:', err);
-      setError('Failed to load data. Please try again later.');
+      console.error('Veri çekerken hata oluştu:', err);
+      setError('Veri yüklenemedi. Lütfen daha sonra tekrar deneyin.');
     } finally {
       setIsLoading(false);
     }
@@ -95,32 +116,197 @@ export default function NotificationScreen() {
     setIsNewGroupModalVisible(true);
   };
 
+  // Rastgele bir kanal adı oluştur
+  const generateRandomChannelName = () => {
+    const prefixes = ['Genel', 'Sohbet', 'Tartışma', 'Toplantı', 'Proje', 'Etkinlik', 'Duyuru'];
+    const suffixes = ['Kanalı', 'Odası', 'Grubu', 'Alanı', 'Köşesi', 'Merkezi'];
+    
+    const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+    
+    return `${randomPrefix} ${randomSuffix}`;
+  };
+
   const createNewGroup = async () => {
+    // Form doğrulama
     if (!newGroupTitle.trim()) {
-      alert('Please enter a group title');
+      Alert.alert('Hata', 'Lütfen grup adı girin');
       return;
     }
 
+    if (!userId) {
+      Alert.alert('Hata', 'Kullanıcı girişi yapılmamış');
+      return;
+    }
+
+    setIsCreatingGroup(true);
+
     try {
-      const response = await axios.post('http://51.21.28.186:5001/api/groups/create', {
-        userId,
+      // 1. Grup oluşturma
+      const groupResponse = await axios.post(`${API_BASE_URL}/api/groups/create`, {
         name: newGroupTitle,
-        description: newGroupDescription
+        description: newGroupDescription || 'Grup açıklaması yok',
+        createdBy: userId
+      }, {
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        }
       });
 
-      if (response.data.success) {
-        alert('Group created successfully!');
-        setIsNewGroupModalVisible(false);
-        setNewGroupTitle('');
-        setNewGroupDescription('');
-        fetchData(); // Grupları yeniden yükle
+      console.log('Grup oluşturma yanıtı:', JSON.stringify(groupResponse.data, null, 2));
+
+      // Grup oluşturma başarılı mı kontrol et
+      if (groupResponse.status === 200 || groupResponse.status === 201) {
+        // API yanıtından grup ID'sini al
+        let newGroupId;
+        
+        // Yanıt yapısını kontrol et ve doğru ID'yi bul
+        if (groupResponse.data.group) {
+          newGroupId = groupResponse.data.group._id || groupResponse.data.group.id;
+        } else if (groupResponse.data._id) {
+          newGroupId = groupResponse.data._id;
+        } else if (groupResponse.data.id) {
+          newGroupId = groupResponse.data.id;
+        } else if (typeof groupResponse.data === 'string') {
+          newGroupId = groupResponse.data;
+        }
+        
+        console.log('Bulunan Grup ID:', newGroupId);
+        
+        if (!newGroupId) {
+          console.error('Grup ID bulunamadı:', groupResponse.data);
+          Alert.alert('Uyarı', 'Grup oluşturuldu ancak kanal oluşturulamadı: Grup ID bulunamadı');
+        } else {
+          // Grup oluşturuldu, şimdi otomatik olarak kanal oluştur
+          setCurrentGroupId(newGroupId);
+          
+          // Rastgele bir kanal adı oluştur
+          const randomChannelName = generateRandomChannelName();
+          
+          // Kanal oluşturma işlemini başlat
+          createChannelWithName(newGroupId, randomChannelName);
+          
+          // Form alanlarını temizle
+          setNewGroupTitle('');
+          setNewGroupDescription('');
+          setIsNewGroupModalVisible(false);
+          
+          // Grupları yeniden yükle
+          fetchData();
+        }
       } else {
-        alert('Failed to create group. Please try again.');
+        Alert.alert('Hata', 'Grup oluşturulamadı. Lütfen tekrar deneyin.');
       }
     } catch (error) {
-      console.error('Error creating group:', error);
-      alert('An error occurred. Please try again.');
+      console.error('Grup oluşturma hatası:', error.response?.data || error);
+      
+      // Hata mesajını kullanıcıya göster
+      const errorMessage = error.response?.data?.message || error.message || 'Bir hata oluştu. Lütfen tekrar deneyin.';
+      Alert.alert('Hata', errorMessage);
+    } finally {
+      setIsCreatingGroup(false);
     }
+  };
+
+  // Belirli bir isimle kanal oluşturma fonksiyonu
+  const createChannelWithName = async (groupId, channelName) => {
+    setIsCreatingChannel(true);
+
+    try {
+      // Kanal oluşturma isteği
+      const channelData = {
+        name: channelName,
+        group: groupId,
+        createdBy: userId
+      };
+      
+      console.log('Kanal oluşturma isteği:', channelData);
+      
+      const channelResponse = await axios.post(`${API_BASE_URL}/api/channels/create`, channelData, {
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('Kanal oluşturma yanıtı:', channelResponse.data);
+      
+      Alert.alert('Başarılı', `Grup ve "${channelName}" kanalı başarıyla oluşturuldu`);
+      
+      // Kanal oluşturulduktan sonra grup detaylarını yeniden yükle
+      fetchData();
+    } catch (error) {
+      console.error('Kanal oluşturma hatası:', error.response?.data || error);
+      
+      // Hata detaylarını görelim
+      if (error.response) {
+        console.error('Hata yanıtı:', error.response.status);
+        console.error('Hata verileri:', error.response.data);
+      }
+      
+      Alert.alert(
+        'Uyarı', 
+        `Grup oluşturuldu fakat kanal oluşturulamadı: ` + 
+        (error.response?.data?.message || error.message || 'Bilinmeyen hata')
+      );
+    } finally {
+      setIsCreatingChannel(false);
+    }
+  };
+
+  // Modal içeriği için render fonksiyonu
+  const renderGroupCreationModal = () => {
+    return (
+      <Modal
+        visible={isNewGroupModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsNewGroupModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Yeni Grup Oluştur</Text>
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Grup Adı"
+              value={newGroupTitle}
+              onChangeText={setNewGroupTitle}
+            />
+            
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              placeholder="Grup Açıklaması (İsteğe bağlı)"
+              value={newGroupDescription}
+              onChangeText={setNewGroupDescription}
+              multiline={true}
+              numberOfLines={4}
+            />
+            
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                style={[styles.button, styles.cancelButton]} 
+                onPress={() => setIsNewGroupModalVisible(false)}
+                disabled={isCreatingGroup}
+              >
+                <Text style={styles.buttonText}>İptal</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.button, styles.createButton, isCreatingGroup && styles.disabledButton]} 
+                onPress={createNewGroup}
+                disabled={isCreatingGroup}
+              >
+                <Text style={styles.buttonText}>
+                  {isCreatingGroup ? 'Oluşturuluyor...' : 'Oluştur'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
   };
 
   return (
@@ -296,47 +482,7 @@ export default function NotificationScreen() {
         </TouchableOpacity>
       </View>
       )}
-      <Modal
-  visible={isNewGroupModalVisible}
-  transparent={true}
-  animationType="slide"
->
-  <View style={styles.modalContainer}>
-    <LinearGradient
-      colors={['#161638', '#714F60', '#B85B44']}
-      style={styles.modalContent}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-    >
-      {/* Modal içeriği buraya gelecek */}
-      <Text style={styles.modalTitle}>Create New Group</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Group Title"
-        placeholderTextColor="#999"
-        value={newGroupTitle}
-        onChangeText={setNewGroupTitle}
-      />
-      <TextInput
-        style={[styles.input, styles.textArea]}
-        placeholder="Group Description"
-        placeholderTextColor="#999"
-        multiline
-        numberOfLines={4}
-        value={newGroupDescription}
-        onChangeText={setNewGroupDescription}
-      />
-      <View style={styles.modalButtonContainer}>
-        <TouchableOpacity style={styles.modalButton} onPress={() => setIsNewGroupModalVisible(false)}>
-          <Text style={styles.modalButtonText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.modalButton, styles.createButton]} onPress={createNewGroup}>
-          <Text style={styles.modalButtonText}>Create</Text>
-        </TouchableOpacity>
-      </View>
-    </LinearGradient>
-  </View>
-</Modal>
+      {renderGroupCreationModal()}
     </LinearGradient>
   );
 }
@@ -577,22 +723,45 @@ const styles = StyleSheet.create({
     height: 100,
     textAlignVertical: 'top',
   },
-  modalButtonContainer: {
+  buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 15,
   },
-  modalButton: {
+  cancelButton: {
     padding: 10,
     borderRadius: 5,
     width: '45%',
     alignItems: 'center',
+    backgroundColor: '#ccc',
   },
   createButton: {
-    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 5,
+    width: '45%',
+    alignItems: 'center',
+    backgroundColor: '#007bff',
   },
-  modalButtonText: {
-    color: 'white',
+  disabledButton: {
+    backgroundColor: '#7fb3ef',
+  },
+  // Yeni eklenen stiller
+  infoContainer: {
+    flexDirection: 'row',
+    marginBottom: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    padding: 8,
+    borderRadius: 5,
+  },
+  infoLabel: {
+    color: '#ddd',
     fontWeight: 'bold',
+    marginRight: 5,
+    fontSize: 12,
+  },
+  infoValue: {
+    color: 'white',
+    fontSize: 12,
+    flex: 1,
   },
 });

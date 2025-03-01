@@ -11,10 +11,15 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
-  Platform
+  Platform,
+  Alert
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker'; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+
+const API_BASE_URL = 'http://51.21.28.186:5001';
 
 const exampleData = [
   {
@@ -77,83 +82,216 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
   const [availableGroups, setAvailableGroups] = useState<Group[]>(exampleGroups);
   const [image, setImage] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [channels, setChannels] = useState<{_id: string, name: string}[]>([]);
+  const [selectedChannelId, setSelectedChannelId] = useState('');
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userToken, setUserToken] = useState<string | null>(null);
+  const [groupData, setGroupData] = useState<any>(null);
+
+  // Kullanıcı bilgilerini AsyncStorage'dan al
+  useEffect(() => {
+    const getUserData = async () => {
+      try {
+        const userData = await AsyncStorage.getItem('userData');
+        if (userData) {
+          const parsedUserData = JSON.parse(userData);
+          setUserId(parsedUserData._id);
+          setUserToken(parsedUserData.token);
+        }
+      } catch (error) {
+        console.error("AsyncStorage'dan kullanıcı bilgileri alınırken hata:", error);
+      }
+    };
+
+    getUserData();
+  }, []);
 
   useEffect(() => {
-    const fetchBets = async () => {
+    const fetchGroupDetails = async () => {
+      if (!userId) return; // Kullanıcı ID'si yoksa işlemi atla
+      
       try {
-        const userId = "currentUserId"; // Gerçek kullanıcı ID'sini buraya eklemelisiniz
-        const response = await fetch(`http://51.21.28.186:5001/api/pages/groups/detail/${gangId}/${userId}`);
+        console.log(`Grup detayları getiriliyor: ${gangId}/${userId}`);
+        const response = await fetch(`${API_BASE_URL}/api/pages/groups/detail/${gangId}/${userId}`);
         const data = await response.json();
-        setBets(data.group);
-        console.log(data);
+        
+        console.log("Grup API yanıtı:", data);
+        
+        // Grup verilerini sakla
+        setGroupData(data.group);
+        
+        // Bahisleri ayarla
+        if (data.group && data.group.bets) {
+          setBets(data.group.bets);
+        }
+        
+        // Kanalları ayarla
+        if (data.group && data.group.channels) {
+          setChannels(data.group.channels);
+          console.log("Kanallar:", data.group.channels);
+          
+          // Eğer kanal varsa, ilk kanalı seç
+          if (data.group.channels.length > 0) {
+            setSelectedChannelId(data.group.channels[0].id);
+            console.log("Seçilen kanal ID:", data.group.channels[0].id);
+          }
+        }
       } catch (error) {
-        console.error("Error fetching bets:", error);
+        console.error("Grup detayları getirilirken hata:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBets();
+    fetchGroupDetails();
+    
     // İzinleri kontrol et (Expo için)
     (async () => {
       if (Platform.OS !== 'web') {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert('Sorry, we need camera roll permissions to make this work!');
+          Alert.alert('Üzgünüz, bu özelliği kullanmak için galeri izinlerine ihtiyacımız var!');
         }
       }
     })();
-  }, [gangId]);
+  }, [gangId, userId]);
+
+  // Rastgele bir kanal ID'si seç
+  const getRandomChannelId = () => {
+    if (channels.length === 0) {
+      return null;
+    }
+    
+    const randomIndex = Math.floor(Math.random() * channels.length);
+    console.log(`Rastgele kanal seçildi: ${channels[randomIndex].name} (${channels[randomIndex].id})`);
+    return channels[randomIndex].id;
+  };
 
   const handleCreateBet = async () => {
+    console.log("===== BAHİS OLUŞTURMA DETAYLARI =====");
+    
+    // Kullanıcı bilgilerini kontrol et
+    console.log("Kullanıcı ID:", userId);
+    console.log("Kullanıcı Token:", userToken ? "Mevcut" : "Yok");
+    
+    if (!userId || !userToken) {
+      console.error("Hata: Kullanıcı bilgileri eksik!");
+      Alert.alert("Hata", "Kullanıcı girişi yapılmamış. Lütfen tekrar giriş yapın.");
+      return;
+    }
+    
+    // Bahis başlığını kontrol et
+    console.log("Bahis Başlığı:", newBetTitle);
+    if (!newBetTitle.trim()) {
+      console.error("Hata: Bahis başlığı boş!");
+      Alert.alert("Hata", "Bahis başlığı boş olamaz.");
+      return;
+    }
+    
+    // Bahis açıklamasını kontrol et
+    console.log("Bahis Açıklaması:", betDescription);
+    if (!betDescription.trim()) {
+      console.error("Hata: Bahis açıklaması boş!");
+      Alert.alert("Hata", "Bahis açıklaması boş olamaz.");
+      return;
+    }
+    
+    // Bahis miktarlarını kontrol et
+    console.log("Minimum Bahis Miktarı:", minBetAmount);
+    console.log("Maksimum Bahis Miktarı:", maxBetAmount);
+    if (!minBetAmount || !maxBetAmount) {
+      console.error("Hata: Bahis miktarları eksik!");
+      Alert.alert("Hata", "Minimum ve maksimum bahis miktarları belirtilmelidir.");
+      return;
+    }
+    
+    // Bitiş tarihini kontrol et
+    console.log("Bitiş Tarihi:", endDate.toISOString());
+    
+    // Grup ID'sini kontrol et
+    console.log("Grup ID:", gangId);
+    
+    // Mevcut kanalları kontrol et
+    console.log("Mevcut Kanallar:", channels);
+    
+    // Rastgele bir kanal ID'si seç
+    const channelId = getRandomChannelId();
+    console.log("Seçilen Kanal ID:", channelId);
+    
+    if (!channelId) {
+      console.error("Hata: Kanal bulunamadı!");
+      Alert.alert("Hata", "Bu grup için kanal bulunamadı. Lütfen önce bir kanal oluşturun.");
+      return;
+    }
+    
+    // Resim durumunu kontrol et
+    console.log("Resim:", image ? "Mevcut" : "Yok");
+    
+    // Tüm veriler hazır, bahis oluşturma işlemine devam et
+    console.log("Tüm veriler hazır, bahis oluşturma işlemine devam ediliyor...");
+    
     setUploading(true);
+    
     try {
-      // Eğer resim varsa önce yükleme yapabilirsiniz
-      let imageUrl = null;
-      if (image) {
-        // Burada resmi sunucuya yükleme işlemi yapılır
-        // Bu örnek için basitleştirilmiş bir uygulama
-        const formData = new FormData();
-        formData.append('image', {
-          uri: image,
-          type: 'image/jpeg',
-          name: 'upload.jpg',
-        });
-        
-        // Resim upload API çağrısı
-        // const uploadResponse = await fetch('YOUR_UPLOAD_API_ENDPOINT', {
-        //   method: 'POST',
-        //   body: formData,
-        //   headers: {
-        //     'Content-Type': 'multipart/form-data',
-        //   },
-        // });
-        // const uploadResult = await uploadResponse.json();
-        // imageUrl = uploadResult.imageUrl;
-        
-        // Demo için
-        imageUrl = image;
-      }
+      // Sabit bir resim URL'si kullan
+      const imageUrl = "https://tinderapp-bet-images.s3.eu-north-1.amazonaws.com/bet-photos/1740665862974.png";
+      console.log("Kullanılacak resim URL'si:", imageUrl);
       
-      // Yeni bahis oluşturma işlemi
-      console.log("Creating new bet:", {
+      // Postman koleksiyonundaki formata göre bahis oluşturma isteği
+      const betData = {
         title: newBetTitle,
         description: betDescription,
-        groups: selectedGroups,
-        endDate: endDate,
-        minAmount: minBetAmount,
-        maxAmount: maxBetAmount,
-        imageUrl: imageUrl
+        createdBy: userId,
+        groupId: gangId,
+        channelId: channelId,
+        endDate: endDate.toISOString(),
+        minBetAmount: parseInt(minBetAmount),
+        maxBetAmount: parseInt(maxBetAmount),
+        photoUrl: imageUrl  // API dokümantasyonuna göre doğru alan adı
+      };
+      
+      console.log("Bahis oluşturma isteği gönderiliyor:", JSON.stringify(betData, null, 2));
+      
+      // API dokümantasyonuna göre doğru endpoint
+      const response = await axios.post(`${API_BASE_URL}/api/bets/create`, betData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        }
       });
       
-      // Modal'ı kapat ve state'i temizle
-      setModalVisible(false);
+      console.log("Bahis oluşturma yanıtı:", JSON.stringify(response.data, null, 2));
+      
+      // Başarılı oluşturma
+      Alert.alert("Başarılı", "Bahis başarıyla oluşturuldu!");
+      
+      // Formu sıfırla ve modalı kapat
       resetForm();
+      setModalVisible(false);
+      
+      // Bahisleri yeniden yükle
+      fetchGroupDetails();
     } catch (error) {
-      console.error("Error creating bet:", error);
-      Alert.alert("Error", "Failed to create bet. Please try again.");
+      console.error("Bahis oluşturulurken hata:", error);
+      
+      // Hata detaylarını göster
+      if (error.response) {
+        // Sunucu yanıtı ile dönen hata
+        console.error("Sunucu yanıtı:", error.response.data);
+        console.error("Durum kodu:", error.response.status);
+        Alert.alert("Hata", `Sunucu hatası: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
+      } else if (error.request) {
+        // İstek yapıldı ama yanıt alınamadı
+        console.error("İstek yapıldı ama yanıt alınamadı:", error.request);
+        Alert.alert("Hata", "Sunucuya bağlanılamadı. İnternet bağlantınızı kontrol edin.");
+      } else {
+        // İstek oluşturulurken bir hata oluştu
+        console.error("İstek hatası:", error.message);
+        Alert.alert("Hata", `İstek hatası: ${error.message}`);
+      }
     } finally {
       setUploading(false);
+      console.log("===== BAHİS OLUŞTURMA İŞLEMİ TAMAMLANDI =====");
     }
   };
 
@@ -191,19 +329,26 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
   };
   const pickImage = async () => {
     try {
-      let result = await ImagePicker.launchImageLibraryAsync({
+      const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
+        aspect: [16, 9],
+        quality: 0.3,
+        maxWidth: 800,
+        maxHeight: 600,
       });
-
+      
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        setImage(result.assets[0].uri);
+        const selectedAsset = result.assets[0];
+        console.log("Seçilen resim:", selectedAsset.uri);
+        setImage(selectedAsset.uri);
+        
+        // Kullanıcıya bilgi verelim
+        Alert.alert("Bilgi", "Fotoğraf seçildi. Bahis oluşturulurken fotoğraf yüklenecektir. Bu işlem biraz zaman alabilir.");
       }
     } catch (error) {
-      console.error("Error picking image:", error);
-      Alert.alert("Error", "Failed to pick image. Please try again.");
+      console.error("Resim seçme hatası:", error);
+      Alert.alert("Hata", "Resim seçilirken bir hata oluştu.");
     }
   };
 
@@ -340,120 +485,91 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <ScrollView showsVerticalScrollIndicator={false}>
-                <Text style={styles.modalTitle}>Create New Bet</Text>
+              <ScrollView 
+                showsVerticalScrollIndicator={true}
+                contentContainerStyle={{ paddingBottom: 20 }}
+              >
+                <Text style={styles.modalTitle}>Yeni Bahis Oluştur</Text>
                 
                 {/* Bet Title */}
                 <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Bet Title</Text>
+                  <Text style={styles.inputLabel}>Bahis Başlığı</Text>
                   <TextInput
                     style={styles.input}
                     value={newBetTitle}
                     onChangeText={setNewBetTitle}
-                    placeholder="Enter bet title"
+                    placeholder="Bahis başlığını girin"
                     placeholderTextColor="#999"
                   />
                 </View>
                 
                 {/* Bet Description */}
                 <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Bet Description</Text>
+                  <Text style={styles.inputLabel}>Bahis Açıklaması</Text>
                   <TextInput
                     style={[styles.input, styles.textArea]}
                     value={betDescription}
                     onChangeText={setBetDescription}
-                    placeholder="Enter bet description"
+                    placeholder="Bahis açıklamasını girin"
                     placeholderTextColor="#999"
                     multiline
                     numberOfLines={4}
                     textAlignVertical="top"
                   />
                 </View>
-
-                {/* Image Upload Section - YENİ EKLENEN KISIM */}
-                <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Bet Image</Text>
-                  
-                  {!image ? (
-                    <TouchableOpacity 
-                      style={styles.uploadButton} 
-                      onPress={showImageOptions}
-                    >
-                      <Image 
-                        source={require('@/assets/images/upload.png')} 
-                        style={styles.uploadIcon}
-                      />
-                      <Text style={styles.uploadText}>Upload Image</Text>
-                    </TouchableOpacity>
-                  ) : (
-                    <View style={styles.imageContainer}>
-                      <Image source={{ uri: image }} style={styles.previewImage} />
-                      <View style={styles.imageOverlay}>
-                        <TouchableOpacity 
-                          style={styles.imageOption} 
-                          onPress={showImageOptions}
-                        >
-                          <Image 
-                            source={require('@/assets/images/edit.png')} 
-                            style={styles.imageOptionIcon} 
-                          />
-                        </TouchableOpacity>
-                        <TouchableOpacity 
-                          style={styles.imageOption} 
-                          onPress={removeImage}
-                        >
-                          <Image 
-                            source={require('@/assets/images/trash.png')} 
-                            style={styles.imageOptionIcon} 
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  )}
-                </View>
                 
-                {/* Which Groups */}
+                {/* Kanal Bilgisi */}
                 <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>Which Groups</Text>
-                  <View style={styles.groupsContainer}>
-                    {availableGroups.map(group => (
-                      <TouchableOpacity 
-                        key={group.id}
-                        onPress={() => toggleGroupSelection(group.id)}
-                        style={[
-                          styles.groupItem,
-                          selectedGroups.includes(group.id) && styles.selectedGroupItem
-                        ]}
-                      >
-                        <Text style={[
-                          styles.groupItemText,
-                          selectedGroups.includes(group.id) && styles.selectedGroupItemText
-                        ]}>
-                          {group.name}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
+                  <Text style={styles.inputLabel}>Kanal</Text>
+                  <View style={styles.channelInfoContainer}>
+                    <Text style={styles.channelInfoText}>
+                      {channels.length > 0 
+                        ? `Rastgele bir kanal seçilecek (${channels.length-1} kanal mevcut)` 
+                        : "Bu grup için kanal bulunamadı"}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Min-Max Bet Amount */}
+                <View style={styles.rowContainer}>
+                  <View style={[styles.inputContainer, { flex: 1, marginRight: 10 }]}>
+                    <Text style={styles.inputLabel}>Min. Bahis</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={minBetAmount}
+                      onChangeText={setMinBetAmount}
+                      placeholder="10"
+                      placeholderTextColor="#999"
+                      keyboardType="numeric"
+                    />
+                  </View>
+                  <View style={[styles.inputContainer, { flex: 1 }]}>
+                    <Text style={styles.inputLabel}>Max. Bahis</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={maxBetAmount}
+                      onChangeText={setMaxBetAmount}
+                      placeholder="100"
+                      placeholderTextColor="#999"
+                      keyboardType="numeric"
+                    />
                   </View>
                 </View>
                 
                 {/* End Date */}
                 <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>End Date</Text>
-                  <TouchableOpacity
-                    onPress={() => setShowDatePicker(true)}
+                  <Text style={styles.inputLabel}>Bitiş Tarihi</Text>
+                  <TouchableOpacity 
                     style={styles.datePickerButton}
+                    onPress={() => setShowDatePicker(true)}
                   >
-                    <Text style={styles.dateText}>{formatDate(endDate)}</Text>
-                    <Image 
-                      source={require('@/assets/images/hourglass.png')} 
-                      style={styles.iconStyle} 
-                    />
+                    <Text style={styles.datePickerButtonText}>{formatDate(endDate)}</Text>
                   </TouchableOpacity>
                   
                   {showDatePicker && (
                     <DateTimePicker
                       value={endDate}
-                      mode="date"
+                      mode="datetime"
                       display="default"
                       onChange={onChangeDate}
                       minimumDate={new Date()}
@@ -461,50 +577,48 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
                   )}
                 </View>
                 
-                {/* Min and Max Bet Amount */}
-                <View style={styles.rowContainer}>
-                  <View style={[styles.inputContainer, { flex: 1, marginRight: 10 }]}>
-                    <Text style={styles.inputLabel}>Min Bet Amount</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={minBetAmount}
-                      onChangeText={setMinBetAmount}
-                      placeholder="Min amount"
-                      placeholderTextColor="#999"
-                      keyboardType="numeric"
-                    />
-                  </View>
+                {/* Image Upload Section */}
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>Resim (İsteğe Bağlı)</Text>
+                  <TouchableOpacity 
+                    style={styles.imageUploadButton}
+                    onPress={showImageOptions}
+                  >
+                    <Text style={{ color: '#fff' }}>
+                      {image ? "Resim Seçildi ✓" : "Resim Ekle"}
+                    </Text>
+                  </TouchableOpacity>
                   
-                  <View style={[styles.inputContainer, { flex: 1 }]}>
-                    <Text style={styles.inputLabel}>Max Bet Amount</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={maxBetAmount}
-                      onChangeText={setMaxBetAmount}
-                      placeholder="Max amount"
-                      placeholderTextColor="#999"
-                      keyboardType="numeric"
-                    />
-                  </View>
+                  {image && (
+                    <TouchableOpacity 
+                      style={{ alignItems: 'center', marginTop: 5 }}
+                      onPress={removeImage}
+                    >
+                      <Text style={{ color: '#ff6b6b' }}>Resmi Kaldır</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
                 
                 {/* Buttons */}
                 <View style={styles.buttonContainer}>
                   <TouchableOpacity 
-                    style={[styles.button, styles.cancelButton]} 
+                    style={[styles.button, styles.cancelButton]}
                     onPress={() => {
                       setModalVisible(false);
                       resetForm();
                     }}
                   >
-                    <Text style={styles.buttonText}>Cancel</Text>
+                    <Text style={styles.buttonText}>İptal</Text>
                   </TouchableOpacity>
                   
                   <TouchableOpacity 
-                    style={[styles.button, styles.createButton]} 
+                    style={[styles.button, styles.createButton, uploading && { opacity: 0.7 }]}
                     onPress={handleCreateBet}
+                    disabled={uploading}
                   >
-                    <Text style={styles.buttonText}>Create Bet</Text>
+                    <Text style={styles.buttonText}>
+                      {uploading ? "Oluşturuluyor..." : "Bahis Oluştur"}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </ScrollView>
@@ -713,7 +827,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  dateText: {
+  datePickerButtonText: {
     color: '#fff',
   },
   uploadButton: {
@@ -769,5 +883,24 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.6,
+  },
+  channelInfoContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+    padding: 10,
+  },
+  channelInfoText: {
+    color: '#fff',
+    fontSize: 12,
+  },
+  imageUploadButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderStyle: 'dashed',
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
