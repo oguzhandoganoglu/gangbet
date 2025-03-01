@@ -1,167 +1,299 @@
-import React from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity, 
+  Image,
+  TextInput,
+  ScrollView,
+  Switch,
+  Alert,
+  ActivityIndicator,
+  Modal
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { useUser } from "../app/UserContext";
 
-const exampleData = [
-  {
-    id: '1',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/elon.png'),
-    claimAmount: '10 USDC',
-    claim: true,
-    result : "Pending",
-    percent : '50,534',
-  },
-  {
-    id: '2',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/latte.jpeg'),
-    claimAmount: '10 USDC',
-    claim: false,
-    result : "Ended",
-    percent : '50,534',
-  },
-  {
-    id: '3',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/latte.jpeg'),
-    claimAmount: '10 USDC',
-    claim: true,
-    result : "Won",
-    percent : '50,534',
-  },
-  {
-    id: '4',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/elon.png'),
-    claimAmount: '10 USDC',
-    claim: true,
-    result : "Lost",
-    percent : '50,534',
-  },
-  {
-    id: '5',
-    title: 'Elon Musk out as Head of DOGE before July?',
-    image: require('@/assets/images/latte.jpeg'),
-    claimAmount: '10 USDC',
-    claim: false,
-    result : "Won",
-    percent : '50,534',
-  },
+export default function GangSettings({ gangDetail, isLoading, isAdmin }) {
+  const router = useRouter();
+  const { user } = useUser();
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [groupName, setGroupName] = useState(gangDetail?.name || '');
+  const [groupDescription, setGroupDescription] = useState(gangDetail?.description || '');
+  const [privateGroup, setPrivateGroup] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
   
-];
-
-export default function GangSettings() {
+  // Format date
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+  
+  // Handle update group settings
+  const handleUpdateGroup = async () => {
+    if (!isAdmin) {
+      Alert.alert('Error', 'Only admins can update group settings');
+      return;
+    }
+    
+    if (!groupName.trim()) {
+      Alert.alert('Error', 'Group name cannot be empty');
+      return;
+    }
+    
+    setIsUpdating(true);
+    try {
+      // Here you would make an API call to update the group
+      // For demo purposes, we'll just show a success message
+      setTimeout(() => {
+        Alert.alert('Success', 'Group settings updated successfully');
+        setShowEditModal(false);
+        setIsUpdating(false);
+      }, 1000);
+    } catch (error) {
+      console.error('Error updating group:', error);
+      Alert.alert('Error', 'Failed to update group settings');
+      setIsUpdating(false);
+    }
+  };
+  
+  // Handle leave group
+  const handleLeaveGroup = async () => {
+    try {
+      // Here you would make an API call to leave the group
+      // For demo purposes, we'll just navigate back
+      setShowLeaveModal(false);
+      router.back();
+    } catch (error) {
+      console.error('Error leaving group:', error);
+      Alert.alert('Error', 'Failed to leave group');
+    }
+  };
+  
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#fff" />
+        <Text style={styles.loadingText}>Loading settings...</Text>
+      </View>
+    );
+  }
+  
+  if (!gangDetail) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Failed to load group details</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={() => router.back()}>
+          <Text style={styles.retryButtonText}>Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+  
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={exampleData}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Image source={item.image} style={styles.profileImage} />
-            <View style={styles.content}>
-              <Text style={styles.title}>{item.title}</Text>
-              <View style={styles.actions}>
-                <View style={styles.percentCard}>
-                  <Image source={require('@/assets/images/thumb-up.png')} style={styles.percentImage} />
-                    <View style={styles.percentText}>
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400}}>YES</Text>
-                    <Text style={{color:'#fff', fontSize:12, fontWeight:400}}> {item.percent}</Text>
-                 </View>
-                </View>
-                {(item.result==="Lost")&& (
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, tintColor:"white" }} />
-                      <Text style={styles.wonText}> %40</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/ghost.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.wonText}> Lost!</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/chart-line.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.statText}>50K</Text>
-                    </View>
-                    <Image source={require('@/assets/images/send.png')} style={{ width: 16, height: 16, marginLeft:18 }} />
-                    <Image source={require('@/assets/images/star.png')} style={{ width: 16, height: 16, marginLeft:6 }} />
-                  </View>
-                )}
-                {(item.result==="Won")&& (
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, tintColor:"white" }} />
-                      <Text style={styles.wonText}> %40</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/mood-suprised.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.wonText}> Won</Text>
-                    </View>
-                    <Image source={require('@/assets/images/share.png')} style={{ width: 16, height: 16, marginLeft:8 }} />
-                  </View>
-                )}
-                {(item.result==="Pending")&& (
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, tintColor:"white" }} />
-                      <Text style={styles.statText}> %40</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/hourglass.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.statText}>30M Left</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/chart-line.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.statText}>50K</Text>
-                    </View>
-                    <Image source={require('@/assets/images/send.png')} style={{ width: 16, height: 16, marginLeft:12 }} />
-                    <Image source={require('@/assets/images/star.png')} style={{ width: 16, height: 16, marginLeft:6 }} />
-                  </View>
-                )}
-                {(item.result==="Ended")&& (
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/scale.png')} style={{ width: 16, height: 16, tintColor:"white" }} />
-                      <Text style={styles.statText}> %40</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/gavel.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.statText}>Ended</Text>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 4 }}>
-                      <Image source={require('@/assets/images/chart-line.png')} style={{ width: 16, height: 16 }} />
-                      <Text style={styles.statText}>50K</Text>
-                    </View>
-                    <Image source={require('@/assets/images/send.png')} style={{ width: 16, height: 16, marginLeft:12 }} />
-                    <Image source={require('@/assets/images/star.png')} style={{ width: 16, height: 16, marginLeft:6 }} />
-                  </View>
-                )}
-              </View>
-            </View>
-            {(item.claim) && (item.result==="Won") && (
-              <View style={styles.claimContainer}>
-                <Text style={styles.claimLabel}>Claimed</Text>
-                <TouchableOpacity style={styles.claimedButton}>
-                  <Text style={styles.claimedText}>{item.claimAmount}</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-            {(!item.claim) && (item.result==="Won") && (
-              <View style={styles.claimContainer}>
-                <Text style={styles.claimLabel}>Claim</Text>
-                <TouchableOpacity style={styles.claimButton}>
-                  <Text style={styles.claimText}>{item.claimAmount}</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+    <ScrollView style={styles.container}>
+      {/* Group Info Section */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Group Information</Text>
+          {isAdmin && (
+            <TouchableOpacity 
+              style={styles.editButton}
+              onPress={() => setShowEditModal(true)}
+            >
+              <Image source={require('@/assets/images/edit.png')} style={styles.editIcon} />
+              <Text style={styles.editText}>Edit</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        
+        <View style={styles.infoItem}>
+          <Text style={styles.infoLabel}>Group Name</Text>
+          <Text style={styles.infoValue}>{gangDetail.name}</Text>
+        </View>
+        
+        {gangDetail.description && (
+          <View style={styles.infoItem}>
+            <Text style={styles.infoLabel}>Description</Text>
+            <Text style={styles.infoValue}>{gangDetail.description}</Text>
           </View>
         )}
-        keyExtractor={(item) => item.id}
-      />
-        {/* "See All" Butonu */}
-      <TouchableOpacity style={styles.seeAllButton}>
-        <Text style={styles.seeAllText}>See All</Text>
-      </TouchableOpacity>
-    </View>
+        
+        <View style={styles.infoItem}>
+          <Text style={styles.infoLabel}>Created By</Text>
+          <Text style={styles.infoValue}>{gangDetail.createdBy}</Text>
+        </View>
+        
+        <View style={styles.infoItem}>
+          <Text style={styles.infoLabel}>Created On</Text>
+          <Text style={styles.infoValue}>{formatDate(gangDetail.createdAt)}</Text>
+        </View>
+        
+        <View style={styles.infoItem}>
+          <Text style={styles.infoLabel}>Members</Text>
+          <Text style={styles.infoValue}>{gangDetail.members.length}</Text>
+        </View>
+        
+        <View style={styles.infoItem}>
+          <Text style={styles.infoLabel}>Active Bets</Text>
+          <Text style={styles.infoValue}>{gangDetail.activeBetsCount}</Text>
+        </View>
+      </View>
+      
+      {/* Admin Controls Section - Only visible to admins */}
+      {isAdmin && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Admin Controls</Text>
+          
+          <TouchableOpacity style={styles.actionButton}>
+            <Image source={require('@/assets/images/user-plus.png')} style={styles.actionIcon} />
+            <Text style={styles.actionText}>Invite Members</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.actionButton}>
+            <Image source={require('@/assets/images/user-minus.png')} style={styles.actionIcon} />
+            <Text style={styles.actionText}>Manage Members</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.actionButton}>
+            <Image source={require('@/assets/images/power.png')} style={styles.actionIcon} />
+            <Text style={styles.actionText}>Finalise Pending Bets</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={[styles.actionButton, styles.dangerButton]}>
+            <Image source={require('@/assets/images/trash.png')} style={[styles.actionIcon, styles.dangerIcon]} />
+            <Text style={[styles.actionText, styles.dangerText]}>Delete Group</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+      
+      {/* User Actions Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Your Actions</Text>
+        
+        <TouchableOpacity 
+          style={[styles.actionButton, styles.dangerButton]}
+          onPress={() => setShowLeaveModal(true)}
+        >
+          <Image source={require('@/assets/images/logout.png')} style={[styles.actionIcon, styles.dangerIcon]} />
+          <Text style={[styles.actionText, styles.dangerText]}>Leave Group</Text>
+        </TouchableOpacity>
+      </View>
+      
+      {/* Edit Group Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showEditModal}
+        onRequestClose={() => setShowEditModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Edit Group</Text>
+            
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Group Name</Text>
+              <TextInput
+                style={styles.input}
+                value={groupName}
+                onChangeText={setGroupName}
+                placeholder="Enter group name"
+                placeholderTextColor="#999"
+              />
+            </View>
+            
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Description</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={groupDescription}
+                onChangeText={setGroupDescription}
+                placeholder="Enter group description"
+                placeholderTextColor="#999"
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+              />
+            </View>
+            
+            <View style={styles.switchContainer}>
+              <Text style={styles.switchLabel}>Private Group</Text>
+              <Switch
+                trackColor={{ false: "#767577", true: "#4285F4" }}
+                thumbColor={privateGroup ? "#fff" : "#f4f3f4"}
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={setPrivateGroup}
+                value={privateGroup}
+              />
+            </View>
+            
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                style={[styles.button, styles.cancelButton]} 
+                onPress={() => {
+                  setShowEditModal(false);
+                  setGroupName(gangDetail.name);
+                  setGroupDescription(gangDetail.description || '');
+                }}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.button, styles.saveButton, isUpdating && styles.disabledButton]} 
+                onPress={handleUpdateGroup}
+                disabled={isUpdating}
+              >
+                {isUpdating ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Save Changes</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      
+      {/* Leave Group Confirmation Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showLeaveModal}
+        onRequestClose={() => setShowLeaveModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.confirmModalContent}>
+            <Text style={styles.confirmTitle}>Leave Group?</Text>
+            <Text style={styles.confirmText}>
+              Are you sure you want to leave this group? You'll need to be invited back to rejoin.
+            </Text>
+            
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                style={[styles.button, styles.cancelButton]} 
+                onPress={() => setShowLeaveModal(false)}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.button, styles.leaveButton]} 
+                onPress={handleLeaveGroup}
+              >
+                <Text style={styles.buttonText}>Leave</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </ScrollView>
   );
 }
 
@@ -169,127 +301,224 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1E1E4C',
-    padding: 1,
+    padding: 15,
   },
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 2,
-    padding: 10,
-    marginBottom: 10,
-  },
-  profileImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 4,
-    marginRight: 10,
-  },
-  content: {
+  loadingContainer: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#1E1E4C',
   },
-  title: {
-    fontSize: 14,
-    fontWeight: 'bold',
+  loadingText: {
     color: '#fff',
+    fontSize: 16,
+    marginTop: 10,
   },
-  actions: {
-    flexDirection: 'row',
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 5,
+    backgroundColor: '#1E1E4C',
+    padding: 20,
   },
-  yesButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 2,
-    padding: 3,
-    marginRight: 12,
+  errorText: {
+    color: '#ff6b6b',
+    fontSize: 18,
+    marginBottom: 15,
+    textAlign: 'center',
   },
-  yesText: {
-    fontSize: 12,
-    fontWeight: 'semibold',
-    marginLeft: 2,
-  },
-  wonText: {
-    fontSize: 12,
-    fontWeight: 400,
-    color: '#ddd',
-  },
-  statText: {
-    fontSize: 12,
-    fontWeight: 400,
-    color: '#ddd',
-  },
-  claimContainer: {
-    alignItems: 'center',
-  },
-  claimLabel: {
-    fontSize: 13,
-    fontWeight: 'semibold',
-    color: '#fff',
-    marginBottom: 7,
-  },
-  claimedButton: {
+  retryButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
-
-  claimButton: {
-    backgroundColor: '#fff',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
-  claimedText: {
-    fontSize: 12,
-    fontWeight: 'semibold',
-    color: '#fff',
-  },
-  claimText: {
-    fontSize: 12,
-    fontWeight: 'semibold',
-    color: '#000',
-  },
-  seeAllButton: {
-    alignSelf: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)', // Hafif transparan arka plan
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 4,
-    marginTop: 10,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.5)', // Kenarlık ekledim
+    borderRadius: 10,
   },
-  
-  seeAllText: {
-    fontSize: 14,
-    fontWeight: 'semibold',
+  retryButtonText: {
     color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  section: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 20,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 15,
+  },
+  editIcon: {
+    width: 14,
+    height: 14,
+    tintColor: '#fff',
+    marginRight: 5,
+  },
+  editText: {
+    color: '#fff',
+    fontSize: 12,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  infoLabel: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 14,
+  },
+  infoValue: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'right',
+    flex: 1,
+    marginLeft: 10,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  actionIcon: {
+    width: 20,
+    height: 20,
+    tintColor: '#fff',
+    marginRight: 10,
+  },
+  actionText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  dangerButton: {
+    backgroundColor: 'rgba(220, 53, 69, 0.2)',
+  },
+  dangerIcon: {
+    tintColor: '#dc3545',
+  },
+  dangerText: {
+    color: '#dc3545',
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '90%',
+    backgroundColor: '#1E1E4C',
+    borderRadius: 15,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  confirmModalContent: {
+    width: '80%',
+    backgroundColor: '#1E1E4C',
+    borderRadius: 15,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 20,
     textAlign: 'center',
-  },  
-  percentCard : {
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor:"#D6D6D673", 
-    borderRadius: 13, 
-    paddingHorizontal: 5,
-    paddingVertical: 3,
   },
-  percentText: {
-    flexDirection: "row",
+  confirmTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#dc3545',
+    marginBottom: 10,
+    textAlign: 'center',
   },
-  percentImage : { 
-    width: 16, 
-    height: 16,
-    tintColor: "#fff",
+  confirmText: {
+    color: '#fff',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 20,
   },
-  percentImage2 : { 
-    width: 16, 
-    height: 16,
-    tintColor: '#5E5E5E5C'
+  inputContainer: {
+    marginBottom: 15,
+  },
+  inputLabel: {
+    fontSize: 14,
+    color: '#fff',
+    marginBottom: 5,
+  },
+  input: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+    padding: 12,
+    color: '#fff',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  switchLabel: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  button: {
+    flex: 1,
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    marginRight: 10,
+  },
+  saveButton: {
+    backgroundColor: '#4285F4',
+  },
+  leaveButton: {
+    backgroundColor: '#dc3545',
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  disabledButton: {
+    opacity: 0.6,
   }
 });

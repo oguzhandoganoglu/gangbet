@@ -1,13 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, Alert, ImageBackground } from "react-native";
-import { PanGestureHandler } from "react-native-gesture-handler";
-import Animated, {
-  useSharedValue,
-  useAnimatedGestureHandler,
-  useAnimatedStyle,
-  withSpring,
-  runOnJS,
-} from "react-native-reanimated";
+import React, { useState, useEffect, useRef } from "react";
+import { 
+  View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, 
+  Alert, ImageBackground, Animated, PanResponder 
+} from "react-native";
 import { useUser } from '../app/UserContext';
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -19,7 +14,7 @@ const profileImages = [
 ];
 
 const { width } = Dimensions.get("window");
-const SWIPE_THRESHOLD = width * 0.3;
+const SWIPE_THRESHOLD = width * 0.25;
 
 // API'den gelen bahis veri tipi
 interface ApiBet {
@@ -76,12 +71,59 @@ const BetCardFriends: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const { user } = useUser();
-  const translateX = useSharedValue(0);
 
-  // API'den bahisleri çekme
+  const position = useRef(new Animated.ValueXY()).current;
+  const rotate = position.x.interpolate({
+    inputRange: [-width / 2, 0, width / 2],
+    outputRange: ['-30deg', '0deg', '30deg'],
+    extrapolate: 'clamp'
+  });
+  const overlayOpacity = position.x.interpolate({
+    inputRange: [-width / 2, 0, width / 2],
+    outputRange: [0.4, 0, 0.4], // Maksimum opaklığı burada ayarlayabilirsiniz
+    extrapolate: 'clamp'
+  });
+
   useEffect(() => {
     fetchBets();
   }, []);
+
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onPanResponderMove: (_, gesture) => {
+      position.setValue({ x: gesture.dx, y: gesture.dy });
+    },
+    onPanResponderRelease: (_, gesture) => {
+      if (gesture.dx > SWIPE_THRESHOLD) {
+        swipeRight();
+      } else if (gesture.dx < -SWIPE_THRESHOLD) {
+        swipeLeft();
+      } else {
+        resetPosition();
+      }
+    }
+  });
+
+  const swipeRight = () => {
+    Animated.spring(position, {
+      toValue: { x: width + 100, y: 0 },
+      useNativeDriver: false
+    }).start(() => handleYesSwipe());
+  };
+
+  const swipeLeft = () => {
+    Animated.spring(position, {
+      toValue: { x: -width - 100, y: 0 },
+      useNativeDriver: false
+    }).start(() => handleNoSwipe());
+  };
+
+  const resetPosition = () => {
+    Animated.spring(position, {
+      toValue: { x: 0, y: 0 },
+      useNativeDriver: false
+    }).start();
+  };
 
   const fetchBets = async () => {
     try {
@@ -98,9 +140,7 @@ const BetCardFriends: React.FC = () => {
       }
       
       const data = await response.json();
-      // Sadece aktif bahisleri filtrele
       const activeBets = data.bets.filter(bet => bet.status === 'active');
-      // Kullanıcının zaten katıldığı bahisleri filtrele
       const availableBets = user ? activeBets.filter(bet =>
         !bet.participants?.some(p => p.user === user._id)
       ) : activeBets;
@@ -113,7 +153,6 @@ const BetCardFriends: React.FC = () => {
     }
   };
 
-  // Bahis yerleştirme
   const placeBet = async (betId: string, choice: 'yes' | 'no') => {
     if (!user || !user._id) {
       Alert.alert('Error', 'You need to be logged in to place a bet');
@@ -152,32 +191,6 @@ const BetCardFriends: React.FC = () => {
     }
   };
 
-  const gestureHandler = useAnimatedGestureHandler({
-    onActive: (event) => {
-      translateX.value = event.translationX;
-    },
-    onEnd: (event) => {
-      if (event.translationX > SWIPE_THRESHOLD) {
-        // Sağa kaydırma - Evet
-        translateX.value = withSpring(
-          width,
-          {},
-          () => runOnJS(handleYesSwipe)()
-        );
-      } else if (event.translationX < -SWIPE_THRESHOLD) {
-        // Sola kaydırma - Hayır
-        translateX.value = withSpring(
-          -width,
-          {},
-          () => runOnJS(handleNoSwipe)()
-        );
-      } else {
-        // Yeterince kaydırılmadı, geri getir
-        translateX.value = withSpring(0);
-      }
-    },
-  });
-
   const handleYesSwipe = () => {
     const currentBet = bets[currentIndex];
     if (currentBet) {
@@ -194,15 +207,9 @@ const BetCardFriends: React.FC = () => {
 
   const removeTopCard = () => {
     setBets((prevBets) => prevBets.filter((_, index) => index !== currentIndex));
+    position.setValue({ x: 0, y: 0 });
   };
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateX: translateX.value }],
-    };
-  });
-
-  // Kalan zamanı hesapla
   const getRemainingTime = (endDateStr: string) => {
     const endDate = new Date(endDateStr);
     const now = new Date();
@@ -235,56 +242,71 @@ const BetCardFriends: React.FC = () => {
   const currentBet = bets[currentIndex];
 
   return (
-    <PanGestureHandler onGestureEvent={gestureHandler}>
-      <Animated.View style={[styles.card, animatedStyle]}>
-        <ImageBackground
-          source={currentBet.photoUrl ? { uri: currentBet.photoUrl } : require("@/assets/images/latte.jpeg")}
-          style={styles.backgroundImage}
-          resizeMode="cover"
-        >
-          <View style={styles.gradientOverlay}>
-            {/* Opaklığı azalan gradient */}
-            <LinearGradient
-              colors={["rgba(0, 0, 0, 1)", "rgba(49, 44, 96, 0.01)"]}
-              style={styles.topGradient}
+    <Animated.View
+      {...panResponder.panHandlers}
+      style={[
+        styles.card,
+        {
+          transform: [
+            { translateX: position.x },
+            { translateY: position.y },
+            { rotate: rotate }
+          ]
+        }
+      ]}
+    >
+      <ImageBackground
+        source={currentBet.photoUrl ? { uri: currentBet.photoUrl } : require("@/assets/images/latte.jpeg")}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      >
+          <Animated.View style={[
+          styles.colorOverlay,
+          {
+            backgroundColor: position.x.interpolate({
+              inputRange: [-width / 2, 0, width / 2],
+              outputRange: ['rgb(255,0,0)', 'rgba(0,0,0,0)', 'rgb(0,255,0)'],
+              extrapolate: 'clamp'
+            }),
+            opacity: overlayOpacity
+          }
+        ]} />
+        <View style={styles.gradientOverlay}>
+          <LinearGradient
+            colors={["rgba(0, 0, 0, 1)", "rgba(49, 44, 96, 0.01)"]}
+            style={styles.topGradient}
+          />
+          
+          <View style={styles.contentContainer}>
+            <View style={styles.headerWrapper}>
+              <Header title={currentBet.title} />
+            </View>
+            <Stats
+              volume={`${currentBet.totalPool}`}
+              date={getRemainingTime(currentBet.endDate)}
             />
-            
-            {/* Ana içerik alanı */}
-            <View style={styles.contentContainer}>
-              {/* Title bileşeni gradient üzerinde olacak */}
-              <View style={styles.headerWrapper}>
-                <Header title={currentBet.title} />
-              </View>
-              <Stats
-                volume={`${currentBet.totalPool}`}
-                date={getRemainingTime(currentBet.endDate)}
+            <View style={styles.spacer} />
+            <ActionButtons />
+            <ProfileImageRow
+              yesCount={currentBet.yesUsersCount}
+              noCount={currentBet.noUsersCount}
+            />
+             
+            <View style={styles.buttonWrapper}>
+              <PriceButton
+                price={currentBet.minBetAmount}
+                onYesPress={() => placeBet(currentBet._id, 'yes')}
+                onNoPress={() => placeBet(currentBet._id, 'no')}
               />
-              <View style={styles.spacer} />
-              <ActionButtons />
-              <ProfileImageRow
-                yesCount={currentBet.yesUsersCount}
-                noCount={currentBet.noUsersCount}
-              />
-               
-              {/* Butonlar gradient üzerinde olacak */}
-              <View style={styles.buttonWrapper}>
-                
-                <PriceButton
-                  price={currentBet.minBetAmount}
-                  onYesPress={() => placeBet(currentBet._id, 'yes')}
-                  onNoPress={() => placeBet(currentBet._id, 'no')}
-                />
-                
-              </View>
             </View>
           </View>
-        </ImageBackground>
-        <LinearGradient
-              colors={["rgba(0, 0, 0, 0.1)", "rgb(0, 0, 0)"]}
-              style={styles.botGradient}
-            />
-      </Animated.View>
-    </PanGestureHandler>
+        </View>
+      </ImageBackground>
+      <LinearGradient
+        colors={["rgba(0, 0, 0, 0.1)", "rgb(0, 0, 0)"]}
+        style={styles.botGradient}
+      />
+    </Animated.View>
   );
 };
 
@@ -352,22 +374,20 @@ const styles = StyleSheet.create({
     width: "100%",
     minHeight: 100,
     height:"85%",
-    overflow: 'hidden', // Önemli: Köşelerin düzgün görünmesi için
+    overflow: 'hidden',
   },
   backgroundImage: {
     width: "100%",
     height: "100%",
   },
-  gradientOverlay: {
-    flex: 1,
-  },
+ 
   headerWrapper: {
-    zIndex: 2, // gradient'in üzerine çıkarmak için
-    position: 'relative', // z-index'in çalışması için
+    zIndex: 2,
+    position: 'relative',
   },
   buttonWrapper: {
-    zIndex: 2, // gradient'in üzerine çıkarmak için
-    position: 'relative', // z-index'in çalışması için
+    zIndex: 2,
+    position: 'relative',
   },
   topGradient: {
     height: 150,
@@ -390,7 +410,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: 'rgba(0, 0, 0, 0.25)',
     padding: 20,
-    position: 'relative', // z-index'lerin düzgün çalışması için
+    position: 'relative',
   },
   spacer: {
     flex: 1,
@@ -400,11 +420,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     padding: 20,
-  },
-  tabs: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 8,
   },
   header: {
     marginVertical: 8,
@@ -417,10 +432,6 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: {width: -1, height: 1},
     textShadowRadius: 10
-  },
-  subtitle: {
-    color: "gray",
-    fontSize: 14,
   },
   stats: {
     marginVertical: 8,
@@ -495,7 +506,15 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: {width: -1, height: 1},
     textShadowRadius: 10
-  }
+  },
+  colorOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 1,
+  },
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 2,
+  },
 });
 
 export default BetCardFriends;
