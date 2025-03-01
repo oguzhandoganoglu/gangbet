@@ -78,7 +78,6 @@ const BetCardFriends: React.FC = () => {
     outputRange: ['-30deg', '0deg', '30deg'],
     extrapolate: 'clamp'
   });
-
   const overlayOpacity = position.x.interpolate({
     inputRange: [-width / 2, 0, width / 2],
     outputRange: [0.4, 0, 0.4], // Maksimum opaklığı burada ayarlayabilirsiniz
@@ -252,8 +251,7 @@ const BetCardFriends: React.FC = () => {
             { translateX: position.x },
             { translateY: position.y },
             { rotate: rotate }
-          ],
-          opacity: overlayOpacity
+          ]
         }
       ]}
     >
@@ -262,6 +260,17 @@ const BetCardFriends: React.FC = () => {
         style={styles.backgroundImage}
         resizeMode="cover"
       >
+          <Animated.View style={[
+          styles.colorOverlay,
+          {
+            backgroundColor: position.x.interpolate({
+              inputRange: [-width / 2, 0, width / 2],
+              outputRange: ['rgb(255,0,0)', 'rgba(0,0,0,0)', 'rgb(0,255,0)'],
+              extrapolate: 'clamp'
+            }),
+            opacity: overlayOpacity
+          }
+        ]} />
         <View style={styles.gradientOverlay}>
           <LinearGradient
             colors={["rgba(0, 0, 0, 1)", "rgba(49, 44, 96, 0.01)"]}
@@ -371,7 +380,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-
+ 
   headerWrapper: {
     zIndex: 2,
     position: 'relative',
