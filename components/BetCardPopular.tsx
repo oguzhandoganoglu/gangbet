@@ -348,11 +348,11 @@ const ActionButtons: React.FC = () => (
 
 const PriceButton: React.FC<PriceButtonProps> = ({ price, onYesPress, onNoPress }) => (
   <View style={styles.priceButtonContainer}>
-    <TouchableOpacity style={[styles.priceButton, styles.yesButton]} onPress={onYesPress}>
-      <Text style={styles.priceText}>YES ${price}</Text>
-    </TouchableOpacity>
     <TouchableOpacity style={[styles.priceButton, styles.noButton]} onPress={onNoPress}>
       <Text style={styles.priceText}>NO ${price}</Text>
+    </TouchableOpacity>
+    <TouchableOpacity style={[styles.priceButton, styles.yesButton]} onPress={onYesPress}>
+      <Text style={styles.priceText}>YES ${price}</Text>
     </TouchableOpacity>
   </View>
 );
