@@ -5,7 +5,44 @@ import { useRouter } from 'expo-router';
 import { usePrivy } from '@privy-io/expo';
 import { useUser } from './UserContext';
 
-// Direkt giriş fonksiyonu - şifreyi sabit "password" olarak değiştirdik
+// Kullanıcı kayıt fonksiyonu
+const registerUser = async (userData: { username: string, email: string, password: string, walletAddress: string }) => {
+  try {
+    console.log('Calling register API with data:', userData);
+    
+    const response = await fetch('http://51.21.28.186:5001/api/users/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
+    
+    console.log('Register API response status:', response.status);
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      console.error('Error parsing register response:', e);
+      return { success: false, message: 'Invalid server response' };
+    }
+    
+    console.log('Register API response data:', data);
+
+    if (data.message === 'User registered successfully') {
+      console.log('User registered successfully:', data);
+      return { success: true, data };
+    } else {
+      console.error('Error registering user:', data);
+      return { success: false, message: data.message || 'Error' };
+    }
+  } catch (error) {
+    console.error('Error during registration:', error);
+    return { success: false, message: 'Network error' };
+  }
+};
+
+// Direkt giriş fonksiyonu - şifreyi sabit "password123" olarak kullanıyoruz
 const loginUser = async (userData: { username: string, password: string}) => {
   try {
     console.log('Calling login API with data:', userData);
@@ -94,8 +131,8 @@ export default function LoginScreen() {
         console.log('Verification result:', loginResult);
         
         if (loginResult) {
-          // Başarılı giriş durumunda backend'e giriş yap
-          handleBackendLogin();
+          // Başarılı giriş durumunda önce kayıt dene, sonra giriş yap
+          handleRegisterAndLogin(loginResult.id);
         }
       } catch (e) {
         console.error('Error in code verification:', e);
@@ -103,10 +140,10 @@ export default function LoginScreen() {
         // Hata mesajını kullanıcıya göster
         let errorMessage = 'Kod doğrulaması sırasında hata oluştu';
         if (e instanceof Error) {
-          // Zaten giriş yapıldıysa direkt olarak backend'e giriş yap
+          // Zaten giriş yapıldıysa direkt olarak backend'e kayıt ve giriş yap
           if (e.message.includes('Already logged in')) {
-            console.log('User already logged in, proceeding with backend login');
-            handleBackendLogin();
+            console.log('User already logged in, proceeding with registration and login');
+            handleRegisterAndLogin(privyUser?.id || 'unknown-id');
             return;
           }
           errorMessage = e.message;
@@ -119,15 +156,28 @@ export default function LoginScreen() {
     }
   };
 
-  // Backend'e doğrudan giriş işlemi
-  const handleBackendLogin = async () => {
+  // Kayıt ve giriş işlemini birleştiren fonksiyon
+  const handleRegisterAndLogin = async (walletAddress: string) => {
     try {
       setLoading(true);
-      console.log('Attempting direct backend login for email:', email);
+      console.log('Attempting to register and login for email:', email);
       
+      // 1. Önce kullanıcıyı kaydet
+      const registerData = {
+        username: email,
+        email: email,
+        password: 'password123',  // Şifre "password123" olarak değiştirildi
+        walletAddress: walletAddress
+      };
+      
+      const registerResult = await registerUser(registerData);
+      console.log('Register result:', registerResult);
+      
+      // 2. Kaydın başarılı olup olmadığına bakılmaksızın giriş yapmayı dene
+      // (Kullanıcı zaten kayıtlıysa "Username already exists" hatası alınır ama bu sorun değil)
       const loginUserResult = await loginUser({
         username: email,
-        password: 'password',  // Sabit şifre "password" olarak ayarlandı
+        password: 'password123',  // Şifre "password123" olarak değiştirildi
       });
       
       if (loginUserResult.success) {
@@ -135,11 +185,33 @@ export default function LoginScreen() {
         await login(loginUserResult.data);
         router.push('/(tabs)/fire');
       } else {
-        Alert.alert('Giriş Hatası', loginUserResult.message || 'Giriş yapılamadı');
+        // İlk şifre denemesi ("password123") başarısız olduysa "password" ile dene
+        if (loginUserResult.message === "Invalid credentials") {
+          console.log('First password attempt failed, trying with "password"');
+          
+          const secondLoginAttempt = await loginUser({
+            username: email,
+            password: 'password',
+          });
+          
+          if (secondLoginAttempt.success) {
+            console.log('Backend login successful with second password, navigating to fire screen');
+            await login(secondLoginAttempt.data);
+            router.push('/(tabs)/fire');
+            return;
+          }
+        }
+        
+        // Kullanıcı bulunamadı ve kayıt da başarısız olduysa hata göster
+        if ((loginUserResult.message === 'User not found' || loginUserResult.message === 'Invalid credentials') && !registerResult.success) {
+          Alert.alert('Hata', 'Kullanıcı kaydı ve girişi başarısız oldu. Lütfen yönetici ile iletişime geçin.');
+        } else {
+          Alert.alert('Giriş Hatası', loginUserResult.message || 'Giriş yapılamadı');
+        }
       }
     } catch (error) {
-      console.error('Backend login error:', error);
-      Alert.alert('Hata', 'Sunucu girişi sırasında bir hata oluştu');
+      console.error('Registration and login error:', error);
+      Alert.alert('Hata', 'Kayıt ve giriş sırasında bir hata oluştu');
     } finally {
       setLoading(false);
     }
@@ -263,15 +335,6 @@ export default function LoginScreen() {
                     : 'Bir hata oluştu'}
                 </Text>
               }
-              
-              {/* Direkt Giriş Butonu
-              <TouchableOpacity
-                style={[styles.directLoginButton, loading && styles.buttonDisabled]}
-                disabled={loading || email.length === 0}
-                onPress={handleBackendLogin}
-              >
-                <Text style={styles.directLoginText}>Direkt Giriş Yap</Text>
-              </TouchableOpacity> */}
             </View>
           )}
           
@@ -401,18 +464,6 @@ const styles = StyleSheet.create({
     color: '#FF6B6B',
     fontSize: 14,
     marginTop: 10,
-  },
-  directLoginButton: {
-    backgroundColor: '#555',
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 8,
-    marginTop: 20,
-  },
-  directLoginText: {
-    color: '#fff',
-    fontSize: 14,
   },
   loadingText: {
     color: 'rgba(255, 255, 255, 0.7)',

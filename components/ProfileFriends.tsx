@@ -53,6 +53,23 @@ export default function ProfileFriends({ data = [] }: ProfileFriendsProps) {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>No friends found</Text>
+        <View style={styles.addFriendContainer}>
+        <View style={styles.searchBar}>
+          <Image source={require('@/assets/images/search.png')} style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Enter friend's user ID"
+            placeholderTextColor="#ccc"
+            value={friendSearch}
+            onChangeText={setFriendSearch}
+          />
+          <TouchableOpacity onPress={handleSendFriendRequest} style={styles.addButton}>
+            <Text style={styles.addButtonText}>Add</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <View style={styles.searchBarContainer}>
+      </View>
       </View>
     );
   }
@@ -114,7 +131,7 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: 'transparent',
   },
