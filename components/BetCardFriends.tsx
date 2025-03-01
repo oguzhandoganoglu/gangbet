@@ -180,7 +180,7 @@ const BetCardFriends: React.FC = () => {
       
       const result = await response.json();
       if (response.ok) {
-        Alert.alert('Success', `Bet placed successfully on ${choice.toUpperCase()}!`);
+        //Alert.alert('Success', `Bet placed successfully on ${choice.toUpperCase()}!`);
         removeTopCard();
       } else {
         Alert.alert('Error', result.message || 'Failed to place bet');
