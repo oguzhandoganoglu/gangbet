@@ -155,13 +155,10 @@ export default function GangActiveBets() {
                   <Text style={styles.title}>{item.title}</Text>
                   <View style={styles.buttons}>
                     <Image source={require('@/assets/images/scale.png')} style={styles.iconStyle} />
-                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 7 }}>%40</Text>
-                    <Image source={require('@/assets/images/chart-line.png')} style={styles.iconStyle} />
-                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 7 }}>50K</Text>
+                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 7 }}>%{item.yesUsersCount/((item.yesUsersCount+item.noUsersCount))*100}</Text>
                     <Image source={require('@/assets/images/users2.png')} style={styles.iconStyle} />
-                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 21 }}>7 Members</Text>
-                    <Image source={require('@/assets/images/send.png')} style={styles.iconStyle} />
-                    <Image source={require('@/assets/images/share.png')} style={styles.iconStyle} />
+                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 21 }}>{item.participants.length}  Members</Text>
+
                   </View>
                 </View>
                 <TouchableOpacity onPress={() => handleFinalisePress(item._id)} style={styles.card2}>
@@ -176,13 +173,10 @@ export default function GangActiveBets() {
                   <Text style={styles.title}>{item.title}</Text>
                   <View style={styles.buttons}>
                     <Image source={require('@/assets/images/scale.png')} style={styles.iconStyle} />
-                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 7 }}>%40</Text>
-                    <Image source={require('@/assets/images/chart-line.png')} style={styles.iconStyle} />
-                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 7 }}>50K</Text>
+                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 7 }}>%{item.yesUsersCount/((item.yesUsersCount+item.noUsersCount))*100}</Text>
                     <Image source={require('@/assets/images/users2.png')} style={styles.iconStyle} />
-                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 21 }}>7 Members</Text>
-                    <Image source={require('@/assets/images/send.png')} style={styles.iconStyle} />
-                    <Image source={require('@/assets/images/share.png')} style={styles.iconStyle} />
+                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 21 }}>{item.participants.length} Members</Text>
+
                   </View>
                 </View>
                 <View style={styles.card3}>
@@ -245,12 +239,12 @@ const styles = StyleSheet.create({
   },
   card: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
   card2: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
     backgroundColor: "#fff",
     paddingVertical: 8,
     paddingHorizontal: 4,
