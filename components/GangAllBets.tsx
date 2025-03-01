@@ -18,6 +18,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const API_BASE_URL = 'http://51.21.28.186:5001';
 
@@ -392,7 +393,14 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
   };
 
   return (
+   
     <View style={styles.container}>
+       <LinearGradient
+            colors={['#161638', '#714F60', '#B85B44']}
+            style={styles.loadingContainer}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 1}}
+          >
       <FlatList
         data={exampleData}
         renderItem={({ item }) => (
@@ -626,14 +634,15 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+      </LinearGradient>
     </View>
+
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
     padding: 1,
   },
   mainCard: {
@@ -701,7 +710,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingVertical: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 0,
     borderRadius: 15,
     marginTop: 10,
     marginBottom: 20,

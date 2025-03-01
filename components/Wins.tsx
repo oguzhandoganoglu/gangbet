@@ -23,52 +23,37 @@ export default function Wins({ data }: WinsProps) {
   const { user } = useUser();
 
   // Ödül talep etme işlevi
-  const handleClaim = async (betId: string) => {
-    if (!user || !user.token) {
-      Alert.alert('Error', 'You need to be logged in to claim');
-      return;
-    }
-    
-    try {
-      const baseUrl = 'http://51.21.28.186:5001'; // API base URL
-      const response = await fetch(`${baseUrl}/api/bets/claim/${betId}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${user.token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      // Önce yanıt metnini al
-      const responseText = await response.text();
-      
-      // Yanıt JSON olarak parse edilebilir mi kontrol et
-      let result;
-      try {
-        result = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('Response is not valid JSON:', responseText.substring(0, 100) + '...');
-        Alert.alert('Error', 'Server returned an invalid response format');
-        return;
-      }
-      
-      if (response.ok) {
-        Alert.alert('Success', 'Claim submitted successfully!');
-      } else {
-        Alert.alert('Error', result.message || 'Failed to claim reward');
-      }
-    } catch (error) {
-      console.error('Error claiming reward:', error);
-      
-      // Daha detaylı hata mesajı
-      if (error.response) {
-        console.error('Response status:', error.response.status);
-        console.error('Response headers:', error.response.headers);
-      }
-      
-      Alert.alert('Error', 'An error occurred while claiming your reward. Please try again later.');
-    }
-  };
+
+  const submitClaim = async (betId) => {
+       
+       try {
+         
+         const response = await fetch(`http://51.21.28.186:5001/api/claims/request`, {
+           method: 'POST',
+           headers: {
+             'Content-Type': 'application/json',
+           },
+           body: JSON.stringify({
+             userId: user?._id,
+             betId: betId._id
+           }),
+         });
+         
+         const result = await response.json();
+         
+         // Claim işlemi başarılı olduğunda
+         if (response.ok) {
+           Alert.alert('Success', 'Your reward has been claimed successfully');
+           // Betleri yeniden getir ve UI'ı güncell
+         } else {
+           // Hata durumunda
+           Alert.alert('Notification', result.message || 'Failed to claim your reward');
+         }
+       } catch (error) {
+         console.error('Error claiming reward:', error);
+         Alert.alert('Error', 'An error occurred while claiming your reward');
+       } 
+     };
 
   // Ödül durumunu gösterme
   const renderClaimStatus = (item) => {
@@ -95,7 +80,7 @@ export default function Wins({ data }: WinsProps) {
           <Text style={styles.claimLabel}>Claim</Text>
           <TouchableOpacity 
             style={styles.claimButton}
-            onPress={() => handleClaim(item.id)}
+            onPress={() => submitClaim(item._id)}
           >
             <Text style={styles.claimText}>{item.amount * 2} USDC</Text>
           </TouchableOpacity>

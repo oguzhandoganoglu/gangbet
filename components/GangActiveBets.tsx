@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, Modal, TouchableOpacity, Alert } from 'react-native';
-
+import { LinearGradient } from 'expo-linear-gradient';
 
 const exampleData = [
   { id: '1', title: 'Elon Musk out as Head of DOGE before July?', status: 'Pending' },
@@ -132,6 +132,12 @@ export default function GangActiveBets() {
 
   return (
     <View style={styles.container}>
+      <LinearGradient
+              colors={['#161638', '#714F60', '#B85B44']}
+              style={styles.loadingContainer}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 1}}
+            >
       <FlatList
         data={bets}
         keyExtractor={(item) => item._id}
@@ -223,6 +229,7 @@ export default function GangActiveBets() {
         <Image source={require('@/assets/images/new-section.png')} style={styles.iconStyle} />
         <Text style={styles.seeAllText}>New Bet</Text>
       </View>
+      </LinearGradient>
     </View>
   );
 }
@@ -230,14 +237,10 @@ export default function GangActiveBets() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E4C',
     padding: 1,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#1E1E4C',
   },
   loadingText: {
     color: '#fff',
@@ -336,10 +339,10 @@ const styles = StyleSheet.create({
   },
   seeAllButton: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingVertical: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 0,
     borderRadius: 15,
     marginTop: 10,
     marginBottom: 20,
@@ -351,7 +354,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#fff',
-    marginRight: 10,
+    marginRight: 3,
   },
   modalOverlay: {
     flex: 1,
