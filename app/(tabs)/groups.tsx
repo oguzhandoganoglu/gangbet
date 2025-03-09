@@ -15,7 +15,18 @@ const generateRandomChannelName = () => {
   return `${randomPrefix}-${randomNum}`;
 };
 
-const createChannelWithName = async (groupId, channelName, userToken) => {
+interface BetItem {
+  id: string;
+  title: string;
+  groupName: string;
+  channelName: string;
+  photoUrl?: string;
+  yesPercentage: number;
+  totalPool: number;
+  participantsCount: number;
+}
+
+const createChannelWithName = async (groupId: any, channelName: string, userToken: string | undefined) => {
   try {
     const response = await axios.post(
       `${API_BASE_URL}/api/channels/create`,
@@ -33,7 +44,7 @@ const createChannelWithName = async (groupId, channelName, userToken) => {
     );
     console.log('Channel created:', response.data);
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating channel:', error);
     Alert.alert('Error', 'Could not create default channel');
     return null;
@@ -52,8 +63,8 @@ export default function NotificationScreen() {
   const [filteredBets, setFilteredBets] = useState([]);
   const [friends, setFriends] = useState([]); 
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [friendsError, setFriendsError] = useState(null);
+  const [error, setError] = useState('');
+  const [friendsError, setFriendsError] = useState('');
   const [isNewGroupModalVisible, setIsNewGroupModalVisible] = useState(false);
   const [newGroupTitle, setNewGroupTitle] = useState('');
   const [newGroupDescription, setNewGroupDescription] = useState('');
@@ -74,7 +85,7 @@ export default function NotificationScreen() {
     }
 
     setIsLoading(true);
-    setError(null);
+    setError('');
 
     try {
       const response = await axios.get(`${API_BASE_URL}/api/pages/groups/all/${userId}`, {
@@ -116,7 +127,7 @@ export default function NotificationScreen() {
       });
       
       setFriends(response.data.friends || []);
-      setFriendsError(null);
+      setFriendsError('');
       
     } catch (err) {
       console.log('Friends API not ready, using dummy data');
@@ -130,16 +141,16 @@ export default function NotificationScreen() {
     } else if (selectedCategory === 'groups') {
       setFilteredBets([]);
     } else {
-      const filtered = betsWithGroups.filter(bet => bet.groupName === selectedCategory);
+      const filtered = betsWithGroups.filter((bet: { groupName?: string }) => bet && 'groupName' in bet && bet.groupName === selectedCategory);
       setFilteredBets(filtered);
     }
   }, [selectedCategory, betsWithGroups]);
 
-  const handleGroupPress = (groupId) => {
+  const handleGroupPress = (groupId: any) => {
     router.push({ pathname: "/gang/[gangId]", params: { gangId: groupId } });
   };
 
-  const handleFriendPress = (friendId) => {
+  const handleFriendPress = (friendId: any) => {
     router.push({ pathname: "/profile/[userId]", params: { userId: friendId } });
   };
 
@@ -154,7 +165,7 @@ export default function NotificationScreen() {
     setIsNewGroupModalVisible(true);
   };
 
-  const createNewGroup = async () => {
+  const createNewGroup = async (): Promise<void> => {
     if (!newGroupTitle.trim()) {
       Alert.alert('Error', 'Please enter a group name');
       return;
@@ -210,9 +221,9 @@ export default function NotificationScreen() {
         Alert.alert('Error', 'Could not create group. Please try again.');
       }
     } catch (error) {
-      console.error('Group creation error:', error.response?.data || error);
+      console.error('Group creation error:', (error as any).response?.data || error);
       
-      const errorMessage = error.response?.data?.message || error.message || 'An error occurred. Please try again.';
+      const errorMessage = (error as any).response?.data?.message || (error as any).message || 'An error occurred. Please try again.';
       Alert.alert('Error', errorMessage);
     } finally {
       setIsCreatingGroup(false);
@@ -227,7 +238,14 @@ export default function NotificationScreen() {
     { id: '5', name: 'Mustafa Şahin', photoUrl: "https://arkeofili.com/wp-content/uploads/2014/12/ata7.jpg", lastActive: '1 week ago' },
   ];
 
-  const FriendCard = ({ friend }) => (
+  interface Friend {
+    id: string;
+    name: string;
+    photoUrl: string;
+    lastActive: string;
+  }
+
+  const FriendCard = ({ friend }: { friend: Friend }) => (
     <TouchableOpacity 
       style={styles.friendCard}
       onPress={() => handleFriendPress(friend.id)}
@@ -373,7 +391,7 @@ export default function NotificationScreen() {
       {selectedCategory === 'groups' && !isLoading && !error && (
         <FlatList
           data={joinedGroups}
-          renderItem={({ item }) => (
+          renderItem={({ item }: { item: { id: string; name: string; membersCount: number; activeBetsCount: number } }) => (
             <TouchableOpacity
               onPress={() => handleGroupPress(item.id)}
               style={styles.groupsCard}
@@ -413,7 +431,7 @@ export default function NotificationScreen() {
       {selectedCategory !== 'groups' && selectedCategory !== 'friends' && !isLoading && !error && (
         <FlatList
           data={filteredBets}
-          renderItem={({ item }) => (
+          renderItem={({ item }: { item: BetItem }) => (
             <View style={styles.cardContainer}>
               <View style={styles.whiteOverlay} />
               <View style={styles.cardContent}>

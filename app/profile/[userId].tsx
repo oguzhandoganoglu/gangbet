@@ -92,13 +92,90 @@ export default function ProfileDetailScreen() {
       { key: 'groups', title: 'Groups' },
     ]);
 
-    const renderTabBar = props => (
-      <TabBar
-        {...props}
-        indicatorStyle={{ backgroundColor: 'white' }}
-        style={{ backgroundColor: 'transparent' }}
-        labelStyle={{ color: 'white', fontSize: 12 }}
-      />
+    interface Notification {
+        id: number;
+        bet: string;
+        sender: string;
+        avatar?: string;
+        content?: string;
+        time: string;
+        groupId: number | null;
+        groupName?: string;
+    }
+
+    interface Route {
+        key: string;
+        title: string;
+    }
+
+    interface Friend {
+        id: string;
+        name: string;
+        photoUrl: string;
+        lastActive: string;
+        friendsCount: string;
+        totalBets: string;
+    }
+
+    const friend: Friend = {
+        id: '2',
+        name: 'Mehmet Demir',
+        photoUrl: "https://media.licdn.com/dms/image/v2/D4D12AQEBWX-CTbuenQ/article-cover_image-shrink_600_2000/article-cover_image-shrink_600_2000/0/1720729957965?e=2147483647&v=beta&t=KEE8zC0coVUnh8LA4I2DULzewVjUHJrXu_b1VSZh2b8",
+        lastActive: '5 min ago',
+        friendsCount: "25",
+        totalBets: "45"
+    };
+
+    const allNotifications: Notification[] = [
+        { 
+            id: 1, 
+            bet: 'Bu bir bet', 
+            sender: 'Ahmet Yılmaz', 
+            avatar: 'https://randomuser.me/api/portraits/men/32.jpg', 
+            time: '2 saat önce',
+            groupId: null
+        },
+        { 
+            id: 2, 
+            bet: 'Bu bir bet',
+            sender: 'Mehmet Demir', 
+            content: 'Galatasaray vs Fenerbahçe maçı için bahis önerisi gönderdi',
+            time: '3 saat önce',
+            groupId: 1
+        },
+        { 
+            id: 3, 
+            bet: 'Bu bir bet',
+            sender: 'Ayşe Kaya', 
+            groupName: 'Basketbol Grubu',
+            time: '5 saat önce',
+            groupId: 2
+        },
+        { 
+            id: 4, 
+            bet: 'Bu bir bet',
+            sender: 'Zeynep Öztürk', 
+            avatar: 'https://randomuser.me/api/portraits/women/44.jpg', 
+            time: '1 gün önce',
+            groupId: null
+        },
+        { 
+            id: 5, 
+            bet: 'Bu bir bet', 
+            sender: 'Burak Yılmaz', 
+            content: 'Real Madrid vs Barcelona maçı için bahis önerisi gönderdi',
+            time: '1 gün önce',
+            groupId: 3
+        },
+    ];
+
+    const renderTabBar = (props: any) => (
+        <TabBar
+            {...props}
+            indicatorStyle={{ backgroundColor: 'white' }}
+            style={{ backgroundColor: 'transparent' }}
+            labelStyle={{ color: 'white', fontSize: 12 }}
+        />
     );
 
     if (error) {
