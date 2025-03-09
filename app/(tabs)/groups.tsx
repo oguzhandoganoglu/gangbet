@@ -1,46 +1,74 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, TextInput, Modal, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import Navbar from '@/components/Navbar';
 import { useRouter } from 'expo-router';
 import axios from 'axios'; 
 import { useUser } from "../UserContext";
 import { LinearGradient } from 'expo-linear-gradient';
 
-// API temel URL'sini bir değişkende tanımlayalım
 const API_BASE_URL = 'http://51.21.28.186:5001';
 
+const generateRandomChannelName = () => {
+  const prefixes = ['general', 'main', 'public', 'group', 'team'];
+  const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+  const randomNum = Math.floor(Math.random() * 1000);
+  return `${randomPrefix}-${randomNum}`;
+};
+
+const createChannelWithName = async (groupId, channelName, userToken) => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/api/channels/create`,
+      {
+        name: channelName,
+        groupId: groupId,
+        description: 'Default channel'
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    console.log('Channel created:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating channel:', error);
+    Alert.alert('Error', 'Could not create default channel');
+    return null;
+  }
+};
+
 export default function NotificationScreen() {
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchText, setSearchText] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('friends');
   const { user } = useUser();
   const userId = user?._id;
   const userToken = user?.token;
   const router = useRouter();
   
-  // State tanımlamaları
   const [joinedGroups, setJoinedGroups] = useState([]);
   const [betsWithGroups, setBetsWithGroups] = useState([]);
   const [filteredBets, setFilteredBets] = useState([]);
+  const [friends, setFriends] = useState([]); 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [friendsError, setFriendsError] = useState(null);
   const [isNewGroupModalVisible, setIsNewGroupModalVisible] = useState(false);
   const [newGroupTitle, setNewGroupTitle] = useState('');
   const [newGroupDescription, setNewGroupDescription] = useState('');
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
-  const [isCreatingChannel, setIsCreatingChannel] = useState(false);
-  const [currentGroupId, setCurrentGroupId] = useState('');
 
-  // API'den veri çekme
   useEffect(() => {
     if (userId) {
       fetchData();
+      fetchFriends();
     }
   }, [userId]);
 
   const fetchData = async () => {
     if (!userId) {
-      setError('Kullanıcı girişi yapılmamış');
+      setError('User not logged in');
       setIsLoading(false);
       return;
     }
@@ -58,94 +86,91 @@ export default function NotificationScreen() {
       
       const data = response.data;
       
-      // Katılınan grupları kaydet
       setJoinedGroups(data.joinedGroups || []);
-      
-      // Grup bahislerini kaydet
       setBetsWithGroups(data.betsWithGroups || []);
-      
-      // Başlangıçta tüm bahisleri göster
       setFilteredBets(data.betsWithGroups || []);
       
     } catch (err) {
-      console.error('Veri çekerken hata oluştu:', err);
-      setError('Veri yüklenemedi. Lütfen daha sonra tekrar deneyin.');
+      console.error('Error fetching data:', err);
+      setError('Could not load data. Please try again later.');
+      
+      setJoinedGroups([]);
+      setBetsWithGroups([]);
+      setFilteredBets([]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Kategori değiştiğinde bahisleri filtrele
+  const fetchFriends = async () => {
+    if (!userId) {
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/users/${userId}/friends`, {
+        headers: {
+          'Authorization': `Bearer ${userToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      setFriends(response.data.friends || []);
+      setFriendsError(null);
+      
+    } catch (err) {
+      console.log('Friends API not ready, using dummy data');
+      setFriendsError('Friends API not available, showing sample friends');
+    }
+  };
+
   useEffect(() => {
-    if (selectedCategory === 'all') {
-      // Tüm bahisleri göster
-      setFilteredBets(betsWithGroups);
-    } else if (selectedCategory === 'managed') {
-      // Yönetilen grupları göster - burada yalnızca grupları gösteriyoruz
+    if (selectedCategory === 'friends') {
+      setFilteredBets([]);
+    } else if (selectedCategory === 'groups') {
       setFilteredBets([]);
     } else {
-      // Seçilen gruba ait bahisleri filtrele
       const filtered = betsWithGroups.filter(bet => bet.groupName === selectedCategory);
       setFilteredBets(filtered);
     }
   }, [selectedCategory, betsWithGroups]);
 
-  // Grup detayı sayfasına gitme
   const handleGroupPress = (groupId) => {
     router.push({ pathname: "/gang/[gangId]", params: { gangId: groupId } });
   };
 
-  // Kategorileri oluşturma (managed, all, ve grup isimleri)
+  const handleFriendPress = (friendId) => {
+    router.push({ pathname: "/profile/[userId]", params: { userId: friendId } });
+  };
+
   const buildCategories = () => {
-    const basicCategories = [
-      { key: 'managed', title: 'Managed |' },
-      { key: 'all', title: 'All' }
+    return [
+      { key: 'groups', title: 'Groups' },
+      { key: 'friends', title: 'Friends' }
     ];
-    
-    // Grup isimlerini kategori olarak ekle
-    const groupCategories = joinedGroups.map(group => ({
-      key: group.name, // Grup adını key olarak kullan
-      title: group.name,
-      id: group.id // Grup ID'sini sakla
-    }));
-    
-    return [...basicCategories, ...groupCategories];
   };
 
   const handleNewGroup = () => {
     setIsNewGroupModalVisible(true);
   };
 
-  // Rastgele bir kanal adı oluştur
-  const generateRandomChannelName = () => {
-    const prefixes = ['Genel', 'Sohbet', 'Tartışma', 'Toplantı', 'Proje', 'Etkinlik', 'Duyuru'];
-    const suffixes = ['Kanalı', 'Odası', 'Grubu', 'Alanı', 'Köşesi', 'Merkezi'];
-    
-    const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-    const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
-    
-    return `${randomPrefix} ${randomSuffix}`;
-  };
-
   const createNewGroup = async () => {
-    // Form doğrulama
     if (!newGroupTitle.trim()) {
-      Alert.alert('Hata', 'Lütfen grup adı girin');
+      Alert.alert('Error', 'Please enter a group name');
       return;
     }
 
     if (!userId) {
-      Alert.alert('Hata', 'Kullanıcı girişi yapılmamış');
+      Alert.alert('Error', 'User not logged in');
       return;
     }
 
     setIsCreatingGroup(true);
 
     try {
-      // 1. Grup oluşturma
       const groupResponse = await axios.post(`${API_BASE_URL}/api/groups/create`, {
         name: newGroupTitle,
-        description: newGroupDescription || 'Grup açıklaması yok',
+        description: newGroupDescription || 'No group description',
         createdBy: userId
       }, {
         headers: {
@@ -154,14 +179,9 @@ export default function NotificationScreen() {
         }
       });
 
-      console.log('Grup oluşturma yanıtı:', JSON.stringify(groupResponse.data, null, 2));
-
-      // Grup oluşturma başarılı mı kontrol et
       if (groupResponse.status === 200 || groupResponse.status === 201) {
-        // API yanıtından grup ID'sini al
         let newGroupId;
         
-        // Yanıt yapısını kontrol et ve doğru ID'yi bul
         if (groupResponse.data.group) {
           newGroupId = groupResponse.data.group._id || groupResponse.data.group.id;
         } else if (groupResponse.data._id) {
@@ -172,90 +192,61 @@ export default function NotificationScreen() {
           newGroupId = groupResponse.data;
         }
         
-        console.log('Bulunan Grup ID:', newGroupId);
-        
         if (!newGroupId) {
-          console.error('Grup ID bulunamadı:', groupResponse.data);
-          Alert.alert('Uyarı', 'Grup oluşturuldu ancak kanal oluşturulamadı: Grup ID bulunamadı');
+          console.error('Group ID not found:', groupResponse.data);
+          Alert.alert('Warning', 'Group created but could not create channel: Group ID not found');
         } else {
-          // Grup oluşturuldu, şimdi otomatik olarak kanal oluştur
-          setCurrentGroupId(newGroupId);
-          
-          // Rastgele bir kanal adı oluştur
           const randomChannelName = generateRandomChannelName();
           
-          // Kanal oluşturma işlemini başlat
-          createChannelWithName(newGroupId, randomChannelName);
+          await createChannelWithName(newGroupId, randomChannelName, userToken);
           
-          // Form alanlarını temizle
           setNewGroupTitle('');
           setNewGroupDescription('');
           setIsNewGroupModalVisible(false);
           
-          // Grupları yeniden yükle
           fetchData();
         }
       } else {
-        Alert.alert('Hata', 'Grup oluşturulamadı. Lütfen tekrar deneyin.');
+        Alert.alert('Error', 'Could not create group. Please try again.');
       }
     } catch (error) {
-      console.error('Grup oluşturma hatası:', error.response?.data || error);
+      console.error('Group creation error:', error.response?.data || error);
       
-      // Hata mesajını kullanıcıya göster
-      const errorMessage = error.response?.data?.message || error.message || 'Bir hata oluştu. Lütfen tekrar deneyin.';
-      Alert.alert('Hata', errorMessage);
+      const errorMessage = error.response?.data?.message || error.message || 'An error occurred. Please try again.';
+      Alert.alert('Error', errorMessage);
     } finally {
       setIsCreatingGroup(false);
     }
   };
 
-  // Belirli bir isimle kanal oluşturma fonksiyonu
-  const createChannelWithName = async (groupId, channelName) => {
-    setIsCreatingChannel(true);
+  const dummyFriends = [
+    { id: '1', name: 'Ahmet Yılmaz', photoUrl: "https://arkeofili.com/wp-content/uploads/2014/12/ata7.jpg", lastActive: '2 hours ago' },
+    { id: '2', name: 'Mehmet Demir', photoUrl: "https://media.licdn.com/dms/image/v2/D4D12AQEBWX-CTbuenQ/article-cover_image-shrink_600_2000/article-cover_image-shrink_600_2000/0/1720729957965?e=2147483647&v=beta&t=KEE8zC0coVUnh8LA4I2DULzewVjUHJrXu_b1VSZh2b8", lastActive: '5 min ago' },
+    { id: '3', name: 'Ayşe Kaya', photoUrl: "https://agtechtr.wordpress.com/wp-content/uploads/2017/04/tarihte-yasamis-tum-insan-turleri-396e411.jpg", lastActive: 'Yesterday' },
+    { id: '4', name: 'Fatma Çelik', photoUrl: "https://www.indyturk.com/sites/default/files/styles/1368x911/public/article/main_image/2023/05/09/1139836-1100657528.jpg?itok=sYj59Wq2", lastActive: 'Online' },
+    { id: '5', name: 'Mustafa Şahin', photoUrl: "https://arkeofili.com/wp-content/uploads/2014/12/ata7.jpg", lastActive: '1 week ago' },
+  ];
 
-    try {
-      // Kanal oluşturma isteği
-      const channelData = {
-        name: channelName,
-        group: groupId,
-        createdBy: userId
-      };
-      
-      console.log('Kanal oluşturma isteği:', channelData);
-      
-      const channelResponse = await axios.post(`${API_BASE_URL}/api/channels/create`, channelData, {
-        headers: {
-          'Authorization': `Bearer ${userToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      console.log('Kanal oluşturma yanıtı:', channelResponse.data);
-      
-      Alert.alert('Başarılı', `Grup ve "${channelName}" kanalı başarıyla oluşturuldu`);
-      
-      // Kanal oluşturulduktan sonra grup detaylarını yeniden yükle
-      fetchData();
-    } catch (error) {
-      console.error('Kanal oluşturma hatası:', error.response?.data || error);
-      
-      // Hata detaylarını görelim
-      if (error.response) {
-        console.error('Hata yanıtı:', error.response.status);
-        console.error('Hata verileri:', error.response.data);
-      }
-      
-      Alert.alert(
-        'Uyarı', 
-        `Grup oluşturuldu fakat kanal oluşturulamadı: ` + 
-        (error.response?.data?.message || error.message || 'Bilinmeyen hata')
-      );
-    } finally {
-      setIsCreatingChannel(false);
-    }
-  };
+  const FriendCard = ({ friend }) => (
+    <TouchableOpacity 
+      style={styles.friendCard}
+      onPress={() => handleFriendPress(friend.id)}
+    >
+      <Image 
+        source={{ uri: friend.photoUrl || 'https://via.placeholder.com/65' }} 
+        style={styles.groupsProfileImage}
+        defaultSource={require('@/assets/images/angry.png')}
+      />
+      <View style={styles.friendInfo}>
+        <Text style={styles.friendName}>{friend.name}</Text>
+        <Text style={styles.friendStatus}>Friend • {friend.lastActive || 'Online'}</Text>
+      </View>
+      <TouchableOpacity style={styles.messageButton}>
+        <Text style={{color:"white", fontSize:12}}>Remove</Text>
+      </TouchableOpacity>
+    </TouchableOpacity>
+  );
 
-  // Modal içeriği için render fonksiyonu
   const renderGroupCreationModal = () => {
     return (
       <Modal
@@ -317,9 +308,6 @@ export default function NotificationScreen() {
       end={{ x: 1, y: 1 }}
     >
       <Navbar />
-      <Text style={styles.header}>Gangs</Text>
-      
-      {/* Kategori butonları - joinedGroups'taki grup isimlerini içerir */}
       <View style={styles.categoryContainer}>
         <FlatList
           horizontal
@@ -347,31 +335,12 @@ export default function NotificationScreen() {
         />
       </View>
       
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <Icon name="search" size={20} color="#ddd" />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search..."
-          placeholderTextColor="#ccc"
-          value={searchText}
-          onChangeText={setSearchText}
-        />
-        <Icon name="filter" size={18} color="#ddd" style={styles.icon}/>
-        <Icon name="star" size={18} color="#ddd" style={styles.icon}/>
-        <Icon name="line-chart" size={18} color="#ddd" style={styles.icon}/>
-        <Icon name="paper-plane" size={18} color="#ddd" style={styles.icon}/>
-        <Icon name="hourglass-half" size={18} color="#ddd" style={styles.icon}/>
-      </View>
-      
-      {/* Loading state */}
       {isLoading && (
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Loading...</Text>
         </View>
       )}
       
-      {/* Error state */}
       {error && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
@@ -381,22 +350,41 @@ export default function NotificationScreen() {
         </View>
       )}
       
-      {/* Managed kategori seçiliyse grupları göster */}
-      {selectedCategory === 'managed' && !isLoading && !error && (
+      {selectedCategory === 'friends' && !isLoading && !error && (
+        <>
+          {friendsError && (
+            <View style={styles.infoBanner}>
+              <Text style={styles.infoText}>{friendsError}</Text>
+            </View>
+          )}
+          <FlatList
+            data={friends.length > 0 ? friends : dummyFriends}
+            renderItem={({ item }) => <FriendCard friend={item} />}
+            keyExtractor={(item) => item.id}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>You haven't added any friends yet.</Text>
+              </View>
+            }
+          />
+        </>
+      )}
+      
+      {selectedCategory === 'groups' && !isLoading && !error && (
         <FlatList
           data={joinedGroups}
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => handleGroupPress(item.id)}
-              style={styles.managedCard}
+              style={styles.groupsCard}
             >
               <Image 
                 source={ require( '@/assets/images/angry.png' )} 
-                style={styles.managedProfileImage}
+                style={styles.groupsProfileImage}
                 defaultSource={require('@/assets/images/angry.png')}
               />
               <View style={{ alignItems: 'flex-start', flex: 1 }}>
-                <Text style={styles.managedtitle}>{item.name}</Text>
+                <Text style={styles.groupstitle}>{item.name}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
                   <Image source={require('@/assets/images/users2.png')} style={{height:16, width:16, marginRight:4}} />
                   <Text style={styles.subText}>{item.membersCount} Members</Text>
@@ -422,8 +410,7 @@ export default function NotificationScreen() {
         />
       )}
       
-      {/* Bahisleri göster - managed kategorisi olmadığında */}
-      {selectedCategory !== 'managed' && !isLoading && !error && (
+      {selectedCategory !== 'groups' && selectedCategory !== 'friends' && !isLoading && !error && (
         <FlatList
           data={filteredBets}
           renderItem={({ item }) => (
@@ -470,17 +457,17 @@ export default function NotificationScreen() {
         />
       )}
       
-      {selectedCategory === 'managed' && (
+      {selectedCategory === 'groups' && (
         <View style={styles.bottomButtonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleNewGroup}>
-          <Image source={require('@/assets/images/layout-grid-add.png')} style={{width: 24, height: 24, marginRight: 5}} />
-          <Text style={styles.buttonText}>New Group</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
-          <Image source={require('@/assets/images/sort-descending-2.png')} style={{width: 24, height: 24, marginRight: 5}} />
-          <Text style={styles.buttonText}>Edit Sorting</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity style={styles.button} onPress={handleNewGroup}>
+            <Image source={require('@/assets/images/layout-grid-add.png')} style={{width: 24, height: 24, marginRight: 5}} />
+            <Text style={styles.buttonText}>New Group</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button}>
+            <Image source={require('@/assets/images/sort-descending-2.png')} style={{width: 24, height: 24, marginRight: 5}} />
+            <Text style={styles.buttonText}>Edit Sorting</Text>
+          </TouchableOpacity>
+        </View>
       )}
       {renderGroupCreationModal()}
     </LinearGradient>
@@ -488,15 +475,6 @@ export default function NotificationScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-    textAlign: 'left',
-    paddingLeft: 15,
-    backgroundColor: 'transparent',
-    marginTop: 20
-  },
   categoryContainer: {
     marginVertical: 10,
     paddingLeft: 10,
@@ -543,7 +521,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginRight: 10,
   },
-  managedProfileImage: {
+  groupsProfileImage: {
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -563,7 +541,7 @@ const styles = StyleSheet.create({
     color: '#ddd',
     marginBottom: 5,
   },
-  managedtitle: {
+  groupstitle: {
     fontSize: 16,
     fontWeight: '700',
     color: '#fff',
@@ -584,24 +562,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginLeft: 5,
   },
-  icon: {
-    marginRight: 15,
-  },
-  searchInput: {
-    flex: 1,
-    padding: 5,
-    color: 'white',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    marginHorizontal: 10,
-    marginBottom: 15,
-    backgroundColor: 'rgba(0, 0, 88, 0.3)',
-    borderRadius: 25,
-  },
   percentCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -620,7 +580,7 @@ const styles = StyleSheet.create({
     tintColor: "#fff",
     marginRight: 3,
   },
-  managedCard: {
+  groupsCard: {
     flexDirection: 'row',
     backgroundColor: 'rgba(46, 46, 94, 0.2)',
     padding: 12,
@@ -654,7 +614,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '400',
   },
-  // Yeni eklenen stiller
   loadingContainer: {
     padding: 20,
     alignItems: 'center',
@@ -704,6 +663,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     width: '80%',
+    backgroundColor: 'rgba(46, 46, 94, 0.9)',
   },
   modalTitle: {
     fontSize: 18,
@@ -745,23 +705,41 @@ const styles = StyleSheet.create({
   disabledButton: {
     backgroundColor: '#7fb3ef',
   },
-  // Yeni eklenen stiller
-  infoContainer: {
+  friendCard: {
     flexDirection: 'row',
-    marginBottom: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    padding: 8,
-    borderRadius: 5,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginHorizontal: 8,
+    marginVertical: 5,
+    padding: 12,
+    borderRadius: 10,
   },
-  infoLabel: {
-    color: '#ddd',
-    fontWeight: 'bold',
-    marginRight: 5,
+  friendInfo: {
+    flex: 1,
+  },
+  friendName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  friendStatus: {
     fontSize: 12,
+    color: '#ddd',
   },
-  infoValue: {
+  messageButton: {
+    padding: 8,
+  },
+  infoBanner: {
+    backgroundColor: 'rgba(50, 50, 150, 0.5)',
+    padding: 8,
+    marginHorizontal: 8,
+    marginBottom: 8,
+    borderRadius: 6,
+  },
+  infoText: {
     color: 'white',
     fontSize: 12,
-    flex: 1,
+    textAlign: 'center',
   },
 });
