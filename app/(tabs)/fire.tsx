@@ -3,8 +3,9 @@ import Navbar from '@/components/Navbar';
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from "expo-linear-gradient";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import BetCardPopular from '@/components/BetCardPopular';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 type BadgeProps = {
   text: string;
@@ -14,37 +15,44 @@ type BadgeProps = {
 
 export default function FireScreen() {
   const [activeTab, setActiveTab] = useState("Friends");
+  const navigation = useNavigation();
+  const router = useRouter();
+
+  const handleAddNewBet = () => {
+    router.push("newBet/newBet" as any);
+  };
   
   return (
-    <LinearGradient colors={["#383A53", "#6F8AAB","#312C60"]} style={styles.gradient}>
+    <LinearGradient
+          colors={['#161638', '#714F60', '#B85B44']}
+          style={{ flex: 1 }}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
       <Navbar />
-      
       <View style={styles.container}>
         <View style={styles.tabsContainer}>
-          <View style={styles.tabs}>
-            <Badge 
-              text="Popular" 
-              isActive={activeTab === "Popular"} 
-              onPress={() => setActiveTab("Popular")} 
-            />
-            <Badge 
-              text="Friends" 
-              isActive={activeTab === "Friends"} 
-              onPress={() => setActiveTab("Friends")} 
-            />
+          <View style={styles.tabsWrapper}>
+            <View style={styles.leftPlaceholder} />
+            <View style={styles.tabs}>
+              <Badge 
+                text="Friends" 
+                isActive={activeTab === "Friends"} 
+                onPress={() => setActiveTab("Friends")} 
+              />
+            </View>
+            <TouchableOpacity 
+              style={styles.addButton}
+              onPress={handleAddNewBet}
+            >
+              <Ionicons name="add-circle" size={24} color="white" />
+            </TouchableOpacity>
           </View>
         </View>
-        
         {activeTab === "Friends" && (
           <View style={styles.cardContainer}>
             <BetCardFriends />
           </View>
-        )}
-        
-        {activeTab === "Popular" && (
-          <GestureHandlerRootView style={styles.cardContainer}>
-            <BetCardPopular />
-          </GestureHandlerRootView>
         )}
       </View>
     </LinearGradient>
@@ -58,9 +66,6 @@ const Badge: React.FC<BadgeProps> = ({ text, isActive, onPress }) => (
 );
 
 const styles = StyleSheet.create({
-  gradient: {
-    flex: 1,
-  },
   container: {
     flex: 1,
     justifyContent: 'flex-start',
@@ -72,13 +77,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   tabsContainer: {
+    width: "100%",
     borderRadius: 4,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
     marginTop: 10,
     marginBottom: 20,
+    paddingHorizontal: 16,
+  },
+  tabsWrapper: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+  },
+  leftPlaceholder: {
+    width: 24,  // Same width as the addButton
   },
   tabs: {
-    paddingHorizontal: 2,
     paddingVertical: 4,
     flexDirection: "row",
     justifyContent: "center",
@@ -88,7 +102,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 6,
     backgroundColor: "#3a3a3c",
-    marginHorizontal: 4,
   },
   badgeActive: {
     backgroundColor: "white",
@@ -100,5 +113,9 @@ const styles = StyleSheet.create({
   badgeTextActive: {
     color: "black",
     fontWeight: "bold",
+  },
+  addButton: {
+    padding: 0,
+    width: 24,
   },
 });
