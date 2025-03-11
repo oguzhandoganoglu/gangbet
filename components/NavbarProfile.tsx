@@ -13,9 +13,10 @@ interface UserData {
 
 interface NavbarProfileProps {
   userData?: UserData;
+  onSettingsPress?: () => void; // Yeni prop eklendi
 }
 
-export default function NavbarProfile({ userData }: NavbarProfileProps) {
+export default function NavbarProfile({ userData, onSettingsPress }: NavbarProfileProps) {
   const router = useRouter();
   const { logout } = usePrivy();
 
@@ -33,6 +34,13 @@ export default function NavbarProfile({ userData }: NavbarProfileProps) {
     router.back(); // Geri navigasyon işlemi
   };
 
+  // Settings butonuna tıklama işleyicisi
+  const handleSettingsClick = () => {
+    if (onSettingsPress) {
+      onSettingsPress(); // Prop olarak gelen fonksiyonu çağır
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -46,7 +54,8 @@ export default function NavbarProfile({ userData }: NavbarProfileProps) {
         
         <Text style={styles.logo}>GANGBET👍</Text>
         
-        <TouchableOpacity style={styles.profileContainer} onPress={() => router.push("/profile")}>
+        {/* Settings butonuna onPress olayı eklendi */}
+        <TouchableOpacity style={styles.profileContainer} onPress={handleSettingsClick}>
           <Image
             source={require("@/assets/images/settings.png")}
             style={styles.settingsImage}
@@ -55,6 +64,7 @@ export default function NavbarProfile({ userData }: NavbarProfileProps) {
         </TouchableOpacity>
       </View>
       
+      {/* Diğer içerik aynı kalır */}
       <View style={styles.uplinecontainer}>
         <View>
           <Image source={require("@/assets/images/user1.png")} style={styles.profileImage}/>
@@ -85,6 +95,8 @@ export default function NavbarProfile({ userData }: NavbarProfileProps) {
     </View>
   );
 }
+
+// Stiller aynı kalıyor
 
 const styles = StyleSheet.create({
   container: {
