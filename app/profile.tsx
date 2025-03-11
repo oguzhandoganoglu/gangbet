@@ -6,8 +6,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import TabBarComponent2 from '@/components/TabBarComponent2';
 import ProfileBets from '@/components/ProfileBets';
 import ProfileFriends from '@/components/ProfileFriends';
-import ProfileNFTs from '@/components/ProfileNFTs';
-import ProfileSuggested from '@/components/ProfileSuggested';
 import ProfileGangs from '@/components/ProfileGangs';
 import { useUser } from '../app/UserContext';
 
@@ -44,10 +42,6 @@ interface ProfileResponse {
     amount: number;
     endDate: string;
   }>;
-  suggestedFriends: Array<{
-    id: string;
-    username: string;
-  }>;
 }
 
 export default function ProfileScreen() {
@@ -60,8 +54,6 @@ export default function ProfileScreen() {
   const [routes] = useState([
     { key: 'first', title: 'Bets' },
     { key: 'second', title: 'Friends' },
-    { key: 'third', title: 'NFTs' },
-    { key: 'forth', title: 'Suggested' },
     { key: 'fifth', title: 'Gangs' },
   ]);
 
@@ -124,10 +116,6 @@ export default function ProfileScreen() {
       case 'second':
         return <ProfileFriends data={profileData.friends} />;
       case 'third':
-        return <ProfileNFTs />;
-      case 'forth':
-        return <ProfileSuggested data={profileData.suggestedFriends} />;
-      case 'fifth':
         return <ProfileGangs data={profileData.groups} />;
       default:
         return null;

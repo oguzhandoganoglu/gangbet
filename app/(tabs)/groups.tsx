@@ -69,6 +69,9 @@ export default function NotificationScreen() {
   const [newGroupTitle, setNewGroupTitle] = useState('');
   const [newGroupDescription, setNewGroupDescription] = useState('');
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+  const [isAddFriendModalVisible, setIsAddFriendModalVisible] = useState(false);
+  const [friendUsername, setFriendUsername] = useState('');
+  const [isAddingFriend, setIsAddingFriend] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -165,6 +168,38 @@ export default function NotificationScreen() {
     setIsNewGroupModalVisible(true);
   };
 
+  const handleAddFriend = () => {
+    setIsAddFriendModalVisible(true);
+  };
+
+  const addNewFriend = async () => {
+    if (!friendUsername.trim()) {
+      Alert.alert('Error', 'Please enter a username');
+      return;
+    }
+
+    setIsAddingFriend(true);
+
+    try {
+      // Burada API entegrasyonu yapılacak
+      // Mock işlem için bekletiyoruz
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      Alert.alert('Success', `Friend request sent to ${friendUsername}!`);
+      setFriendUsername('');
+      setIsAddFriendModalVisible(false);
+      
+      // İdeal durumda burada arkadaş listesi güncellenecek
+      // fetchFriends();
+      
+    } catch (error) {
+      console.error('Error adding friend:', error);
+      Alert.alert('Error', 'Could not send friend request. Please try again.');
+    } finally {
+      setIsAddingFriend(false);
+    }
+  };
+
   const createNewGroup = async (): Promise<void> => {
     if (!newGroupTitle.trim()) {
       Alert.alert('Error', 'Please enter a group name');
@@ -236,6 +271,8 @@ export default function NotificationScreen() {
     { id: '3', name: 'Ayşe Kaya', photoUrl: "https://agtechtr.wordpress.com/wp-content/uploads/2017/04/tarihte-yasamis-tum-insan-turleri-396e411.jpg", lastActive: 'Yesterday' },
     { id: '4', name: 'Fatma Çelik', photoUrl: "https://www.indyturk.com/sites/default/files/styles/1368x911/public/article/main_image/2023/05/09/1139836-1100657528.jpg?itok=sYj59Wq2", lastActive: 'Online' },
     { id: '5', name: 'Mustafa Şahin', photoUrl: "https://arkeofili.com/wp-content/uploads/2014/12/ata7.jpg", lastActive: '1 week ago' },
+    { id: '6', name: 'Fatma Çelik', photoUrl: "https://www.indyturk.com/sites/default/files/styles/1368x911/public/article/main_image/2023/05/09/1139836-1100657528.jpg?itok=sYj59Wq2", lastActive: 'Online' },
+    { id: '7', name: 'Mustafa Şahin', photoUrl: "https://arkeofili.com/wp-content/uploads/2014/12/ata7.jpg", lastActive: '1 week ago' },
   ];
 
   interface Friend {
@@ -309,6 +346,50 @@ export default function NotificationScreen() {
               >
                 <Text style={styles.buttonText}>
                   {isCreatingGroup ? 'Creating...' : 'Create'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
+  const renderAddFriendModal = () => {
+    return (
+      <Modal
+        visible={isAddFriendModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsAddFriendModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Add Friend</Text>
+            
+            <TextInput
+              style={styles.input}
+              placeholder="Enter username"
+              value={friendUsername}
+              onChangeText={setFriendUsername}
+            />
+            
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                style={[styles.button, styles.cancelButton]} 
+                onPress={() => setIsAddFriendModalVisible(false)}
+                disabled={isAddingFriend}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.button, styles.createButton, isAddingFriend && styles.disabledButton]} 
+                onPress={addNewFriend}
+                disabled={isAddingFriend}
+              >
+                <Text style={styles.buttonText}>
+                  {isAddingFriend ? 'Sending...' : 'Send Request'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -487,7 +568,18 @@ export default function NotificationScreen() {
           </TouchableOpacity>
         </View>
       )}
+
+      {selectedCategory === 'friends' && (
+        <View style={styles.bottomButtonContainer}>
+          <TouchableOpacity style={styles.button} onPress={handleAddFriend}>
+            <Image source={require('@/assets/images/user-plus.png')} style={{width: 24, height: 24, marginRight: 5}} />
+            <Text style={styles.buttonText}>Add Friend</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+      
       {renderGroupCreationModal()}
+      {renderAddFriendModal()}
     </LinearGradient>
   );
 }

@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 2,
-    padding: 10,
+    padding: 20,
     marginBottom: 2,
   },
   profileImage: {
@@ -189,6 +189,8 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingHorizontal: 10,
     width: '100%',
+    bottom: 40,
+    height: 35
   },
   searchIcon: {
     width: 20,
@@ -211,6 +213,6 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 10,
   }
 });

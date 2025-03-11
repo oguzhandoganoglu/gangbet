@@ -81,7 +81,7 @@ export default function ProfileBets({ data = [] }: ProfileBetsProps) {
                 <View style={styles.detailsContainer}>
                   <View style={styles.detailItem}>
                     <Image source={require('@/assets/images/scale.png')} style={styles.detailIcon} />
-                    <Text style={styles.detailText}>{item.channelName}</Text>
+                    <Text style={styles.detailText} numberOfLines={1} ellipsizeMode="tail">{item.channelName}</Text>
                   </View>
                   <View style={styles.detailItem}>
                     <Image source={require('@/assets/images/hourglass.png')} style={styles.detailIcon} />
@@ -119,16 +119,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 2,
     padding: 10,
-    marginBottom: 2,
+    marginBottom: 1,
   },
   profileImage: {
     width: 36,
     height: 36,
     borderRadius: 30,
-    marginRight: 10,
   },
   content: {
     flex: 1,
+    left:10
   },
   title: {
     fontSize: 14,
@@ -141,29 +141,36 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   detailsContainer: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'nowrap',
   },
   detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginLeft: 10,
+    flexShrink: 1,
   },
   detailIcon: {
     width: 16,
     height: 16,
     marginRight: 4,
     tintColor: '#fff',
+    flexShrink: 0,
   },
   detailText: {
-    fontSize: 12,
+    fontSize: 10,
     color: '#ddd',
-    marginRight: 12,
+    marginRight: 0,
+    flexShrink: 1,
+    maxWidth: 100,
   },
   imageContainer: {
     position: 'relative',
     width: 36,
     height: 36,
+    top: 5
   },
   percentCard: {
     flexDirection: 'row',
@@ -171,8 +178,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 13,
     paddingHorizontal: 5,
-    paddingVertical: 3,
-    marginRight: 10,
+    paddingVertical: 5,
+    flexShrink: 0,
   },
   percentText: {
     flexDirection: "row",

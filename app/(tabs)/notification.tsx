@@ -152,11 +152,18 @@ export default function NotificationScreen() {
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [filteredNotifications, setFilteredNotifications] = useState(allNotifications);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
-
+  
   // Filter notifications when selectedFilter changes
   useEffect(() => {
     if (selectedFilter === 'All') {
       setFilteredNotifications(allNotifications);
+    } else if (selectedFilter === 'Invites') {
+      // Davetleri filtrele (friendRequest ve groupInvite tipleri)
+      setFilteredNotifications(
+        allNotifications.filter(notification => 
+          notification.type === 'friendRequest' || notification.type === 'groupInvite'
+        )
+      );
     } else {
       const groupId = userGroups.find(group => group.name === selectedFilter)?.id;
       setFilteredNotifications(
@@ -166,6 +173,7 @@ export default function NotificationScreen() {
       );
     }
   }, [selectedFilter]);
+  
 
   const renderNotificationItem = ({ item }) => {
     switch (item.type) {
@@ -205,6 +213,7 @@ export default function NotificationScreen() {
           </TouchableOpacity>
           
           {/* Filter dropdown - now with semi-transparent background */}
+        {/*Filter dropdown bölümünü güncelleyin - "Invites" seçeneğini ekleyin */}
           {showFilterDropdown && (
             <View style={styles.filterDropdown}>
               <TouchableOpacity 
@@ -218,6 +227,19 @@ export default function NotificationScreen() {
                 }}
               >
                 <Text style={styles.filterOptionText}>All</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[
+                  styles.filterOption, 
+                  selectedFilter === 'Invites' && styles.selectedFilterOption
+                ]}
+                onPress={() => {
+                  setSelectedFilter('Invites');
+                  setShowFilterDropdown(false);
+                }}
+              >
+                <Text style={styles.filterOptionText}>Invites</Text>
               </TouchableOpacity>
               
               {userGroups.map(group => (

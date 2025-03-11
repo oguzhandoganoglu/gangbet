@@ -160,18 +160,14 @@ export default function GangSettings({ gangDetail, isLoading, isAdmin }) {
           
           <TouchableOpacity style={styles.actionButton}>
             <Image source={require('@/assets/images/user-plus.png')} style={styles.actionIcon} />
-            <Text style={styles.actionText}>Invite Members</Text>
+            <Text style={styles.actionText}>Add Admin</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.actionButton}>
             <Image source={require('@/assets/images/user-minus.png')} style={styles.actionIcon} />
-            <Text style={styles.actionText}>Manage Members</Text>
+            <Text style={styles.actionText}>Delete Admin</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.actionButton}>
-            <Image source={require('@/assets/images/power.png')} style={styles.actionIcon} />
-            <Text style={styles.actionText}>Finalise Pending Bets</Text>
-          </TouchableOpacity>
           
           <TouchableOpacity style={[styles.actionButton, styles.dangerButton]}>
             <Image source={require('@/assets/images/trash.png')} style={[styles.actionIcon, styles.dangerIcon]} />
@@ -417,6 +413,7 @@ const styles = StyleSheet.create({
   },
   dangerButton: {
     backgroundColor: '#fff',
+    top:5
   },
   dangerIcon: {
     tintColor: '#dc3545',

@@ -421,7 +421,7 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
             </View>
             {item.status === "Pending" && (
               <View style={styles.card}>
-                <View>
+                <View style={{flex: 1, paddingRight: 10}}>
                   <Text style={styles.title}>{item.title}</Text>
                   <View style={styles.buttons}>
                     <Image source={require('@/assets/images/scale.png')} style={styles.iconStyle} />
@@ -434,15 +434,15 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
                     <Image source={require('@/assets/images/share.png')} style={styles.iconStyle} />
                   </View>
                 </View>
-                <View style={styles.card2}>
+                <TouchableOpacity onPress={() => handleFinalisePress(item._id)} style={styles.card2}>
                   <Image source={require('@/assets/images/power.png')} style={styles.iconStyle2} />
                   <Text style={{ color: '#000', fontSize: 12, fontWeight: '400' }}>Finalise</Text>
-                </View>
+                </TouchableOpacity>
               </View>
             )}
             {item.status === "Result" && (
               <View style={styles.card}>
-                <View>
+                <View style={{flex: 1, paddingRight: 10}}>
                   <Text style={styles.title}>{item.title}</Text>
                   <View style={styles.buttons}>
                     <Image source={require('@/assets/images/scale.png')} style={styles.iconStyle} />
@@ -466,22 +466,27 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
         keyExtractor={(item) => item.id}
       />
 
-      <View style={styles.seeAllButton}>
-        <Image source={require('@/assets/images/search.png')} style={styles.iconStyle} />
-        <Image source={require('@/assets/images/vector.png')} style={{ width: 4, height: 16, marginRight: 5, marginLeft: 80 }} />
-        <Image source={require('@/assets/images/seeding.png')} style={styles.iconStyle} />
-        <Text style={styles.seeAllText}>Latest</Text>
-        <Image source={require('@/assets/images/hourglass.png')} style={styles.iconStyle} />
-        <Text style={styles.seeAllText}>Time Ended</Text>
-        
-        {/* New Bet butonu - Tıklandığında modal açılacak */}
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <View style={styles.newBetButton}>
+        <View style={styles.seeAllButton}>
+          <View style={styles.seeAllIconGroup}>
+            <Image source={require('@/assets/images/search.png')} style={styles.iconStyle} />
+            <Image source={require('@/assets/images/vector.png')} style={{ width: 4, height: 16, marginHorizontal: 10 }} />
+          </View>
+          
+          <View style={styles.seeAllIconGroup}>
+            <Image source={require('@/assets/images/seeding.png')} style={styles.iconStyle} />
+            <Text style={styles.seeAllText}>Latest</Text>
+          </View>
+          
+          <View style={styles.seeAllIconGroup}>
+            <Image source={require('@/assets/images/hourglass.png')} style={styles.iconStyle} />
+            <Text style={styles.seeAllText}>Time Ended</Text>
+          </View>
+          
+          <View style={styles.seeAllIconGroup}>
             <Image source={require('@/assets/images/new-section.png')} style={styles.iconStyle} />
             <Text style={styles.seeAllText}>New Bet</Text>
           </View>
-        </TouchableOpacity>
-      </View>
+        </View>
 
       {/* New Bet Popup Modal */}
       <Modal
@@ -653,26 +658,31 @@ const styles = StyleSheet.create({
   },
   card: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center', // 'flex-start' yerine 'center' kullanın
+    justifyContent: 'space-between', // Ekleyin
+    width: '100%', // Ekleyin
   },
   card2: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
     backgroundColor: "#fff",
-    paddingVertical: 8,
-    paddingHorizontal: 4,
+    paddingVertical: 6, // 8'den 6'ya düşürün
+    paddingHorizontal: 8,
     borderRadius: 20,
-    minWidth: 78,
+    minWidth: 70, // 78'den 70'e düşürün
+    justifyContent: 'center',
+    flexShrink: 0, // Ekleyin
   },
   card3: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingVertical: 8,
-    paddingHorizontal: 11,
+    paddingVertical: 6, // 8'den 6'ya düşürün
+    paddingHorizontal: 8,
     borderRadius: 20,
+    minWidth: 70, // Ekleyin
+    justifyContent: 'center',
+    flexShrink: 0, // Ekleyin
   },
   subcard: {
     flexDirection: 'row',
@@ -703,25 +713,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginTop: 8,
     flexShrink: 1,
-    width: '90%',
-  },
-  seeAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingVertical: 10,
-    paddingHorizontal: 0,
-    borderRadius: 15,
-    marginTop: 10,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.5)',
-  },
-  seeAllText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#fff',
-    marginRight: 10,
+    width: '75%', // %90 yerine %75 kullanın
   },
   // Modal ve Yeni Eklenen Stiller
   newBetButton: {
@@ -911,5 +903,31 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  seeAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between', // Öğeleri yatay olarak eşit dağıtır
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 15,
+    marginTop: 10,
+    marginBottom: 20,
+    marginHorizontal: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    flexWrap: 'nowrap', // Öğelerin alt satıra geçmesini engeller
+  },
+  seeAllIconGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexShrink: 1,
+  },
+  seeAllText: {
+    fontSize: 12, // 14'ten 12'ye düşürdüm
+    fontWeight: '600',
+    color: '#fff',
+    marginLeft: 3,
   },
 });

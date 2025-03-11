@@ -45,13 +45,7 @@ export default function ProfileGangs({ data = [] }: ProfileGangsProps) {
         )}
         keyExtractor={(item) => item.id}
       />
-      <TouchableOpacity style={styles.createButton}>
-        <Image
-          source={require('@/assets/images/angry.png')}
-          style={styles.createIcon}
-        />
-        <Text style={styles.createText}>Create New Gang</Text>
-      </TouchableOpacity>
+      
     </View>
   );
 }

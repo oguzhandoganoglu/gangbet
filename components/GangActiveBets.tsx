@@ -159,14 +159,13 @@ export default function GangActiveBets() {
             </View>
             {item.result === "waiting" && (
               <View style={styles.card}>
-                <View>
+                <View style={{flex: 1, paddingRight: 10}}>
                   <Text style={styles.title}>{item.title}</Text>
                   <View style={styles.buttons}>
                     <Image source={require('@/assets/images/scale.png')} style={styles.iconStyle} />
                     <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 7 }}>%{item.yesUsersCount/((item.yesUsersCount+item.noUsersCount))*100}</Text>
                     <Image source={require('@/assets/images/users2.png')} style={styles.iconStyle} />
                     <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 21 }}>{item.participants.length}  Members</Text>
-
                   </View>
                 </View>
                 <TouchableOpacity onPress={() => handleFinalisePress(item._id)} style={styles.card2}>
@@ -220,15 +219,26 @@ export default function GangActiveBets() {
       </Modal>
 
       <View style={styles.seeAllButton}>
+      <View style={styles.seeAllIconGroup}>
         <Image source={require('@/assets/images/search.png')} style={styles.iconStyle} />
-        <Image source={require('@/assets/images/vector.png')} style={{ width: 4, height: 16, marginRight: 5, marginLeft: 80 }} />
+        <Image source={require('@/assets/images/vector.png')} style={{ width: 4, height: 16, marginHorizontal: 10 }} />
+      </View>
+      
+      <View style={styles.seeAllIconGroup}>
         <Image source={require('@/assets/images/seeding.png')} style={styles.iconStyle} />
         <Text style={styles.seeAllText}>Latest</Text>
+      </View>
+      
+      <View style={styles.seeAllIconGroup}>
         <Image source={require('@/assets/images/hourglass.png')} style={styles.iconStyle} />
         <Text style={styles.seeAllText}>Time Ended</Text>
+      </View>
+      
+      <View style={styles.seeAllIconGroup}>
         <Image source={require('@/assets/images/new-section.png')} style={styles.iconStyle} />
         <Text style={styles.seeAllText}>New Bet</Text>
       </View>
+    </View>
       </LinearGradient>
     </View>
   );
@@ -275,17 +285,18 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
   },
   card2: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: "#fff",
-    paddingVertical: 8,
+    paddingVertical: 6,  // 8'den 6'ya düşürdüm
     paddingHorizontal: 4,
     borderRadius: 20,
-    minWidth: 78,
+    minWidth: 72,       // 78'den 72'ye düşürdüm
+    justifyContent: 'center',
   },
   card3: {
     flexDirection: 'row',
@@ -335,26 +346,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginTop: 8,
     flexShrink: 1,
-    width: '90%',
-  },
-  seeAllButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingVertical: 10,
-    paddingHorizontal: 0,
-    borderRadius: 15,
-    marginTop: 10,
-    marginBottom: 20,
-    marginHorizontal: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.5)',
-  },
-  seeAllText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#fff',
-    marginRight: 3,
+    width: '70%',  // Burada %90'dan %70'e düşürdüm
   },
   modalOverlay: {
     flex: 1,
@@ -381,6 +373,32 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     width: '50%',
     alignItems: 'center',
-  }
+  },
+  seeAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between', // Öğeleri yatay olarak eşit dağıtır
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderRadius: 15,
+    marginTop: 10,
+    marginBottom: 20,
+    marginHorizontal: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    flexWrap: 'nowrap', // Öğelerin alt satıra geçmesini engeller
+  },
+  seeAllIconGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexShrink: 1,
+  },
+  seeAllText: {
+    fontSize: 12, // 14'ten 12'ye düşürdüm
+    fontWeight: '600',
+    color: '#fff',
+    marginLeft: 3,
+  },
 
 });
