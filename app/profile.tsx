@@ -54,7 +54,7 @@ export default function ProfileScreen() {
   const [routes] = useState([
     { key: 'first', title: 'Bets' },
     { key: 'second', title: 'Friends' },
-    { key: 'fifth', title: 'Gangs' },
+    { key: 'third', title: 'Gangs' },
   ]);
 
   // Profil verilerini çek

@@ -213,12 +213,15 @@ export default function ProfileDetailScreen() {
                             <Image style={styles.gangImage} source={{ uri: friend.photoUrl || 'https://via.placeholder.com/65' }}  />
                             <Text style={styles.gangName}>{friend.name}</Text>
                         </View>
-                        <View>
-                          <TouchableOpacity>
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity style={styles.actionButton}>
                             <Text style={{color:"white"}}>Remove</Text>
-                          </TouchableOpacity>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.actionButton}>
+                            <Text style={{color:"white"}}>Add</Text>
+                            </TouchableOpacity>
                         </View>
-                    </View>
+                        </View>
                     
                     <View style={styles.statsContainer}>
                         <View style={styles.statItem}>
@@ -364,4 +367,17 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 16,
     },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        top: '90%'
+      },
+      actionButton: {
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 15,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        marginLeft: 8,
+      },
 });
