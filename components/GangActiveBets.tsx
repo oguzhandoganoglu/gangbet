@@ -1,48 +1,30 @@
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, Modal, TouchableOpacity, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-
-const exampleData = [
-  { id: '1', title: 'Elon Musk out as Head of DOGE before July?', status: 'Pending' },
-  { id: '2', title: 'Elon Musk out as Head of DOGE before July?', status: 'Result' },
-  { id: '3', title: 'Elon Musk out as Head of DOGE before July?', status: 'Result' },
-  { id: '4', title: 'Elon Musk out as Head of DOGE before July?', status: 'Pending' },
-];
 
 export default function GangActiveBets() {
   const [modalVisible, setModalVisible] = useState(false);
   const [bets, setBets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBetId, setSelectedBetId] = useState(null);
-  interface ApiBet {
-    _id: string;
-    title: string;
-    description: string;
-    photoUrl?: string;
-    createdBy: {
-      _id: string;
-      username: string;
-    };
-    channel: string;
-    totalPool: number;
-    totalYesAmount: number;
-    totalNoAmount: number;
-    yesUsersCount: number;
-    noUsersCount: number;
-    yesOdds: number;
-    noOdds: number;
-    minBetAmount: number;
-    maxBetAmount: number;
-    status: string;
-    result: string;
-    endDate: string;
-    participants: Array<{
-      user: string;
-      choice: string;
-      amount: number;
-    }>;
-  }
+  
+  // Kalan zamanı hesapla
+  const formatRemainingTime = (endDateStr) => {
+    const endDate = new Date(endDateStr);
+    const now = new Date();
+    const diffTime = endDate.getTime() - now.getTime();
+    
+    if (diffTime <= 0) return "Ended";
+    
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const diffHours = Math.floor((diffTime / (1000 * 60 * 60)) % 24);
+    
+    if (diffDays > 0) {
+      return `${diffDays}D Left`;
+    } else {
+      return `${diffHours}H Left`;
+    }
+  };
 
   const fetchBets = async () => {
     try {
@@ -59,7 +41,6 @@ export default function GangActiveBets() {
       
       const data = await response.json();
       const activeBets = data.bets.filter(bet => bet.status === 'active');
-
       
       setBets(activeBets);
       setLoading(false);
@@ -74,10 +55,7 @@ export default function GangActiveBets() {
     setModalVisible(true);
   };
 
-
   const handleYesPress = async () => {
-    // Backend'e istek gönder
-   
     try {
       const payload = { betId: selectedBetId, result: 'yes' };
       const response = await fetch('http://51.21.28.186:5001/api/bets/resolve', {
@@ -103,7 +81,6 @@ export default function GangActiveBets() {
   };
 
   const handleNoPress = async () => {
-    // Backend'e istek gönder
     try {
       const response = await fetch('https://your-backend-api.com/endpoint', {
         method: 'POST',
@@ -112,11 +89,9 @@ export default function GangActiveBets() {
           'Content-Type': 'application/json'
         }
       });
-      // Başarılı işlem
       Alert.alert("Success", "Result recorded");
       setModalVisible(false);
     } catch (error) {
-      // Hata durumunda
       Alert.alert("Error", "Could not send the result");
     }
   };
@@ -126,119 +101,167 @@ export default function GangActiveBets() {
   };
 
   useEffect(() => {
-      fetchBets();
-    }, []);
+    fetchBets();
+  }, []);
 
+  // Kullanıcının bahse yaptığı seçimi belirle (normalde API'dan gelmeli)
+  const getUserChoice = (item) => {
+    // Bu örnek için rastgele bir seçim yapıyoruz
+    // Gerçek uygulamada kullanıcının gerçek seçimi API'dan alınmalı
+    return Math.random() > 0.5 ? 'yes' : 'no';
+  };
+
+  // Kullanıcının bahis miktarını belirle (normalde API'dan gelmeli)
+  const getUserAmount = (item) => {
+    // Bu örnek için rastgele bir miktar
+    // Gerçek uygulamada kullanıcının gerçek bahis miktarı API'dan alınmalı
+    return Math.floor(Math.random() * 100) + 10;
+  };
 
   return (
     <View style={styles.container}>
       <LinearGradient
-              colors={['#161638', '#714F60', '#B85B44']}
-              style={styles.loadingContainer}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 1}}
-            >
-      <FlatList
-        data={bets}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => (
-          <View style={styles.mainCard}>
-            <View style={styles.card}>
-              {item.result === "waiting" && (
-                <View style={styles.subcard}>
-                  <Image source={require('@/assets/images/alert-triangle.png')} style={styles.iconStyle} />
-                  <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400' }}>Need Finalise</Text>
-                </View>
-              )}
-              {item.result === "ended" && (
-                <View style={styles.subcard}>
-                  <Image source={require('@/assets/images/gavel.png')} style={styles.iconStyle} />
-                  <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400' }}>Finalised</Text>
-                </View>
-              )}
-            </View>
-            {item.result === "waiting" && (
-              <View style={styles.card}>
-                <View style={{flex: 1, paddingRight: 10}}>
-                  <Text style={styles.title}>{item.title}</Text>
-                  <View style={styles.buttons}>
-                    <Image source={require('@/assets/images/scale.png')} style={styles.iconStyle} />
-                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 7 }}>%{item.yesUsersCount/((item.yesUsersCount+item.noUsersCount))*100}</Text>
-                    <Image source={require('@/assets/images/users2.png')} style={styles.iconStyle} />
-                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 21 }}>{item.participants.length}  Members</Text>
-                  </View>
-                </View>
-                <TouchableOpacity onPress={() => handleFinalisePress(item._id)} style={styles.card2}>
-                  <Image source={require('@/assets/images/power.png')} style={styles.iconStyle2} />
-                  <Text style={{ color: '#000', fontSize: 12, fontWeight: '400' }}>Finalise</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-            {item.status === "ended" && (
-              <View style={styles.card}>
-                <View>
-                  <Text style={styles.title}>{item.title}</Text>
-                  <View style={styles.buttons}>
-                    <Image source={require('@/assets/images/scale.png')} style={styles.iconStyle} />
-                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 7 }}>%{item.yesUsersCount/((item.yesUsersCount+item.noUsersCount))*100}</Text>
-                    <Image source={require('@/assets/images/users2.png')} style={styles.iconStyle} />
-                    <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400', marginRight: 21 }}>{item.participants.length} Members</Text>
-
-                  </View>
-                </View>
-                <View style={styles.card3}>
-                  <Image source={require('@/assets/images/thumb-up.png')} style={styles.iconStyle2} />
-                  <Text style={{ color: '#000', fontSize: 12, fontWeight: '400' }}>Yes!</Text>
-                </View>
-              </View>
-            )}
-          </View>
-        )}
-        
-      />
-
-      <Modal
-        visible={modalVisible}
-        transparent={true}
-        animationType="slide"
+        colors={['#161638', '#714F60', '#B85B44']}
+        style={styles.loadingContainer}
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 1}}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-              <Text style={{ color: '#000', fontSize: 16 }}>X</Text>
-            </TouchableOpacity>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 20 }}>What is the result?</Text>
-            <TouchableOpacity onPress={handleYesPress} style={styles.resultButton}>
-              <Text style={{ color: '#fff', fontSize: 16 }}>Yes</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleNoPress} style={styles.resultButton}>
-              <Text style={{ color: '#fff', fontSize: 16 }}>No</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        <FlatList
+          data={bets}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => {
+            const userChoice = getUserChoice(item);
+            const userAmount = getUserAmount(item);
+            
+            return (
+              <View style={styles.mainCard}>
+                {/* Status banner */}
+                <View style={styles.card}>
+                  {item.result === "waiting" && (
+                    <View style={styles.subcard}>
+                      <Image source={require('@/assets/images/alert-triangle.png')} style={styles.iconStyle} />
+                      <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400' }}>Need Finalise</Text>
+                    </View>
+                  )}
+                  {item.result === "ended" && (
+                    <View style={styles.subcard}>
+                      <Image source={require('@/assets/images/gavel.png')} style={styles.iconStyle} />
+                      <Text style={{ color: '#fff', fontSize: 12, fontWeight: '400' }}>Finalised</Text>
+                    </View>
+                  )}
+                </View>
+                
+                {/* Main card content */}
+                <View style={styles.cardContent}>
+                  {/* Bet Image */}
+                  <View style={styles.imageContainer}>
+                    <Image 
+                      source={{ uri: item.photoUrl || 'https://tinderapp-bet-images.s3.eu-north-1.amazonaws.com/bet-photos/1740813122515.jpg' }} 
+                      style={styles.profileImage} 
+                      defaultSource={require('@/assets/images/angry.png')}
+                    />
+                  </View>
+                  
+                  {/* Bet Details */}
+                  <View style={styles.content}>
+                    <Text style={styles.title}>{item.title}</Text>
+                    
+                    <View style={styles.actions}>
+                      {/* User Choice Card */}
+                      {item.result !== "ended" && (
+                        <View style={[
+                          styles.percentCard, 
+                          { backgroundColor: userChoice === 'yes' ? 'rgba(80, 200, 120, 0.6)' : 'rgba(255, 99, 71, 0.6)' }
+                        ]}>
+                          <Image 
+                            source={
+                              userChoice === 'yes' 
+                                ? require('@/assets/images/thumb-up.png') 
+                                : require('@/assets/images/thumb-down.png')
+                            } 
+                            style={styles.percentImage} 
+                          />
+                          <View style={styles.percentText}>
+                            <Text style={{color:'#fff', fontSize:12, fontWeight:'400'}}>
+                              {userChoice.toUpperCase()}
+                            </Text>
+                            <Text style={{color:'#fff', fontSize:12, fontWeight:'400'}}>
+                              {' '}{userAmount} USDC
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+                      
+                      {/* Additional stats */}
+                      <View style={styles.detailsContainer}>
+                        <View style={styles.detailItem}>
+                          <Image source={require('@/assets/images/scale.png')} style={styles.iconStyle} />
+                          <Text style={styles.detailText}>%{Math.round(item.yesUsersCount/((item.yesUsersCount+item.noUsersCount || 1))*100) || 0}</Text>
+                        </View>
+                        
+                        <View style={styles.detailItem}>
+                          <Image source={require('@/assets/images/users2.png')} style={styles.iconStyle} />
+                          <Text style={styles.detailText}>{item.participants ? item.participants.length : 0} Members</Text>
+                        </View>
+                        
+                        <View style={styles.detailItem}>
+                          <Image source={require('@/assets/images/hourglass.png')} style={styles.iconStyle} />
+                          <Text style={styles.detailText}>{formatRemainingTime(item.endDate)}</Text>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                  
+                  {/* Finalise/Result Button */}
+                  {item.result === "waiting" && (
+                    <TouchableOpacity 
+                      onPress={() => handleFinalisePress(item._id)} 
+                      style={styles.finaliseButton}
+                    >
+                      <Image source={require('@/assets/images/power.png')} style={styles.iconStyle2} />
+                      <Text style={{ color: '#000', fontSize: 12, fontWeight: '400' }}>Finalise</Text>
+                    </TouchableOpacity>
+                  )}
+                  
+                  {item.result === "yes" && (
+                    <View style={styles.resultButton}>
+                      <Image source={require('@/assets/images/thumb-up.png')} style={styles.iconStyle2} />
+                      <Text style={{ color: '#000', fontSize: 12, fontWeight: '400' }}>Yes!</Text>
+                    </View>
+                  )}
+                  
+                  {item.result === "no" && (
+                    <View style={[styles.resultButton, { backgroundColor: 'rgba(255, 99, 71, 0.8)' }]}>
+                      <Image source={require('@/assets/images/thumb-down.png')} style={styles.iconStyle2} />
+                      <Text style={{ color: '#000', fontSize: 12, fontWeight: '400' }}>No!</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            );
+          }}
+        />
 
-      <View style={styles.seeAllButton}>
-      <View style={styles.seeAllIconGroup}>
-        <Image source={require('@/assets/images/search.png')} style={styles.iconStyle} />
-        <Image source={require('@/assets/images/vector.png')} style={{ width: 4, height: 16, marginHorizontal: 10 }} />
-      </View>
-      
-      <View style={styles.seeAllIconGroup}>
-        <Image source={require('@/assets/images/seeding.png')} style={styles.iconStyle} />
-        <Text style={styles.seeAllText}>Latest</Text>
-      </View>
-      
-      <View style={styles.seeAllIconGroup}>
-        <Image source={require('@/assets/images/hourglass.png')} style={styles.iconStyle} />
-        <Text style={styles.seeAllText}>Time Ended</Text>
-      </View>
-      
-      <View style={styles.seeAllIconGroup}>
-        <Image source={require('@/assets/images/new-section.png')} style={styles.iconStyle} />
-        <Text style={styles.seeAllText}>New Bet</Text>
-      </View>
-    </View>
+        <Modal
+          visible={modalVisible}
+          transparent={true}
+          animationType="slide"
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
+                <Text style={{ color: '#000', fontSize: 16 }}>X</Text>
+              </TouchableOpacity>
+              <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 20 }}>What is the result?</Text>
+              <TouchableOpacity onPress={handleYesPress} style={styles.modalResultButton}>
+                <Text style={styles.modalButtonText}>Yes</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleNoPress} style={styles.modalResultButton}>
+                <Text style={styles.modalButtonText}>No</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </LinearGradient>
     </View>
   );
@@ -288,31 +311,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
-  card2: {
+  cardContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  finaliseButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: "#fff",
-    paddingVertical: 6,  // 8'den 6'ya düşürdüm
-    paddingHorizontal: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
     borderRadius: 20,
-    minWidth: 72,       // 78'den 72'ye düşürdüm
     justifyContent: 'center',
+    position: 'absolute',
+    right: 0,
+    top: 35,
   },
-  card3: {
+  resultButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingVertical: 8,
-    paddingHorizontal: 11,
+    backgroundColor: 'rgba(80, 200, 120, 0.8)',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
     borderRadius: 20,
-    minWidth: 70,
-  },
-  cardYes: {
-    backgroundColor: 'rgba(69, 170, 69, 0.6)',
-  },
-  cardNo: {
-    backgroundColor: 'rgba(220, 53, 69, 0.6)',
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
   subcard: {
     flexDirection: 'row',
@@ -321,7 +348,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 10,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   iconStyle: {
     width: 16,
@@ -334,19 +361,12 @@ const styles = StyleSheet.create({
     height: 18,
     marginRight: 5,
   },
-  buttons: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    marginTop: 10,
-    flexWrap: 'wrap',
-  },
   title: {
     fontSize: 14,
     fontWeight: 'bold',
     color: '#fff',
-    marginTop: 8,
-    flexShrink: 1,
-    width: '70%',  // Burada %90'dan %70'e düşürdüm
+    marginBottom: 8,
+    paddingRight: 70,
   },
   modalOverlay: {
     flex: 1,
@@ -354,51 +374,87 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  modalContent: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    width: '80%',
-    alignItems: 'center',
+  imageContainer: {
+    width: 60,
+    height: 60,
+    marginRight: 10,
   },
-  closeButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
+  profileImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
-  resultButton: {
-    backgroundColor: '#1E1E4C',
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 5,
-    width: '50%',
-    alignItems: 'center',
+  content: {
+    flex: 1,
   },
-  seeAllButton: {
+  actions: {
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+  },
+  percentCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between', // Öğeleri yatay olarak eşit dağıtır
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-    borderRadius: 15,
-    marginTop: 10,
-    marginBottom: 20,
-    marginHorizontal: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.5)',
-    flexWrap: 'nowrap', // Öğelerin alt satıra geçmesini engeller
+    borderRadius: 13,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    alignSelf: 'flex-start',
+    marginBottom: 8,
   },
-  seeAllIconGroup: {
+  percentText: {
+    flexDirection: 'row',
+  },
+  percentImage: {
+    width: 16,
+    height: 16,
+    tintColor: '#fff',
+    marginRight: 4,
+  },
+  detailsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexShrink: 1,
+    flexWrap: 'wrap',
   },
-  seeAllText: {
-    fontSize: 12, // 14'ten 12'ye düşürdüm
-    fontWeight: '600',
+  detailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  detailText: {
+    fontSize: 12,
     color: '#fff',
-    marginLeft: 3,
   },
+// Modalın CSS stillerini düzeltmek için aşağıdaki değişiklikleri yapın:
+
+// Modal içindeki butonlar için yeni bir stil ekleyin
+modalResultButton: {
+  backgroundColor: '#1E1E4C',
+  padding: 10,
+  borderRadius: 5,
+  marginVertical: 5,
+  width: '50%',
+  alignItems: 'center',
+},
+
+modalButtonText: {
+  color: '#fff', 
+  fontSize: 16
+},
+
+// Modalın kendisi için diğer düzeltmeleri de ekleyin
+modalContent: {
+  backgroundColor: '#fff',
+  padding: 20,
+  borderRadius: 10,
+  width: '80%',
+  alignItems: 'center',
+},
+
+closeButton: {
+  position: 'absolute',
+  top: 10,
+  right: 10,
+  zIndex: 10,
+},
 
 });
