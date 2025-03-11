@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, FlatList, Image, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 
 // ActiveBets bileşeni için prop tipi
 interface ActiveBetsProps {
@@ -20,6 +21,13 @@ interface ActiveBetsProps {
 }
 
 export default function ActiveBets({ data }: ActiveBetsProps) {
+  const router = useRouter();
+
+  // Bet detay sayfasına yönlendirme fonksiyonu
+  const navigateToBetDetail = (betId: string) => {
+    router.push({ pathname: "/bet/[betId]", params: { betId: betId } });
+  };
+
   // Kalan süreyi formatla (milisaniye -> saat:dakika formatına)
   const formatRemainingTime = (milliseconds: number) => {
     if (milliseconds <= 0) return "Ended";
@@ -52,7 +60,11 @@ export default function ActiveBets({ data }: ActiveBetsProps) {
       <FlatList
         data={data}
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <TouchableOpacity 
+            style={styles.card}
+            onPress={() => navigateToBetDetail(item.id)}
+            activeOpacity={0.7}
+          >
             <View style={styles.imageContainer}>
               <Image 
                 source={{ uri: item.photoUrl }} 
@@ -98,7 +110,7 @@ export default function ActiveBets({ data }: ActiveBetsProps) {
                 </View>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
         keyExtractor={(item) => item.id}
       />
