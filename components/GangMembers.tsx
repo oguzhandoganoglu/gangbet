@@ -11,12 +11,18 @@ import {
   Alert,
   Modal
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function GangMembers({ members, admins, isLoading }) {
   const [searchText, setSearchText] = useState('');
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
+  
+  const router = useRouter();
+  const handleFriendPress = (friendId: any) => {
+    router.push({ pathname: "/profile/[userId]", params: { userId: friendId } });
+  };
   
   // Function to determine if a member is an admin
   const isAdmin = (memberId) => {
@@ -73,6 +79,7 @@ export default function GangMembers({ members, admins, isLoading }) {
   }
   
   return (
+    
     <View style={styles.container}>
       <LinearGradient
               colors={['#161638', '#714F60', '#B85B44']}
@@ -102,6 +109,9 @@ export default function GangMembers({ members, admins, isLoading }) {
         data={filteredMembers}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
+          <TouchableOpacity 
+                onPress={() => handleFriendPress(item.id)}
+              >
           <View style={styles.memberCard}>
             <View style={styles.memberInfo}>
               <View style={styles.avatarContainer}>
@@ -150,6 +160,7 @@ export default function GangMembers({ members, admins, isLoading }) {
               )}
             </View>
           </View>
+          </TouchableOpacity>
         )}
       />
       

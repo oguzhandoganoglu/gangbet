@@ -18,6 +18,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const API_BASE_URL = 'http://51.21.28.186:5001';
@@ -445,6 +446,11 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
       ]
     );
   };
+  const router = useRouter();
+
+  const navigateToBetDetail = (betId: string) => {
+    router.push({ pathname: "/bet/[betId]", params: { betId: betId } });
+  };
 
   return (
    
@@ -456,13 +462,16 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
             end={{x: 1, y: 1}}
           >
       <FlatList
-  data={exampleData}
-  renderItem={({ item }) => {
+        data={exampleData}
+    
+        renderItem={({ item }) => {
+          
     // Rastgele kullanıcı seçimi ve miktarı (gerçek uygulamada API'dan gelecek)
     const userChoice = Math.random() > 0.5 ? 'yes' : 'no';
     const userAmount = Math.floor(Math.random() * 100) + 10;
     
     return (
+      <TouchableOpacity onPress={() => navigateToBetDetail(item.id)}>
       <View style={styles.mainCard}>
         <View style={styles.card}>
           {item.status === "Pending" && (
@@ -565,6 +574,7 @@ export default function GangAllBets({ gangId }: GangAllBetsProps) {
           )}
         </View>
       </View>
+      </TouchableOpacity>
     );
   }}
   keyExtractor={(item) => item.id}

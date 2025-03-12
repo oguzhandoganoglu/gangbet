@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, FlatList, Image, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 
 // API'den gelen bahis veri tipi
 interface BetData {
@@ -17,6 +18,13 @@ interface ProfileBetsProps {
 }
 
 export default function ProfileBets({ data = [] }: ProfileBetsProps) {
+  const router = useRouter();
+
+  // Bet detay sayfasına yönlendirme fonksiyonu
+  const navigateToBetDetail = (betId: string) => {
+    router.push({ pathname: "/bet/[betId]", params: { betId: betId } });
+  };
+
   // Kalan zamanı hesapla
   const calculateRemainingTime = (endDateStr: string) => {
     const endDate = new Date(endDateStr);
@@ -48,49 +56,54 @@ export default function ProfileBets({ data = [] }: ProfileBetsProps) {
       <FlatList
         data={data}
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <View style={styles.imageContainer}>
-              <Image 
-                source={{ uri: item.photoUrl }}
-                defaultSource={require('@/assets/images/placeholder.png')} 
-                style={styles.profileImage} 
-              />
-            </View>
-            <View style={styles.content}>
-              <Text style={styles.title}>{item.title}</Text>
-              <View style={styles.actions}>
-                <View style={styles.percentCard}>
-                  <Image 
-                    source={
-                      item.userChoice === 'yes' 
-                        ? require('@/assets/images/thumb-up.png')
-                        : require('@/assets/images/thumb-down.png')
-                    } 
-                    style={styles.percentImage} 
-                  />
-                  <View style={styles.percentText}>
-                    <Text style={styles.choiceText}>
-                      {item.userChoice.toUpperCase()}
-                    </Text>
-                    <Text style={styles.choiceText}> 
-                      {item.amount} USDC
-                    </Text>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => navigateToBetDetail(item.id)}
+          >
+            <View style={styles.card}>
+              <View style={styles.imageContainer}>
+                <Image 
+                  source={{ uri: item.photoUrl }}
+                  defaultSource={require('@/assets/images/placeholder.png')} 
+                  style={styles.profileImage} 
+                />
+              </View>
+              <View style={styles.content}>
+                <Text style={styles.title}>{item.title}</Text>
+                <View style={styles.actions}>
+                  <View style={styles.percentCard}>
+                    <Image 
+                      source={
+                        item.userChoice === 'yes' 
+                          ? require('@/assets/images/thumb-up.png')
+                          : require('@/assets/images/thumb-down.png')
+                      } 
+                      style={styles.percentImage} 
+                    />
+                    <View style={styles.percentText}>
+                      <Text style={styles.choiceText}>
+                        {item.userChoice.toUpperCase()}
+                      </Text>
+                      <Text style={styles.choiceText}> 
+                        {item.amount} USDC
+                      </Text>
+                    </View>
                   </View>
-                </View>
 
-                <View style={styles.detailsContainer}>
-                  <View style={styles.detailItem}>
-                    <Image source={require('@/assets/images/scale.png')} style={styles.detailIcon} />
-                    <Text style={styles.detailText} numberOfLines={1} ellipsizeMode="tail">{item.channelName}</Text>
-                  </View>
-                  <View style={styles.detailItem}>
-                    <Image source={require('@/assets/images/hourglass.png')} style={styles.detailIcon} />
-                    <Text style={styles.detailText}>{calculateRemainingTime(item.endDate)}</Text>
+                  <View style={styles.detailsContainer}>
+                    <View style={styles.detailItem}>
+                      <Image source={require('@/assets/images/scale.png')} style={styles.detailIcon} />
+                      <Text style={styles.detailText} numberOfLines={1} ellipsizeMode="tail">{item.channelName}</Text>
+                    </View>
+                    <View style={styles.detailItem}>
+                      <Image source={require('@/assets/images/hourglass.png')} style={styles.detailIcon} />
+                      <Text style={styles.detailText}>{calculateRemainingTime(item.endDate)}</Text>
+                    </View>
                   </View>
                 </View>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
         keyExtractor={(item) => item.id}
       />
@@ -128,7 +141,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    left:10
+    left: 10
   },
   title: {
     fontSize: 14,

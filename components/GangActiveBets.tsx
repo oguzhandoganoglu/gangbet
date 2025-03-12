@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, Modal, TouchableOpacity, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router'; // Import router
 
 export default function GangActiveBets() {
+  const router = useRouter(); // Initialize router
   const [modalVisible, setModalVisible] = useState(false);
   const [bets, setBets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBetId, setSelectedBetId] = useState(null);
   
-  // Kalan zamanı hesapla
+  // Calculate remaining time
   const formatRemainingTime = (endDateStr) => {
     const endDate = new Date(endDateStr);
     const now = new Date();
@@ -53,6 +55,11 @@ export default function GangActiveBets() {
   const handleFinalisePress = (betId) => {
     setSelectedBetId(betId);
     setModalVisible(true);
+  };
+
+  // Function to navigate to bet detail
+  const navigateToBetDetail = (betId) => {
+    router.push({ pathname: "/bet/[betId]", params: { betId: betId } });
   };
 
   const handleYesPress = async () => {
@@ -104,17 +111,15 @@ export default function GangActiveBets() {
     fetchBets();
   }, []);
 
-  // Kullanıcının bahse yaptığı seçimi belirle (normalde API'dan gelmeli)
+  // Determine user's bet choice (should come from API)
   const getUserChoice = (item) => {
-    // Bu örnek için rastgele bir seçim yapıyoruz
-    // Gerçek uygulamada kullanıcının gerçek seçimi API'dan alınmalı
+    // This is a placeholder - should get real data from API
     return Math.random() > 0.5 ? 'yes' : 'no';
   };
 
-  // Kullanıcının bahis miktarını belirle (normalde API'dan gelmeli)
+  // Determine user's bet amount (should come from API)
   const getUserAmount = (item) => {
-    // Bu örnek için rastgele bir miktar
-    // Gerçek uygulamada kullanıcının gerçek bahis miktarı API'dan alınmalı
+    // This is a placeholder - should get real data from API
     return Math.floor(Math.random() * 100) + 10;
   };
 
@@ -134,7 +139,10 @@ export default function GangActiveBets() {
             const userAmount = getUserAmount(item);
             
             return (
-              <View style={styles.mainCard}>
+              <TouchableOpacity 
+                style={styles.mainCard}
+                onPress={() => navigateToBetDetail(item._id)}
+              >
                 {/* Status banner */}
                 <View style={styles.card}>
                   {item.result === "waiting" && (
@@ -215,7 +223,10 @@ export default function GangActiveBets() {
                   {/* Finalise/Result Button */}
                   {item.result === "waiting" && (
                     <TouchableOpacity 
-                      onPress={() => handleFinalisePress(item._id)} 
+                      onPress={(e) => {
+                        e.stopPropagation(); // Prevent card navigation
+                        handleFinalisePress(item._id);
+                      }} 
                       style={styles.finaliseButton}
                     >
                       <Image source={require('@/assets/images/power.png')} style={styles.iconStyle2} />
@@ -237,7 +248,7 @@ export default function GangActiveBets() {
                     </View>
                   )}
                 </View>
-              </View>
+              </TouchableOpacity>
             );
           }}
         />
@@ -328,6 +339,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     top: 35,
+    zIndex: 10,
   },
   resultButton: {
     flexDirection: 'row',
@@ -424,37 +436,29 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#fff',
   },
-// Modalın CSS stillerini düzeltmek için aşağıdaki değişiklikleri yapın:
-
-// Modal içindeki butonlar için yeni bir stil ekleyin
-modalResultButton: {
-  backgroundColor: '#1E1E4C',
-  padding: 10,
-  borderRadius: 5,
-  marginVertical: 5,
-  width: '50%',
-  alignItems: 'center',
-},
-
-modalButtonText: {
-  color: '#fff', 
-  fontSize: 16
-},
-
-// Modalın kendisi için diğer düzeltmeleri de ekleyin
-modalContent: {
-  backgroundColor: '#fff',
-  padding: 20,
-  borderRadius: 10,
-  width: '80%',
-  alignItems: 'center',
-},
-
-closeButton: {
-  position: 'absolute',
-  top: 10,
-  right: 10,
-  zIndex: 10,
-},
-
+  modalResultButton: {
+    backgroundColor: '#1E1E4C',
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 5,
+    width: '50%',
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: '#fff', 
+    fontSize: 16
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 10,
+  },
 });

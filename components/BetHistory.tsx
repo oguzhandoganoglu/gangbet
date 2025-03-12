@@ -1,10 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router'; // Import router
 
 // BetHistory bileşeni için prop tipi
 interface BetHistoryProps {
   data: Array<{
     id: string;
+    _id: string; // Make sure _id exists for API calls
     title: string;
     photoUrl: string;
     groupName: string;
@@ -19,6 +21,13 @@ interface BetHistoryProps {
 }
 
 export default function BetHistory({ data }: BetHistoryProps) {
+  const router = useRouter(); // Initialize router
+
+  // Bet detay sayfasına yönlendirme işlevi
+  const navigateToBetDetail = (betId: string) => {
+    router.push({ pathname: "/bet/[betId]", params: { betId: betId } });
+  };
+
   if (!data || data.length === 0) {
     return (
       <View style={styles.emptyContainer}>
@@ -32,7 +41,11 @@ export default function BetHistory({ data }: BetHistoryProps) {
       <FlatList
         data={data}
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <TouchableOpacity 
+            style={styles.card}
+            onPress={() => navigateToBetDetail(item._id || item.id)}
+            activeOpacity={0.7}
+          >
             <Image 
               source={{ uri: item.photoUrl }} 
               style={styles.profileImage}
@@ -84,7 +97,7 @@ export default function BetHistory({ data }: BetHistoryProps) {
                 </View>
               </View>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
         keyExtractor={(item) => item.id}
       />

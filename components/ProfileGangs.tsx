@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { useRouter } from 'expo-router';
 
 // API veri tipi
 interface GroupData {
@@ -13,6 +14,12 @@ interface ProfileGangsProps {
 }
 
 export default function ProfileGangs({ data = [] }: ProfileGangsProps) {
+  const router = useRouter();
+
+  const handleGroupPress = (groupId: string) => {
+    router.push({ pathname: "/gang/[gangId]", params: { gangId: groupId } });
+  };
+
   if (data.length === 0) {
     return (
       <View style={styles.emptyContainer}>
@@ -27,7 +34,11 @@ export default function ProfileGangs({ data = [] }: ProfileGangsProps) {
       <FlatList
         data={data}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.groupCard}>
+          <TouchableOpacity 
+            style={styles.groupCard}
+            activeOpacity={0.7}
+            onPress={() => handleGroupPress(item.id)}
+          >
             <View style={styles.iconContainer}>
               <Text style={styles.groupInitial}>{item.name.charAt(0)}</Text>
             </View>
@@ -35,7 +46,10 @@ export default function ProfileGangs({ data = [] }: ProfileGangsProps) {
               <Text style={styles.groupName}>{item.name}</Text>
               <Text style={styles.memberCount}>{item.membersCount} members</Text>
             </View>
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity 
+              style={styles.actionButton}
+              onPress={() => handleGroupPress(item.id)}
+            >
               <Image
                 source={require('@/assets/images/info-circle.png')}
                 style={styles.actionIcon}

@@ -1,11 +1,13 @@
 import React from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useUser } from '../app/UserContext';
+import { useRouter } from 'expo-router'; // Import router
 
 // Wins bileşeni için prop tipi
 interface WinsProps {
   data: Array<{
     id: string;
+    _id: string; // Make sure _id exists for API calls
     title: string;
     photoUrl: string;
     groupName: string;
@@ -21,39 +23,42 @@ interface WinsProps {
 
 export default function Wins({ data }: WinsProps) {
   const { user } = useUser();
+  const router = useRouter(); // Initialize router
+
+  // Bet detay sayfasına yönlendirme işlevi
+  const navigateToBetDetail = (betId: string) => {
+    router.push({ pathname: "/bet/[betId]", params: { betId: betId } });
+  };
 
   // Ödül talep etme işlevi
-
   const submitClaim = async (betId) => {
-       
-       try {
-         
-         const response = await fetch(`http://51.21.28.186:5001/api/claims/request`, {
-           method: 'POST',
-           headers: {
-             'Content-Type': 'application/json',
-           },
-           body: JSON.stringify({
-             userId: user?._id,
-             betId: betId._id
-           }),
-         });
-         
-         const result = await response.json();
-         
-         // Claim işlemi başarılı olduğunda
-         if (response.ok) {
-           Alert.alert('Success', 'Your reward has been claimed successfully');
-           // Betleri yeniden getir ve UI'ı güncell
-         } else {
-           // Hata durumunda
-           Alert.alert('Notification', result.message || 'Failed to claim your reward');
-         }
-       } catch (error) {
-         console.error('Error claiming reward:', error);
-         Alert.alert('Error', 'An error occurred while claiming your reward');
-       } 
-     };
+    try {
+      const response = await fetch(`http://51.21.28.186:5001/api/claims/request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user?._id,
+          betId: betId
+        }),
+      });
+      
+      const result = await response.json();
+      
+      // Claim işlemi başarılı olduğunda
+      if (response.ok) {
+        Alert.alert('Success', 'Your reward has been claimed successfully');
+        // Betleri yeniden getir ve UI'ı güncelle
+      } else {
+        // Hata durumunda
+        Alert.alert('Notification', result.message || 'Failed to claim your reward');
+      }
+    } catch (error) {
+      console.error('Error claiming reward:', error);
+      Alert.alert('Error', 'An error occurred while claiming your reward');
+    } 
+  };
 
   // Ödül durumunu gösterme
   const renderClaimStatus = (item) => {
@@ -102,7 +107,11 @@ export default function Wins({ data }: WinsProps) {
       <FlatList
         data={data}
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <TouchableOpacity 
+            style={styles.card}
+            onPress={() => navigateToBetDetail(item._id || item.id)}
+            activeOpacity={0.7}
+          >
             <Image 
               source={{ uri: item.photoUrl }} 
               style={styles.profileImage}
@@ -139,7 +148,7 @@ export default function Wins({ data }: WinsProps) {
             </View>
           
             {renderClaimStatus(item)}
-          </View>
+          </TouchableOpacity>
         )}
         keyExtractor={(item) => item.id}
       />
