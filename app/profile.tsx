@@ -7,6 +7,7 @@ import TabBarComponent2 from '@/components/TabBarComponent2';
 import ProfileBets from '@/components/ProfileBets';
 import ProfileFriends from '@/components/ProfileFriends';
 import ProfileGangs from '@/components/ProfileGangs';
+import ProfileSettingsView from '@/components/ProfileSettingsView'; // Ekleyin
 import { useUser } from '../app/UserContext';
 
 // API yanıt tipi
@@ -49,6 +50,7 @@ export default function ProfileScreen() {
   const [profileData, setProfileData] = useState<ProfileResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showSettings, setShowSettings] = useState(false); // Yeni state ekleyin
   const { user } = useUser();
 
   const [routes] = useState([
@@ -57,6 +59,15 @@ export default function ProfileScreen() {
     { key: 'third', title: 'Gangs' },
   ]);
 
+   // Settings görünümünü açmak için işleyici
+   const handleSettingsPress = () => {
+    setShowSettings(true);
+  };
+
+  // Settings görünümünü kapatmak için işleyici  
+  const handleCloseSettings = () => {
+    setShowSettings(false);
+  };
   // Profil verilerini çek
   useEffect(() => {
     fetchProfileData();
@@ -129,7 +140,10 @@ export default function ProfileScreen() {
       start={{x: 0, y: 0}}
       end={{x: 1, y: 1}}
     >
-      <NavbarProfile userData={profileData?.user} />
+      <NavbarProfile 
+        userData={profileData?.user} 
+        onSettingsPress={handleSettingsPress} // Prop ekleyin
+      />
       <View style={{width: '100%', flex:1}}>
         <TabView
           navigationState={{ index, routes }}
@@ -140,6 +154,13 @@ export default function ProfileScreen() {
           style={{flex:1}}
         />
       </View>
+      
+      {/* Settings sayfasını koşullu olarak gösterin */}
+      {showSettings && (
+        <View style={{...StyleSheet.absoluteFillObject, zIndex: 999}}>
+          <ProfileSettingsView onClose={handleCloseSettings} />
+        </View>
+      )}
     </LinearGradient>
   );
 }

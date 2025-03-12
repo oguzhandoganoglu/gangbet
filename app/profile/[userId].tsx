@@ -5,72 +5,106 @@ import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import { useNavigation } from '@react-navigation/native'; 
 import { useUser } from "../UserContext";
 import { LinearGradient } from 'expo-linear-gradient';
+import ProfileBets from '@/components/ProfileBets';
+import ProfileFriends from '@/components/ProfileFriends';
+import ProfileGangs from '@/components/ProfileGangs';
 
-const friend = {id:'2', name: 'Mehmet Demir', photoUrl: "https://media.licdn.com/dms/image/v2/D4D12AQEBWX-CTbuenQ/article-cover_image-shrink_600_2000/article-cover_image-shrink_600_2000/0/1720729957965?e=2147483647&v=beta&t=KEE8zC0coVUnh8LA4I2DULzewVjUHJrXu_b1VSZh2b8", lastActive: '5 min ago', friendsCount:"25", totalBets:"45"}
+const friend = {
+  id: '2', 
+  name: 'Mehmet Demir', 
+  photoUrl: "https://media.licdn.com/dms/image/v2/D4D12AQEBWX-CTbuenQ/article-cover_image-shrink_600_2000/article-cover_image-shrink_600_2000/0/1720729957965?e=2147483647&v=beta&t=KEE8zC0coVUnh8LA4I2DULzewVjUHJrXu_b1VSZh2b8", 
+  lastActive: '5 min ago', 
+  friendsCount: "25", 
+  totalBets: "45"
+};
 
-
-const allNotifications = [
-  { 
-    id: 1, 
-    bet:'Bu bir bet', 
-    sender: 'Ahmet Yılmaz', 
-    avatar: 'https://randomuser.me/api/portraits/men/32.jpg', 
-    time: '2 saat önce',
-    groupId: null
+// Örnek veri setleri
+const exampleBets = [
+  {
+    id: '1',
+    title: 'Bitcoin will reach $100k by end of 2025',
+    photoUrl: 'https://tinderapp-bet-images.s3.eu-north-1.amazonaws.com/bet-photos/1740813122515.jpg',
+    channelName: 'Crypto Predictions',
+    userChoice: 'yes',
+    amount: 50,
+    endDate: new Date(Date.now() + 86400000 * 30).toISOString() // 30 gün sonra
   },
-  { 
-    id: 2, 
-    bet:'Bu bir bet',
-    sender: 'Mehmet Demir', 
-    content: 'Galatasaray vs Fenerbahçe maçı için bahis önerisi gönderdi',
-    time: '3 saat önce',
-    groupId: 1
+  {
+    id: '2',
+    title: 'Tesla will release a new model this year',
+    photoUrl: 'https://tinderapp-bet-images.s3.eu-north-1.amazonaws.com/bet-photos/1740813122515.jpg',
+    channelName: 'Tech News',
+    userChoice: 'no',
+    amount: 25,
+    endDate: new Date(Date.now() + 86400000 * 15).toISOString() // 15 gün sonra
   },
-  { 
-    id: 3, 
-    bet:'Bu bir bet',
-    sender: 'Ayşe Kaya', 
-    groupName: 'Basketbol Grubu',
-    time: '5 saat önce',
-    groupId: 2
-  },
-  { 
-    id: 4, 
-    bet:'Bu bir bet',
-    sender: 'Zeynep Öztürk', 
-    avatar: 'https://randomuser.me/api/portraits/women/44.jpg', 
-    time: '1 gün önce',
-    groupId: null
-  },
-  { 
-    id: 5, 
-    bet:'Bu bir bet', 
-    sender: 'Burak Yılmaz', 
-    content: 'Real Madrid vs Barcelona maçı için bahis önerisi gönderdi',
-    time: '1 gün önce',
-    groupId: 3
-  },
+  {
+    id: '3',
+    title: 'Turkey will win Eurovision 2025',
+    photoUrl: 'https://tinderapp-bet-images.s3.eu-north-1.amazonaws.com/bet-photos/1740813122515.jpg',
+    channelName: 'Entertainment',
+    userChoice: 'yes',
+    amount: 35,
+    endDate: new Date(Date.now() + 86400000 * 60).toISOString() // 60 gün sonra
+  }
 ];
 
+const exampleFriends = [
+  { id: '1', username: 'Ahmet Yılmaz' },
+  { id: '2', username: 'Zeynep Öztürk' },
+  { id: '3', username: 'Fatma Çelik' },
+  { id: '4', username: 'Mustafa Şahin' }
+];
 
+const exampleGroups = [
+  { id: '1', name: 'Crypto Enthusiasts', membersCount: 34 },
+  { id: '2', name: 'Sports Bettors', membersCount: 56 },
+  { id: '3', name: 'Tech Predictions', membersCount: 28 }
+];
+
+// Özel tab render fonksiyonları
 const BetsRoute = () => (
-  <View style={styles.tabContent}>
-    <Text style={styles.tabText}>Friends Content</Text>
-  </View>
+  <ProfileBets data={exampleBets} />
 );
 
-const FriendsRoute = () => (
-  <View style={styles.tabContent}>
-    <Text style={styles.tabText}>Friends Content</Text>
-  </View>
-);
+const FriendsRoute = () => {
+  // Özel bir FriendsList bileşeni oluşturmak için
+  const CustomFriendsList = ({ data }) => {
+    return (
+      <View style={styles.container}>
+        <FlatList
+          data={data}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <Image
+                source={require('@/assets/images/user4.png')}
+                style={styles.profileImage}
+              />
+              <View style={styles.content}>
+                <Text style={styles.title}>{item.username}</Text>
+                <View style={styles.actions}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={styles.wonText}>Friends</Text>
+                  </View>
+                </View>
+              </View>
+              {/* Remove butonu kaldırıldı */}
+            </View>
+          )}
+          keyExtractor={(item) => item.id}
+        />
+      </View>
+    );
+  };
+
+  return <CustomFriendsList data={exampleFriends} />;
+};
 
 const GroupsRoute = () => (
-  <View style={styles.tabContent}>
-    <Text style={styles.tabText}>Groups Content</Text>
-  </View>
+  <ProfileGangs data={exampleGroups} />
 );
 
+// Özel SceneMap oluşturma
 const renderScene = SceneMap({
   bets: BetsRoute,
   friends: FriendsRoute,
@@ -117,58 +151,6 @@ export default function ProfileDetailScreen() {
         totalBets: string;
     }
 
-    const friend: Friend = {
-        id: '2',
-        name: 'Mehmet Demir',
-        photoUrl: "https://media.licdn.com/dms/image/v2/D4D12AQEBWX-CTbuenQ/article-cover_image-shrink_600_2000/article-cover_image-shrink_600_2000/0/1720729957965?e=2147483647&v=beta&t=KEE8zC0coVUnh8LA4I2DULzewVjUHJrXu_b1VSZh2b8",
-        lastActive: '5 min ago',
-        friendsCount: "25",
-        totalBets: "45"
-    };
-
-    const allNotifications: Notification[] = [
-        { 
-            id: 1, 
-            bet: 'Bu bir bet', 
-            sender: 'Ahmet Yılmaz', 
-            avatar: 'https://randomuser.me/api/portraits/men/32.jpg', 
-            time: '2 saat önce',
-            groupId: null
-        },
-        { 
-            id: 2, 
-            bet: 'Bu bir bet',
-            sender: 'Mehmet Demir', 
-            content: 'Galatasaray vs Fenerbahçe maçı için bahis önerisi gönderdi',
-            time: '3 saat önce',
-            groupId: 1
-        },
-        { 
-            id: 3, 
-            bet: 'Bu bir bet',
-            sender: 'Ayşe Kaya', 
-            groupName: 'Basketbol Grubu',
-            time: '5 saat önce',
-            groupId: 2
-        },
-        { 
-            id: 4, 
-            bet: 'Bu bir bet',
-            sender: 'Zeynep Öztürk', 
-            avatar: 'https://randomuser.me/api/portraits/women/44.jpg', 
-            time: '1 gün önce',
-            groupId: null
-        },
-        { 
-            id: 5, 
-            bet: 'Bu bir bet', 
-            sender: 'Burak Yılmaz', 
-            content: 'Real Madrid vs Barcelona maçı için bahis önerisi gönderdi',
-            time: '1 gün önce',
-            groupId: 3
-        },
-    ];
-
     const renderTabBar = (props: any) => (
         <TabBar
             {...props}
@@ -196,56 +178,54 @@ export default function ProfileDetailScreen() {
 
     return (
       <LinearGradient
-                colors={['#161638', '#714F60', '#B85B44']}
-                style={styles.container}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-            >
+        colors={['#161638', '#714F60', '#B85B44']}
+        style={styles.container}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
         <SafeAreaView style={styles.safeArea}>
-            
-                <View style={styles.content}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                        <Image source={require('@/assets/images/back.png')} style={styles.backIcon} />
-                    </TouchableOpacity>
+            <View style={styles.content}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <Image source={require('@/assets/images/back.png')} style={styles.backIcon} />
+                </TouchableOpacity>
 
-                    <View style={styles.headerContainer}>
-                        <View style={styles.headerRow}>
-                            <Image style={styles.gangImage} source={{ uri: friend.photoUrl || 'https://via.placeholder.com/65' }}  />
-                            <Text style={styles.gangName}>{friend.name}</Text>
-                        </View>
-                        <View style={styles.buttonContainer}>
-                            <TouchableOpacity style={styles.actionButton}>
-                            <Text style={{color:"white"}}>Remove</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.actionButton}>
-                            <Text style={{color:"white"}}>Add</Text>
-                            </TouchableOpacity>
-                        </View>
-                        </View>
-                    
-                    <View style={styles.statsContainer}>
-                        <View style={styles.statItem}>
-                            <Image source={require('@/assets/images/users2.png')} style={styles.statIcon} />
-                            <Text style={styles.statText}>{friend.friendsCount}</Text>
-                        </View>
-                        <View style={styles.statItem}>
-                            <Image source={require('@/assets/images/gavel.png')} style={styles.statIcon} />
-                            <Text style={styles.statText}>{friend.totalBets} Bets</Text>
-                        </View>
+                <View style={styles.headerContainer}>
+                    <View style={styles.headerRow}>
+                        <Image style={styles.gangImage} source={{ uri: friend.photoUrl || 'https://via.placeholder.com/65' }}  />
+                        <Text style={styles.gangName}>{friend.name}</Text>
                     </View>
-
-                    <TabView
-                        navigationState={{ index, routes }}
-                        renderScene={renderScene}
-                        onIndexChange={setIndex}
-                        initialLayout={{ width: Dimensions.get('window').width }}
-                        renderTabBar={renderTabBar}
-                        style={styles.tabView}
-                    />
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity style={styles.actionButton}>
+                        <Text style={{color:"white"}}>Remove</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.actionButton}>
+                        <Text style={{color:"white"}}>Add</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            
+                
+                <View style={styles.statsContainer}>
+                    <View style={styles.statItem}>
+                        <Image source={require('@/assets/images/users2.png')} style={styles.statIcon} />
+                        <Text style={styles.statText}>{friend.friendsCount}</Text>
+                    </View>
+                    <View style={styles.statItem}>
+                        <Image source={require('@/assets/images/gavel.png')} style={styles.statIcon} />
+                        <Text style={styles.statText}>{friend.totalBets} Bets</Text>
+                    </View>
+                </View>
+
+                <TabView
+                    navigationState={{ index, routes }}
+                    renderScene={renderScene}
+                    onIndexChange={setIndex}
+                    initialLayout={{ width: Dimensions.get('window').width }}
+                    renderTabBar={renderTabBar}
+                    style={styles.tabView}
+                />
+            </View>
         </SafeAreaView>
-        </LinearGradient>
+      </LinearGradient>
     );
 }
 
@@ -258,7 +238,7 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        backgroundColor: 'transparent', // İçerik arka planını şeffaf yap
+        backgroundColor: 'transparent',
     },
     errorContainer: {
         flex: 1,
@@ -355,13 +335,13 @@ const styles = StyleSheet.create({
     },
     tabView: {
         flex: 1,
-        backgroundColor: 'transparent', // TabView arka planını şeffaf yap
+        backgroundColor: 'transparent',
     },
     tabContent: {
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'transparent', // Tab içeriği arka planını şeffaf yap
+        backgroundColor: 'transparent',
     },
     tabText: {
         color: 'white',
@@ -372,12 +352,42 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         top: '90%'
-      },
-      actionButton: {
+    },
+    actionButton: {
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 15,
         backgroundColor: 'rgba(255, 255, 255, 0.2)',
         marginLeft: 8,
-      },
+    },
+    // ProfileFriends özel stil tanımları
+    card: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 2,
+        padding: 20,
+        marginBottom: 2,
+    },
+    profileImage: {
+        width: 36,
+        height: 36,
+        borderRadius: 30,
+        marginRight: 10,
+    },
+    title: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#fff',
+    },
+    actions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 5,
+    },
+    wonText: {
+        fontSize: 12,
+        color: '#ddd',
+        marginRight: 12,
+    },
 });
