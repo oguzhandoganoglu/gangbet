@@ -84,21 +84,21 @@ export default function TabsLayout() {
             }}
           />
           <Tab.Screen
-            name="profile"
-            component={SwippingScreen}
-            options={{
-              tabBarIcon: ({ focused }) => (
-                <Image source={focused ? require('@/assets/images/layout-list-filled.png') : require('@/assets/images/layout-list.png')} style={{ width: 24, height: 24 }}/>
-              ),
-              cardStyle: { backgroundColor: 'transparent' },
-            }}
-          />
-          <Tab.Screen
             name="notification"
             component={NotificationScreen}
             options={{
               tabBarIcon: ({ focused }) => (
                 <Image source={focused ? require('@/assets/images/notification-filled.png') : require('@/assets/images/notification.png')} style={{ width: 24, height: 24 }}/>
+              ),
+              cardStyle: { backgroundColor: 'transparent' },
+            }}
+          />
+          <Tab.Screen
+            name="profile"
+            component={SwippingScreen}
+            options={{
+              tabBarIcon: ({ focused }) => (
+                <Image source={focused ? require('@/assets/images/layout-list-filled.png') : require('@/assets/images/layout-list.png')} style={{ width: 24, height: 24 }}/>
               ),
               cardStyle: { backgroundColor: 'transparent' },
             }}
