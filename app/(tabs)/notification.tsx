@@ -332,7 +332,8 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   notificationsList: {
-    padding: 16,
+    paddingVertical: 2,
+    paddingHorizontal: 0
   },
   emptyContainer: {
     padding: 20,
@@ -348,7 +349,7 @@ const styles = StyleSheet.create({
   cardContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 12,
-    marginBottom: 12,
+    marginBottom: 4,
     overflow: 'hidden',
     position: 'relative',
     elevation: 2,
@@ -360,7 +361,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   cardContent: {
-    padding: 16,
+    padding: 8,
     flexDirection: 'row',
   },
   profileImage: {
