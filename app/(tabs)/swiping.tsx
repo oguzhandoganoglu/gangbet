@@ -90,7 +90,6 @@ const FriendsRoute = () => {
                   </View>
                 </View>
               </View>
-              {/* Remove butonu kaldırıldı */}
             </View>
           )}
           keyExtractor={(item) => item.id}
@@ -152,6 +151,14 @@ export default function SwippingScreen() {
          friendsCount: string;
          totalBets: string;
      }
+     
+     const handleLogout = () => {
+         // Implement logout functionality here
+         // For example:
+         // logout();
+         // navigation.navigate('Login');
+         alert('Logging out...');
+     };
  
      const renderTabBar = (props: any) => (
          <TabBar
@@ -193,14 +200,9 @@ export default function SwippingScreen() {
                          <Image style={styles.gangImage} source={{ uri: friend.photoUrl || 'https://via.placeholder.com/65' }}  />
                          <Text style={styles.gangName}>{friend.name}</Text>
                      </View>
-                     <View style={styles.buttonContainer}>
-                         <TouchableOpacity style={styles.actionButton}>
-                         <Text style={{color:"white"}}>Remove</Text>
-                         </TouchableOpacity>
-                         <TouchableOpacity style={styles.actionButton}>
-                         <Text style={{color:"white"}}>Add</Text>
-                         </TouchableOpacity>
-                     </View>
+                     <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+                        <Text style={styles.logoutText}>Logout</Text>
+                     </TouchableOpacity>
                  </View>
                  
                  <View style={styles.statsContainer}>
@@ -213,6 +215,7 @@ export default function SwippingScreen() {
                          <Text style={styles.statText}>{friend.totalBets} Bets</Text>
                      </View>
                  </View>
+                
  
                  <TabView
                      navigationState={{ index, routes }}
@@ -301,6 +304,17 @@ export default function SwippingScreen() {
          marginLeft: 10,
          marginRight: 10,
      },
+     logoutButton: {
+         paddingHorizontal: 15,
+         paddingVertical: 8,
+         borderRadius: 15,
+         backgroundColor: 'rgba(255, 255, 255, 0.2)',
+     },
+     logoutText: {
+         color: 'white',
+         fontWeight: '500',
+         fontSize: 14,
+     },
      statsContainer: {
          flexDirection: 'row',
          paddingHorizontal: 20,
@@ -348,16 +362,17 @@ export default function SwippingScreen() {
      },
      buttonContainer: {
          flexDirection: 'row',
-         justifyContent: 'space-between',
+         justifyContent: 'center',
          alignItems: 'center',
-         top: '90%'
+         marginBottom: 15,
+         paddingHorizontal: 20,
      },
      actionButton: {
          paddingHorizontal: 12,
          paddingVertical: 6,
          borderRadius: 15,
          backgroundColor: 'rgba(255, 255, 255, 0.2)',
-         marginLeft: 8,
+         marginHorizontal: 8,
      },
      // ProfileFriends özel stil tanımları
      card: {
