@@ -69,16 +69,14 @@ export default function NavbarProfile({ userData, onSettingsPress }: NavbarProfi
         <View>
           <Image source={require("@/assets/images/user1.png")} style={styles.profileImage}/>
         </View>
-        <View>
-          <View style={styles.uplinecontainer}>
+        <View style={styles.userInfoContainer}>
+          <View style={styles.nameLogoutContainer}>
             <View style={styles.xbuttonContainer}>
-              <Image source={require("@/assets/images/xlogo.png")} style={styles.xImage}/>
               <Text style={styles.xtext}>
-                {userData?.username ? `@${userData.username}` : '@gangbetuser_x'}
+                Apl Tolga Toksöz
               </Text>
             </View>
-            <Image source={require("@/assets/images/qrcode.png")} style={styles.qrImage}/>
-            <TouchableOpacity onPress={handleLogout} style={styles.button}>
+            <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
               <Image source={require("@/assets/images/logout.png")} style={styles.qrImage} />
             </TouchableOpacity>
           </View>
@@ -148,7 +146,6 @@ const styles = StyleSheet.create({
   qrImage: {
     width: 24,
     height: 24,
-    marginLeft: 8,
     tintColor: "white",
   },
   xImage: {
@@ -156,6 +153,15 @@ const styles = StyleSheet.create({
     height: 16,
     marginRight: 5,
     tintColor: "white",
+  },
+  userInfoContainer: {
+    flex: 1,
+  },
+  nameLogoutContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
   },
   xbuttonContainer: {
     flexDirection: "row",
@@ -166,10 +172,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginLeft: 5,
   },
+  logoutButton: {
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    marginRight: 5,
+  },
   uplinecontainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    width: "100%",
   },
   bottomlinecontainer: {
     flexDirection: "row",
@@ -205,7 +218,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 8,
     borderRadius: 64,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
     marginHorizontal: 5,
   },
   buttonText: {

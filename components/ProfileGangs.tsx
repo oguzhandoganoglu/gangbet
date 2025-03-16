@@ -30,7 +30,6 @@ export default function ProfileGangs({ data = [] }: ProfileGangsProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.headerText}>Gangs</Text>
       <FlatList
         data={data}
         renderItem={({ item }) => (

@@ -49,33 +49,50 @@ export default function ProfileFriends({ data = [] }: ProfileFriendsProps) {
     }
   };
 
+  // Search bar component to avoid duplication
+  const SearchBarComponent = () => (
+    <View style={styles.searchBar}>
+      <Image source={require('@/assets/images/search.png')} style={styles.searchIcon} />
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Enter friend's user ID"
+        placeholderTextColor="#ccc"
+        value={friendSearch}
+        onChangeText={setFriendSearch}
+      />
+      <TouchableOpacity onPress={handleSendFriendRequest} style={styles.addButton}>
+        <Text style={styles.addButtonText}>Add</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   if (data.length === 0) {
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyText}>No friends found</Text>
         <View style={styles.addFriendContainer}>
-        <View style={styles.searchBar}>
-          <Image source={require('@/assets/images/search.png')} style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Enter friend's user ID"
-            placeholderTextColor="#ccc"
-            value={friendSearch}
-            onChangeText={setFriendSearch}
-          />
-          <TouchableOpacity onPress={handleSendFriendRequest} style={styles.addButton}>
-            <Text style={styles.addButtonText}>Add</Text>
-          </TouchableOpacity>
+          <SearchBarComponent />
         </View>
-      </View>
-      <View style={styles.searchBarContainer}>
-      </View>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      {/* Search input for filtering existing friends */}
+      <View style={styles.filterContainer}>
+        <View style={styles.filterBar}>
+          <Image source={require('@/assets/images/search.png')} style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search friends"
+            placeholderTextColor="#ccc"
+            value={search}
+            onChangeText={setSearch}
+          />
+        </View>
+      </View>
+      
       <FlatList
         data={filteredData}
         renderItem={({ item }) => (
@@ -93,31 +110,17 @@ export default function ProfileFriends({ data = [] }: ProfileFriendsProps) {
               </View>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Image source={require('@/assets/images/bell-off.png')} style={{ width: 16, height: 16, marginRight:2 }} />
-              <Image source={require('@/assets/images/user-minus.png')} style={{ width: 16, height: 16, marginRight:4 }} />
-              <Text style={{color:"#fff", fontSize:12, fontWeight:'400'}}>Remove</Text>
+              <Image source={require('@/assets/images/bell-off.png')} style={{ width: 16, height: 16, marginRight: 2 }} />
+              <Image source={require('@/assets/images/user-minus.png')} style={{ width: 16, height: 16, marginRight: 4 }} />
+              <Text style={{color: "#fff", fontSize: 12, fontWeight: '400'}}>Remove</Text>
             </View>
           </View>
         )}
         keyExtractor={(item) => item.id}
       />
+      
       <View style={styles.addFriendContainer}>
-        <View style={styles.searchBar}>
-          <Image source={require('@/assets/images/search.png')} style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Enter friend's user ID"
-            placeholderTextColor="#ccc"
-            value={friendSearch}
-            onChangeText={setFriendSearch}
-          />
-          <TouchableOpacity onPress={handleSendFriendRequest} style={styles.addButton}>
-            <Text style={styles.addButtonText}>Add</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-      <View style={styles.searchBarContainer}>
-        
+        <SearchBarComponent />
       </View>
     </View>
   );
@@ -134,10 +137,24 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: 'transparent',
+    padding: 15,
   },
   emptyText: {
     color: '#fff',
     fontSize: 16,
+    marginBottom: 20,
+  },
+  filterContainer: {
+    padding: 15,
+    marginBottom: 10,
+  },
+  filterBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 15,
+    paddingHorizontal: 10,
+    height: 35,
   },
   card: {
     flexDirection: 'row',
@@ -174,13 +191,7 @@ const styles = StyleSheet.create({
   addFriendContainer: {
     paddingHorizontal: 15,
     paddingBottom: 10,
-  },
-  searchBarContainer: {
-    position: 'absolute',
-    bottom: 20,
-    left: '25%',
-    width: '50%',
-    alignItems: 'center',
+    marginTop: 10,
   },
   searchBar: {
     flexDirection: 'row',
@@ -189,7 +200,6 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingHorizontal: 10,
     width: '100%',
-    bottom: 40,
     height: 35
   },
   searchIcon: {

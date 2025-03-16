@@ -10,6 +10,7 @@ import ProfileFriends from '@/components/ProfileFriends';
 import ProfileGangs from '@/components/ProfileGangs';
 import Navbar from '@/components/Navbar';
 import NavbarNotificaiton from '@/components/NavbarNotification';
+import ProfileScreen from '../profile';
 
 const friend = {
   id: '2', 
@@ -193,39 +194,7 @@ export default function SwippingScreen() {
          end={{ x: 1, y: 1 }}
        >
          <SafeAreaView style={styles.safeArea}>
-             <View style={styles.content}>
-                 <NavbarNotificaiton />
-                 <View style={styles.headerContainer}>
-                     <View style={styles.headerRow}>
-                         <Image style={styles.gangImage} source={{ uri: friend.photoUrl || 'https://via.placeholder.com/65' }}  />
-                         <Text style={styles.gangName}>{friend.name}</Text>
-                     </View>
-                     <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-                        <Text style={styles.logoutText}>Logout</Text>
-                     </TouchableOpacity>
-                 </View>
-                 
-                 <View style={styles.statsContainer}>
-                     <View style={styles.statItem}>
-                         <Image source={require('@/assets/images/users2.png')} style={styles.statIcon} />
-                         <Text style={styles.statText}>{friend.friendsCount}</Text>
-                     </View>
-                     <View style={styles.statItem}>
-                         <Image source={require('@/assets/images/gavel.png')} style={styles.statIcon} />
-                         <Text style={styles.statText}>{friend.totalBets} Bets</Text>
-                     </View>
-                 </View>
-                
- 
-                 <TabView
-                     navigationState={{ index, routes }}
-                     renderScene={renderScene}
-                     onIndexChange={setIndex}
-                     initialLayout={{ width: Dimensions.get('window').width }}
-                     renderTabBar={renderTabBar}
-                     style={styles.tabView}
-                 />
-             </View>
+             <ProfileScreen />
          </SafeAreaView>
        </LinearGradient>
      );
