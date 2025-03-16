@@ -4,11 +4,9 @@ import { View, Text, StyleSheet, Dimensions, ActivityIndicator } from 'react-nat
 import { TabView } from 'react-native-tab-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import TabBarComponent2 from '@/components/TabBarComponent2';
-import ActiveBets from '@/components/ActiveBets';
-import Wins from '@/components/Wins';
-import BetHistory from '@/components/BetHistory';
 import Balances from '@/components/Balances';
 import { useUser } from '../UserContext';
+
 
 
 // Wallet veri tipi 
@@ -63,10 +61,7 @@ interface WalletData {
 export default function WalletScreen() {
   const [index, setIndex] = useState(0);
   const [routes] = useState([
-    { key: 'first', title: 'Active Bets' },
-    { key: 'second', title: 'Wins' },
-    { key: 'third', title: 'Bet History' },
-    { key: 'forth', title: 'Balances' },
+    { key: 'first', title: '' },
   ]);
   
   const [walletData, setWalletData] = useState<WalletData | null>(null);
@@ -113,12 +108,6 @@ export default function WalletScreen() {
   const renderScene = ({ route }) => {
     switch (route.key) {
       case 'first':
-        return <ActiveBets data={walletData?.activeUserBets || []} />;
-      case 'second':
-        return <Wins data={walletData?.endedUserBets.filter(bet => bet.hasWon) || []} />;
-      case 'third':
-        return <BetHistory data={walletData?.endedUserBets || []} />;
-      case 'forth':
         return <Balances walletInfo={walletData?.wallet} transactions={walletData?.transactions} stats={walletData?.transactionStats} />;
       default:
         return null;

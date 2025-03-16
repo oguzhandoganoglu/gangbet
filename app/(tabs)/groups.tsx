@@ -1,6 +1,6 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList, TextInput, Modal, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import Navbar from '@/components/Navbar';
+import NavbarNotificaiton from '@/components/NavbarNotification';
 import { useRouter } from 'expo-router';
 import axios from 'axios'; 
 import { useUser } from "../UserContext";
@@ -406,7 +406,7 @@ export default function NotificationScreen() {
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
-      <Navbar />
+      <NavbarNotificaiton />
       <View style={styles.categoryContainer}>
         <FlatList
           horizontal

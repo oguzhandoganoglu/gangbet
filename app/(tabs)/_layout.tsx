@@ -98,7 +98,7 @@ export default function TabsLayout() {
             component={SwippingScreen}
             options={{
               tabBarIcon: ({ focused }) => (
-                <Image source={focused ? require('@/assets/images/layout-list-filled.png') : require('@/assets/images/layout-list.png')} style={{ width: 24, height: 24 }}/>
+                <Image source={focused ? require('@/assets/images/users2-filled.png') : require('@/assets/images/users2.png')} style={{ width: 24, height: 24 }}/>
               ),
               cardStyle: { backgroundColor: 'transparent' },
             }}

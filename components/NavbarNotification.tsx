@@ -10,8 +10,7 @@ export default function NavbarNotificaiton() {
       <View style={styles.header}>
         <Text style={styles.logo}>GANGBET👍</Text>
         <TouchableOpacity style={styles.profileContainer}>
-          <Text style={styles.profileText}>Total Won</Text>
-          <Text style={styles.profileText2}>4 Bets</Text>
+          <Text style={styles.profileText2}>0xu381213123...</Text>
         </TouchableOpacity>
       </View>
     </LinearGradient>
@@ -55,7 +54,7 @@ const styles = StyleSheet.create({
   },
   profileText2: {
     color: "white",
-    fontSize: 16,
+    fontSize: 11,
     fontWeight: '600',
   },
 });

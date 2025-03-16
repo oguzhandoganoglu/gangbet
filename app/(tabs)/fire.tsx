@@ -1,5 +1,5 @@
 import BetCardFriends from '@/components/BetCardFriends';
-import Navbar from '@/components/Navbar';
+import NavbarNotificaiton from '@/components/NavbarNotification';
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from "expo-linear-gradient";
@@ -29,7 +29,7 @@ export default function FireScreen() {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-      <Navbar />
+      <NavbarNotificaiton />
       <View style={styles.container}>
         <View style={styles.tabsContainer}>
           <View style={styles.tabsWrapper}>

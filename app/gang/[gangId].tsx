@@ -108,9 +108,18 @@ export default function GangDetailScreen() {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
         >
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            {/* <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                 <Image source={require('@/assets/images/back.png')} style={styles.backIcon} />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
+            <TouchableOpacity 
+                      style={styles.backButton}
+                      onPress={() => navigation.goBack()}
+                    >
+                      <Image 
+                        source={require('@/assets/images/arrow-back.png')} 
+                        style={styles.backIcon} 
+                      />
+                    </TouchableOpacity>
 
             <View style={styles.headerContainer}>
                 <View style={styles.headerRow}>
@@ -193,11 +202,9 @@ const styles = StyleSheet.create({
     },
     backButton: {
         position: 'absolute',
-        top: 20,
+        top: 10,
         left: 20,
         zIndex: 10,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        borderRadius: 20,
         padding: 8,
     },
     backIcon: {

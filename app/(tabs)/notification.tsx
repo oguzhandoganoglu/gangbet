@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Navbar from '@/components/Navbar';
+import NavbarNotificaiton from '@/components/NavbarNotification';
 import { LinearGradient } from 'expo-linear-gradient';
 
 // Notification Card Components
@@ -17,13 +17,13 @@ const FriendRequestCard = ({ notification }) => (
         <Text style={styles.title}>{notification.sender}</Text>
         <Text style={styles.groupText}>Arkadaşlık isteği • {notification.time}</Text>
         <View style={styles.iconsContainer}>
-          <TouchableOpacity style={[styles.percentCard, { backgroundColor: '#4CAF50' }]}>
+          <TouchableOpacity style={[styles.percentCard, { backgroundColor: 'rgba(80, 200, 120, 0.6)' }]}>
             <Image source={require('@/assets/images/thumb-up.png')} style={styles.percentImage} />
             <View style={styles.percentText}>
               <Text style={{color:'#fff', fontSize:12}}>KABUL ET</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.percentCard, { backgroundColor: '#FF5252', marginLeft: 8 }]}>
+          <TouchableOpacity style={[styles.percentCard, { backgroundColor: 'rgba(255, 99, 71, 0.6)', marginLeft: 8 }]}>
             <Image source={require('@/assets/images/thumb-up.png')} style={[styles.percentImage, { transform: [{ rotate: '180deg' }] }]} />
             <View style={styles.percentText}>
               <Text style={{color:'#fff', fontSize:12}}>REDDET</Text>
@@ -45,7 +45,7 @@ const BetNotificationCard = ({ notification }) => (
         <Text style={styles.title}>{notification.sender}</Text>
         <Text style={styles.groupText}>{notification.content} • {notification.time}</Text>
         <View style={styles.iconsContainer}>
-          <TouchableOpacity style={[styles.percentCard, { backgroundColor: '#2196F3' }]}>
+          <TouchableOpacity style={[styles.percentCard, { backgroundColor: 'rgba(255, 255, 255, 0.2)' }]}>
             <Image source={require('@/assets/images/thumb-up.png')} style={styles.percentImage} />
             <View style={styles.percentText}>
               <Text style={{color:'#fff', fontSize:12}}>GÖRÜNTÜLE</Text>
@@ -75,13 +75,13 @@ const GroupInviteCard = ({ notification }) => (
         <Text style={styles.title}>{notification.sender}</Text>
         <Text style={styles.groupText}>{notification.groupName} grubuna davet • {notification.time}</Text>
         <View style={styles.iconsContainer}>
-          <TouchableOpacity style={[styles.percentCard, { backgroundColor: '#4CAF50' }]}>
+          <TouchableOpacity style={[styles.percentCard, { backgroundColor: 'rgba(80, 200, 120, 0.6)' }]}>
             <Image source={require('@/assets/images/thumb-up.png')} style={styles.percentImage} />
             <View style={styles.percentText}>
               <Text style={{color:'#fff', fontSize:12}}>KATIL</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.percentCard, { backgroundColor: '#FF5252', marginLeft: 8 }]}>
+          <TouchableOpacity style={[styles.percentCard, { backgroundColor: 'rgba(255, 99, 71, 0.6)', marginLeft: 8 }]}>
             <Image source={require('@/assets/images/thumb-up.png')} style={[styles.percentImage, { transform: [{ rotate: '180deg' }] }]} />
             <View style={styles.percentText}>
               <Text style={{color:'#fff', fontSize:12}}>REDDET</Text>
@@ -196,7 +196,7 @@ export default function NotificationScreen() {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        <Navbar title="Bildirimler" />
+        <NavbarNotificaiton />
         
         {/* Filter section - now transparent */}
         <View style={styles.filterContainer}>

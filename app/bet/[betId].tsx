@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Alert } from 'react-native'; // Alert'i import etmeyi unutmayın
 
 // Örnek veri tipi
 interface BetDetailProps {
@@ -14,13 +15,14 @@ interface BetDetailProps {
   createdAt: string;
   endDate: string;
   remainingTime: number;
-  userChoice: string;
-  amount: number;
+  userChoice: string | null; 
+  amount: number | null; 
   totalPool: number;
   yesOdds: string;
   noOdds: string;
   yesCount: number;
   noCount: number;
+  
   participants: Array<{
     id: string;
     name: string;
@@ -35,6 +37,7 @@ export default function BetDetailScreen() {
   const { id } = useLocalSearchParams();
   const [betDetail, setBetDetail] = useState<BetDetailProps | null>(null);
   const [loading, setLoading] = useState(true);
+  const [stakeAmount, setStakeAmount] = useState(50); // Default stake amount
 
   useEffect(() => {
     // Burada gerçek bir API çağrısı yapılacak
@@ -49,8 +52,8 @@ export default function BetDetailScreen() {
       createdAt: "2025-01-15T10:30:00Z",
       endDate: "2025-12-31T23:59:59Z",
       remainingTime: 25920000000, // ~300 days in milliseconds
-      userChoice: "yes",
-      amount: 50,
+      userChoice: null,
+      amount: null,
       totalPool: 2500,
       yesOdds: "1.8",
       noOdds: "2.2",
@@ -140,7 +143,43 @@ export default function BetDetailScreen() {
   const totalVotes = betDetail.yesCount + betDetail.noCount;
   const yesPercentage = Math.round((betDetail.yesCount / totalVotes) * 100) || 0;
   const noPercentage = Math.round((betDetail.noCount / totalVotes) * 100) || 0;
+  
+  // Function to handle user selection
+  const handleChoiceSelection = (choice: 'yes' | 'no') => {
+    if (!betDetail) return;
+    
+    // In a real app, you would make an API call here
+    // For this example, we'll just update the local state
+    Alert.alert(
+      "Confirm Bet",
+      `Are you sure you want to bet ${stakeAmount} USDC on "${choice.toUpperCase()}"?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Confirm",
+          onPress: () => {
+            setBetDetail({
+              ...betDetail,
+              userChoice: choice,
+              amount: stakeAmount,
+              // Update the counters
+              yesCount: choice === 'yes' ? betDetail.yesCount + 1 : betDetail.yesCount,
+              noCount: choice === 'no' ? betDetail.noCount + 1 : betDetail.noCount,
+              totalPool: betDetail.totalPool + stakeAmount
+            });
+          }
+        }
+      ]
+    );
+  };
 
+// Function to handle stake amount changes
+const adjustStakeAmount = (amount: number) => {
+  setStakeAmount(Math.max(10, stakeAmount + amount)); // Minimum 10 USDC
+};
   return (
     <LinearGradient
             colors={['#161638', '#714F60', '#B85B44']}
@@ -217,34 +256,98 @@ export default function BetDetailScreen() {
           </View>
           
           {/* User Choice */}
-          <View style={styles.choiceContainer}>
-            <Text style={styles.choiceTitle}>Your Choice</Text>
-            <View style={[
-              styles.choiceCard,
-              { backgroundColor: betDetail.userChoice === 'yes' ? 'rgba(80, 200, 120, 0.6)' : 'rgba(255, 99, 71, 0.6)' }
-            ]}>
-              <Image 
-                source={
-                  betDetail.userChoice === 'yes' 
-                    ? require('@/assets/images/thumb-up.png') 
-                    : require('@/assets/images/thumb-down.png')
-                } 
-                style={styles.choiceIcon} 
-              />
-              <View style={styles.choiceDetails}>
-                <Text style={styles.choiceText}>
-                  {betDetail.userChoice.toUpperCase()}
-                </Text>
-                <Text style={styles.oddsText}>
-                  {betDetail.userChoice === 'yes' ? betDetail.yesOdds : betDetail.noOdds}x
-                </Text>
-              </View>
-              <View style={styles.stakeInfo}>
-                <Text style={styles.stakeLabel}>Your Stake</Text>
-                <Text style={styles.stakeValue}>{betDetail.amount} USDC</Text>
-              </View>
-            </View>
+          {/* User Choice or Choice Options */}
+<View style={styles.choiceContainer}>
+  {betDetail.userChoice ? (
+    // If user has already made a choice
+    <>
+      <Text style={styles.choiceTitle}>Your Choice</Text>
+      <View style={[
+        styles.choiceCard,
+        { backgroundColor: betDetail.userChoice === 'yes' ? 'rgba(80, 200, 120, 0.6)' : 'rgba(255, 99, 71, 0.6)' }
+      ]}>
+        <Image 
+          source={
+            betDetail.userChoice === 'yes' 
+              ? require('@/assets/images/thumb-up.png') 
+              : require('@/assets/images/thumb-down.png')
+          } 
+          style={styles.choiceIcon} 
+        />
+        <View style={styles.choiceDetails}>
+          <Text style={styles.choiceText}>
+            {betDetail.userChoice.toUpperCase()}
+          </Text>
+          <Text style={styles.oddsText}>
+            {betDetail.userChoice === 'yes' ? betDetail.yesOdds : betDetail.noOdds}
+          </Text>
+        </View>
+        <View style={styles.stakeInfo}>
+          <Text style={styles.stakeLabel}>Your Stake</Text>
+          <Text style={styles.stakeValue}>{betDetail.amount} USDC</Text>
+        </View>
+      </View>
+    </>
+  ) : (
+    // If user hasn't made a choice yet
+    <View>
+      <Text style={styles.choiceTitle}>Make Your Prediction</Text>
+      
+      {/* Stake amount selector */}
+      <View style={styles.stakeSelector}>
+        <Text style={styles.stakeSelectorTitle}>Your Stake</Text>
+        <View style={styles.stakeAdjuster}>
+          <TouchableOpacity 
+            style={styles.stakeButton}
+            onPress={() => adjustStakeAmount(-10)}
+          >
+            <Text style={styles.stakeButtonText}>-</Text>
+          </TouchableOpacity>
+          
+          <Text style={styles.stakeAmountText}>{stakeAmount} USDC</Text>
+          
+          <TouchableOpacity 
+            style={styles.stakeButton}
+            onPress={() => adjustStakeAmount(10)}
+          >
+            <Text style={styles.stakeButtonText}>+</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      
+      {/* Yes/No buttons */}
+      <View style={styles.choiceOptions}>
+        <TouchableOpacity 
+          style={[styles.choiceButton, styles.yesButton]}
+          onPress={() => handleChoiceSelection('yes')}
+        >
+          <Image 
+            source={require('@/assets/images/thumb-up.png')} 
+            style={styles.choiceButtonIcon} 
+          />
+          <View>
+            <Text style={styles.choiceButtonText}>YES</Text>
+            <Text style={styles.choiceButtonOdds}>Odds: {betDetail.yesOdds}</Text>
           </View>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[styles.choiceButton, styles.noButton]}
+          onPress={() => handleChoiceSelection('no')}
+        >
+          <Image 
+            source={require('@/assets/images/thumb-down.png')} 
+            style={styles.choiceButtonIcon} 
+          />
+          <View>
+            <Text style={styles.choiceButtonText}>NO</Text>
+            <Text style={styles.choiceButtonOdds}>Odds: {betDetail.noOdds}</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    </View>
+  )}
+</View>
           
           {/* Voting Stats */}
           <View style={styles.votingContainer}>
@@ -600,5 +703,72 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
     fontWeight: 'bold',
-  }
+  },
+  // styles.js içinde yeni stillerinizi eklemeniz gerekecek
+stakeSelector: {
+  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  borderRadius: 8,
+  padding: 16,
+  marginBottom: 16,
+},
+stakeSelectorTitle: {
+  color: 'rgba(255, 255, 255, 0.8)',
+  fontSize: 14,
+  marginBottom: 12,
+},
+stakeAdjuster: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+},
+stakeButton: {
+  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  width: 40,
+  height: 40,
+  borderRadius: 20,
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+stakeButtonText: {
+  color: '#fff',
+  fontSize: 20,
+  fontWeight: 'bold',
+},
+stakeAmountText: {
+  color: '#fff',
+  fontSize: 18,
+  fontWeight: 'bold',
+},
+choiceOptions: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+},
+choiceButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  width: '48%',
+  padding: 16,
+  borderRadius: 8,
+},
+yesButton: {
+  backgroundColor: 'rgba(80, 200, 120, 0.6)',
+},
+noButton: {
+  backgroundColor: 'rgba(255, 99, 71, 0.6)',
+},
+choiceButtonIcon: {
+  width: 24,
+  height: 24,
+  marginRight: 12,
+  tintColor: '#fff',
+},
+choiceButtonText: {
+  color: '#fff',
+  fontSize: 16,
+  fontWeight: 'bold',
+},
+choiceButtonOdds: {
+  color: 'rgba(255, 255, 255, 0.8)',
+  fontSize: 12,
+},
 });

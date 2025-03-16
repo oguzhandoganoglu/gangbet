@@ -17,15 +17,8 @@ export default function NavbarWallet() {
     >
       <View style={styles.header}>
         <Text style={styles.logo}>GANGBET👍</Text>
-        <TouchableOpacity 
-          style={styles.profileContainer} 
-          onPress={() => router.push("/profile")}
-        >
-          <Image
-            source={require("@/assets/images/user1.png")}
-            style={styles.profileImage}
-          />
-          <Text style={styles.profileText}>Profile</Text>
+        <TouchableOpacity style={styles.profileContainer}>
+          <Text style={styles.profileText2}>0xu381213123...</Text>
         </TouchableOpacity>
       </View>
       {/* Kullanıcı balance değerini göster */}
@@ -78,12 +71,11 @@ const styles = StyleSheet.create({
     marginLeft: 2,
   },
   profileContainer: {
-    flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.2)", // Daha saydam
+    backgroundColor: "rgba(255, 255, 255, 0.2)", // Hafif saydam arka plan
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 20,
+    borderRadius: 10,
   },
   profileImage: {
     width: 24,
@@ -93,8 +85,13 @@ const styles = StyleSheet.create({
   },
   profileText: {
     color: "white",
-    fontSize: 12,
-    fontWeight: "500",
+    fontSize: 10,
+    fontWeight: "400",
+  },
+  profileText2: {
+    color: "white",
+    fontSize: 11,
+    fontWeight: '600',
   },
   balanceText: {
     fontSize: 26,
