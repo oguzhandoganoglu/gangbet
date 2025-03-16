@@ -1,9 +1,7 @@
 import NavbarWallet from '@/components/NavbarWallet';
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
-import { TabView } from 'react-native-tab-view';
 import { LinearGradient } from 'expo-linear-gradient';
-import TabBarComponent2 from '@/components/TabBarComponent2';
 import Balances from '@/components/Balances';
 import { useUser } from '../UserContext';
 
@@ -104,15 +102,6 @@ export default function WalletScreen() {
     fetchWalletData();
   }, [user]);
   
-  // Bileşenleri veri ile oluşturmak için renderScene fonksiyonunu güncelleme
-  const renderScene = ({ route }) => {
-    switch (route.key) {
-      case 'first':
-        return <Balances walletInfo={walletData?.wallet} transactions={walletData?.transactions} stats={walletData?.transactionStats} />;
-      default:
-        return null;
-    }
-  };
   
   if (loading) {
     return (
@@ -149,14 +138,7 @@ export default function WalletScreen() {
     >
       <NavbarWallet/>
       <View style={styles.container}>
-        <TabView
-          navigationState={{ index, routes }}
-          renderScene={renderScene}
-          onIndexChange={setIndex}
-          initialLayout={{ width: Dimensions.get('window').width }}
-          renderTabBar={props => <TabBarComponent2 {...props} />}
-          style={{flex:1}}
-        />
+        <Balances walletInfo={walletData?.wallet} transactions={walletData?.transactions} stats={walletData?.transactionStats} />
       </View>
     </LinearGradient>
   );
